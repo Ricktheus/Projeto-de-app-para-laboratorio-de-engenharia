@@ -90,7 +90,9 @@ erDiagram
     }
     LAUDOS {
         uuid id PK
-        uuid cliente_id FK
+        uuid concretagem_id FK "Origem dos dados"
+        uuid cliente_id FK "Para facilitar consultas do portal"
+        string tipo_laudo "parcial_7d | final_28d"
         string codigo_verificacao UK "Código Anti-Fraude"
         date data_emissao
         string pdf_original_url
@@ -105,9 +107,9 @@ erDiagram
 
 ### 1. Aplicativo Mobile (Sócio de Campo - Moldagem e Coleta)
 * **Tela de Moldagem:**
-  * Botão de câmera para tirar foto da NF (dispara o OCR e preenche os campos automaticamente).
+  * Botão de câmera para tirar foto da NF (dispara o OCR) e opção de "Preenchimento Manual" (fallback). Ao salvar a concretagem, o sistema gera automaticamente 4 registros de Corpos de Prova (2x 7 dias, 2x 28 dias).
   * Campos manuais: Slump (abatimento), Placa, Lacre, Aditivo, nº de CPs (padrão 4).
-  * Botão "Gerar Etiquetas": Envia comando Bluetooth para a impressora e imprime os 4 QR Codes associados a esta moldagem.
+  * Botão "Gerar Etiquetas": Envia comando Bluetooth e imprime as 4 etiquetas (contendo QR Code + Texto visível: Obra, Data, Idade e ID).
 * **Tela de Coleta:**
   * Lista de CPs pendentes de coleta (aqueles que completaram 24h em obra).
   * O sócio escaneia o QR Code do CP ao tirá-lo do molde para confirmar a coleta e iniciar o processo de cura úmida no laboratório.
@@ -122,8 +124,8 @@ erDiagram
 
 ### 3. Painel Web (Engenheiro de Escritório & Portal do Cliente)
 * **Área do Escritório:**
-  * Visualização instantânea das concretagens recebidas do campo.
-  * Tela de validação final dos dados e geração do laudo PDF (criptografado, com restrição de escrita e QR code de verificação no rodapé).
+  * Visualização instantânea e tela de **edição** das concretagens recebidas do campo.
+  * Tela de validação final e emissão do Laudo Parcial (7d) e Laudo Final (28d) em PDF (criptografado, com QR code de verificação no rodapé).
 * **Área da Engenheira:**
   * Recebe aviso de laudos prontos, baixa o PDF, assina via gov.br e faz o upload da versão assinada de volta no painel.
 * **Portal do Cliente:**
