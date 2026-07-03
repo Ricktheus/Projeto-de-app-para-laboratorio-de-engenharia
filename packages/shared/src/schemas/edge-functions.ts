@@ -1,0 +1,79 @@
+import { z } from 'zod';
+
+import { isoDateSchema, tipoFraturaSchema, uuidSchema } from './common';
+
+/**
+ * Wire contracts for the Edge Functions and RPCs (SPEC §5). Keys match the
+ * SPEC's JSON EXACTLY (some snake_case, some camelCase) — these schemas are the
+ * shared boundary validators for both the client and the server (DRY).
+ */
+
+// ---- §5.1 ocr-nota-fiscal --------------------------------------------------
+
+export const ocrNotaFiscalRequestSchema = z.object({
+  imageBase64: z.string().min(1),
+  concretagemRef: z.string().min(1),
+});
+export type OcrNotaFiscalRequest = z.infer<typeof ocrNotaFiscalRequestSchema>;
+
+/** A single OCR-extracted field with the model's confidence [0..1]. */
+const ocrField = <T extends z.ZodTypeAny>(value: T) =>
+  z.object({ value, confidence: z.number().min(0).max(1) });
+
+export const ocrNotaFiscalResponseSchema = z.object({
+  fields: z
+    .object({
+      nf_numero: ocrField(z.string()),
+      fck_projeto: ocrField(z.number()),
+      volume_m3: ocrField(z.number()),
+      concreteira: ocrField(z.string()),
+      data_concretagem: ocrField(isoDateSchema),
+    })
+    .partial(),
+  lowConfidenceFields: z.array(z.string()),
+});
+export type OcrNotaFiscalResponse = z.infer<typeof ocrNotaFiscalResponseSchema>;
+
+// ---- §5.2 registrar_ruptura (PostgREST RPC, snake_case) --------------------
+
+export const registrarRupturaDadosSchema = z.object({
+  peso_g: z.number().positive().nullish(),
+  diametro_mm: z.number().positive().nullish(),
+  altura_mm: z.number().positive().nullish(),
+  carga_ruptura_kgf: z.number().int().positive(),
+  tipo_fratura: tipoFraturaSchema,
+});
+
+export const registrarRupturaRequestSchema = z.object({
+  cp_id: uuidSchema,
+  dados: registrarRupturaDadosSchema,
+});
+export type RegistrarRupturaRequest = z.infer<typeof registrarRupturaRequestSchema>;
+
+// ---- §5.3 gerar-laudo-pdf --------------------------------------------------
+
+export const gerarLaudoPdfRequestSchema = z.object({ laudo_id: uuidSchema });
+export type GerarLaudoPdfRequest = z.infer<typeof gerarLaudoPdfRequestSchema>;
+
+// ---- §5.5 validar-laudo (public) -------------------------------------------
+
+export const validarLaudoQuerySchema = z.object({ codigo: z.string().min(1) });
+export type ValidarLaudoQuery = z.infer<typeof validarLaudoQuerySchema>;
+
+// ---- §5.6 exportar-excel ---------------------------------------------------
+
+export const exportarExcelRequestSchema = z.object({
+  periodo: z.object({ de: isoDateSchema, ate: isoDateSchema }),
+  concreteira: z.string().nullish(),
+  fckAlvo: z.number().positive().nullish(),
+  obraId: uuidSchema.nullish(),
+});
+export type ExportarExcelRequest = z.infer<typeof exportarExcelRequestSchema>;
+
+// ---- §5.7 enviar-email (internal) ------------------------------------------
+
+export const enviarEmailRequestSchema = z.object({
+  evento: z.string().min(1),
+  laudo_id: uuidSchema,
+});
+export type EnviarEmailRequest = z.infer<typeof enviarEmailRequestSchema>;

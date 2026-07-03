@@ -6,7 +6,7 @@ Este repositório contém os documentos de concepção e especificação para o 
 
 ## 📌 Status Atual do Projeto
 
-**Fase Atual:** ✅ SPEC Técnica gerada — **Pronto para iniciar o desenvolvimento (Sprint 001)**.
+**Fase Atual:** 🚧 Em desenvolvimento — **S001 (Fundação Supabase) e S002 (Núcleo de Domínio) concluídas; próxima: Sprint 003**.
 
 1. **Revisão Crítica Realizada:** Foi mapeado um conjunto de gaps críticos e edge cases no PRD original, gerando o relatório [revisao_critica_prd.md](./revisao_critica_prd.md).
 2. **Respostas da Engenheira Recebidas:** As 25 perguntas de validação foram respondidas pela engenheira e, junto com um laudo real de referência, usadas para atualizar o PRD.
@@ -18,9 +18,9 @@ Este repositório contém os documentos de concepção e especificação para o 
 
 | Sprint | Objetivo | Status |
 |---|---|---|
-| **S001** | Fundação Supabase: schema, RLS/RBAC, auditoria, Auth | ⏳ A iniciar (próximo passo) |
-| **S002** | Núcleo de domínio (MPa, projeção, máquinas de estado) | 🔲 Planejado |
-| **S003** | Auth & navegação (mobile + web), UI kit | 🔲 Planejado |
+| **S001** | Fundação Supabase: schema, RLS/RBAC, auditoria, Auth | ✅ Concluída |
+| **S002** | Núcleo de domínio (MPa, projeção, máquinas de estado) | ✅ Concluída |
+| **S003** | Auth & navegação (mobile + web), UI kit | ⏳ A iniciar (próximo passo) |
 | **S004** | Clientes/Usuários/Obras + Concretagem + OCR da NF | 🔲 Planejado |
 | **S005** | Corpos de prova, etiquetas Bluetooth, coleta | 🔲 Planejado |
 | **S006** | Prensa: ruptura, MPa, fratura, descarte, fotos | 🔲 Planejado |
