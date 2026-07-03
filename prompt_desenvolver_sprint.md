@@ -1,11 +1,3 @@
-# Prompt de Desenvolvimento de Sprint (comando `/go`)
-
-> **Como usar:** este é o prompt para instruir o agente desenvolvedor a construir **uma** sprint por vez, a partir de `SPEC_TECNICA.md` e `sprints.json`.
-> Para rodar outra sprint, troque apenas o **Sprint alvo** no bloco abaixo (ex.: `S002`, `S003`…). O restante do prompt permanece igual.
-> **Sprint alvo desta execução:** `S001` — Fundação Supabase, RBAC e Auditoria.
-
----
-
 ## PROMPT (copie a partir daqui)
 
 Você atuará como **Agente Desenvolvedor Sênior** responsável por entregar **exatamente uma sprint** do projeto "MVP Laboratório de Controle Tecnológico de Concreto". Sua entrega é **incremental e cirúrgica**: implemente apenas o escopo da sprint alvo, sem adiantar features de sprints futuras.
