@@ -1,0 +1,596 @@
+{
+  "project": "MVP Laboratório de Controle Tecnológico de Concreto",
+  "version": "1.0",
+  "generated_at": "2026-07-03",
+  "source_docs": ["PRD_MVP.md", "implementation_plan.md", "MEMORIA_PROJETO.md", "revisao_critica_prd.md", "SPEC_TECNICA.md"],
+  "code_conventions": {
+    "code_language": "en",
+    "ui_language": "pt-BR",
+    "db_naming": "snake_case",
+    "ts_naming": "camelCase",
+    "typescript": "strict",
+    "principles": ["DRY", "SOLID", "clean-code"],
+    "offline_support": false,
+    "mobile_ergonomics": "botões >=56dp, contraste AA+, tipografia >=18sp"
+  },
+  "sprints": [
+    {
+      "id": "S001",
+      "objetivo": "Fundação do monorepo e do Supabase: schema, enums, relacionamentos, RLS traduzindo a Matriz RBAC, auditoria automática e Auth/RBAC.",
+      "coder_agent_id": "Agent-DevOps + Agent-DB-Postgres",
+      "stack": ["pnpm-workspaces", "Turborepo", "TypeScript-5", "Supabase-CLI", "Postgres-15", "pgTAP"],
+      "features": [
+        {
+          "id": "F-S001-1",
+          "user_story": "Como sistema, quero todas as tabelas, enums e relacionamentos migrados para suportar rastreabilidade vitalícia.",
+          "criterios_aceite": [
+            "supabase db reset aplica todas as migrations sem erro",
+            "supabase gen types typescript gera os tipos consumidos por packages/supabase",
+            "concretagens e laudos possuem coluna updated_at para optimistic locking",
+            "Nenhuma tabela crítica permite DELETE físico (usar ativo/versionamento)"
+          ],
+          "edge_cases": [
+            "Migration deve ser idempotente",
+            "Falha de migration aborta o deploy (CI vermelho)"
+          ]
+        },
+        {
+          "id": "F-S001-2",
+          "user_story": "Como sistema, quero políticas RLS que implementem exatamente a Matriz RBAC do PRD (Seção 3.2).",
+          "criterios_aceite": [
+            "socio_campo vê apenas as concretagens que cadastrou; engenheiros veem todas",
+            "cliente vê apenas laudos assinado das suas obras (RLS por cliente_id)",
+            "audit_log é legível apenas por admins (eng_lab/eng_escritorio)",
+            "evidencia_fotos nunca acessível ao cliente",
+            "Página pública é o único acesso anônimo (read-only por codigo_verificacao)"
+          ],
+          "edge_cases": [
+            "Query sem policy correspondente é negada por padrão (RLS ENABLE + sem policy permissiva)",
+            "service_role só é usado em Edge Functions e de forma auditada"
+          ]
+        },
+        {
+          "id": "F-S001-3",
+          "user_story": "Como responsável técnico, quero auditoria automática de todas as escritas em tabelas críticas.",
+          "criterios_aceite": [
+            "Trigger audit_trigger em INSERT/UPDATE/DELETE de concretagens, corpos_prova, rupturas, laudos, obras, clientes, usuarios",
+            "UPDATE em concretagens.fck_projeto gera 1 linha em audit_log com old_value != new_value",
+            "Descarte/expurgo persiste o motivo no registro de auditoria"
+          ],
+          "edge_cases": [
+            "audit_log nunca é editável pelo usuário",
+            "Escrita em audit_log ocorre apenas via trigger/service"
+          ]
+        },
+        {
+          "id": "F-S001-4",
+          "user_story": "Como admin, quero que cada usuário do Auth tenha um perfil com role e is_admin.",
+          "criterios_aceite": [
+            "usuarios 1:1 com auth.users via trigger on_auth_user_created",
+            "role default 'cliente', ajustável pelo admin",
+            "is_admin=true para os 2 sócios engenheiros"
+          ],
+          "edge_cases": [
+            "Deletar auth.user faz cascade no perfil",
+            "cliente_id preenchido apenas quando role='cliente'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S002",
+      "objetivo": "Núcleo de domínio agnóstico de framework (packages/shared): cálculo de MPa, projeção 7/14->28d, máquinas de estado (enums + guardas), schemas Zod, constantes e catálogo de mensagens.",
+      "coder_agent_id": "Agent-Backend-TS",
+      "stack": ["TypeScript-5", "Zod", "Vitest"],
+      "features": [
+        {
+          "id": "F-S002-1",
+          "user_story": "Como sistema, quero uma função pura calcMpa que converta carga (kgf) em resistência (MPa) usando diâmetro nominal.",
+          "criterios_aceite": [
+            "MPa = (cargaKgf * 9.80665) / (pi * dNominalMm^2 / 4)",
+            "Usa diâmetro NOMINAL, não o medido",
+            "Arredondamento: MPa 2 casas decimais; KGF inteiro",
+            "Vetores (molde 100x200, área 7853.98 mm2): 21977->27.44, 24194->30.21, 20045->25.03, 23562->29.42"
+          ],
+          "edge_cases": [
+            "cargaKgf <= 0 lança DomainError('CARGA_INVALIDA')",
+            "dNominalMm <= 0 lança DomainError('DIAMETRO_INVALIDO')"
+          ]
+        },
+        {
+          "id": "F-S002-2",
+          "user_story": "Como engenheiro, quero estimar a resistência aos 28 dias a partir de resultados de 7/14 dias.",
+          "criterios_aceite": [
+            "f28 = fIdade / fator(idade)",
+            "Defaults configuráveis: 7d=0.70, 14d=0.90 (lidos de app_settings)",
+            "estimateF28({fIdade:21, idadeDias:7}) retorna 30.00",
+            "Fatores fixos iguais para todos os tipos de cimento"
+          ],
+          "edge_cases": [
+            "Idade sem fator configurado retorna null (não projeta)",
+            "Opcionalmente exibe faixa (min-max) com 0.65 e 0.85"
+          ]
+        },
+        {
+          "id": "F-S002-3",
+          "user_story": "Como sistema, quero máquinas de estado de CP e Laudo como enums + guardas puros.",
+          "criterios_aceite": [
+            "CP: moldado|coletado|rompido|descartado|expurgado com transições do PRD 5.1",
+            "Laudo: rascunho|pronto_assinatura|assinado|substituido com transições do PRD 5.2",
+            "canTransition(entity, from, to, context) retorna { ok, reason }",
+            "canRomper bloqueia ruptura antecipada de CP mandatorio_28d",
+            "canMarcarAssinado exige pdfAssinadoUrl"
+          ],
+          "edge_cases": [
+            "descartar/expurgar exigem motivo (texto) senão guarda falha",
+            "pronto_assinatura exige todos os CPs cobertos em estado terminal"
+          ]
+        },
+        {
+          "id": "F-S002-4",
+          "user_story": "Como sistema, quero schemas Zod, constantes e catálogo de mensagens PT centralizados.",
+          "criterios_aceite": [
+            "Schemas de Concretagem, Obra, Cliente, Ruptura, Laudo e payloads de Edge Functions",
+            "FRATURA_TIPOS com os 6 rótulos do laboratório",
+            "ENGINEERING_RANGES conforme PRD 7.4",
+            "MESSAGES com o catálogo PT (SPEC 3.0)"
+          ],
+          "edge_cases": [
+            "Schemas reutilizados em cliente e Edge Functions (DRY)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S003",
+      "objetivo": "Autenticação e navegação: login (mobile+web), roteamento por papel, proteção de rotas e UI kit ergonômico.",
+      "coder_agent_id": "Agent-Fullstack-RN-React",
+      "stack": ["Expo-SDK-51", "expo-router", "nativewind", "React-18", "Vite-5", "Tailwind-3", "react-router-dom-6", "supabase-js-2", "react-query-5", "zustand", "react-hook-form", "zod"],
+      "features": [
+        {
+          "id": "F-S003-1",
+          "user_story": "Como usuário (US17), quero logar com e-mail e senha e ser direcionado à home do meu papel.",
+          "criterios_aceite": [
+            "Credenciais válidas criam sessão e redirecionam por papel (socio_campo->campo, eng_lab->prensa/painel, eng_escritorio->painel, cliente->portal)",
+            "Todos os papéis internos logam tanto no mobile quanto no web",
+            "Botão 'Entrar' fica disabled + spinner durante o request"
+          ],
+          "edge_cases": [
+            "Credenciais inválidas: mensagem genérica 'E-mail ou senha inválidos.' (não revela se e-mail existe)",
+            "3+ tentativas erradas em 5 min: 'Muitas tentativas. Aguarde 1 minuto e tente novamente.'",
+            "401/expiração: 'Sua sessão expirou. Faça login novamente.'"
+          ]
+        },
+        {
+          "id": "F-S003-2",
+          "user_story": "Como sistema, quero proteger rotas por papel.",
+          "criterios_aceite": [
+            "role lida do JWT/usuarios",
+            "Acesso indevido redireciona à home do papel + toast 'Você não tem permissão para acessar esta página.'",
+            "socio_campo não acessa gestão de usuários nem prensa"
+          ],
+          "edge_cases": [
+            "Deep link para rota protegida sem sessão redireciona ao login"
+          ]
+        },
+        {
+          "id": "F-S003-3",
+          "user_story": "Como operador de campo/prensa, quero componentes de UI grandes e de alto contraste.",
+          "criterios_aceite": [
+            "BigButton >=56dp e contraste AA+",
+            "NumericInput com teclado numérico grande",
+            "Componentes StatusPill, Toast, EmptyState, LoadingButton disponíveis para reuso"
+          ],
+          "edge_cases": [
+            "Uso com luvas/mãos sujas: alvos de toque amplos"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S004",
+      "objetivo": "Clientes/Usuários (CRUD, admins), Obras (CRUD), Concretagem e OCR da Nota Fiscal (Edge Function GPT-4o-mini Vision).",
+      "coder_agent_id": "Agent-Mobile-RN + Agent-Backend-Edge",
+      "stack": ["expo-camera", "expo-image-picker", "expo-location", "Deno-Edge-Function", "OpenAI-gpt-4o-mini-Vision", "react-hook-form", "zod"],
+      "features": [
+        {
+          "id": "F-S004-1",
+          "user_story": "Como admin (US16), quero cadastrar clientes e usuários do sistema.",
+          "criterios_aceite": [
+            "Somente eng_lab/eng_escritorio (admins) podem cadastrar",
+            "Ao cadastrar cliente cria credencial via inviteUserByEmail e envia e-mail de boas-vindas (US24-CA4)",
+            "Criação gera audit_log"
+          ],
+          "edge_cases": [
+            "Não-admin: 403 'Você não tem permissão para executar esta ação.'",
+            "CNPJ inválido: 'CNPJ inválido.'",
+            "E-mail já cadastrado: 'Já existe um usuário com este e-mail.'"
+          ]
+        },
+        {
+          "id": "F-S004-2",
+          "user_story": "Como sócio (US20), quero cadastrar uma nova obra no app (nome, sigla, cliente, endereço, GPS).",
+          "criterios_aceite": [
+            "Obra criada fica disponível na tela de concretagem",
+            "GPS autorizado preenche gps_latitude/longitude automaticamente",
+            "GPS negado cria obra sem GPS (não bloqueia)"
+          ],
+          "edge_cases": [
+            "Sigla duplicada para o mesmo cliente: 'Já existe uma obra com esta sigla para este cliente.' (constraint UNIQUE(cliente_id, sigla))"
+          ]
+        },
+        {
+          "id": "F-S004-3",
+          "user_story": "Como sócio autor ou engenheiro (US21), quero editar/inativar uma obra.",
+          "criterios_aceite": [
+            "Inativação via soft-delete (ativo=false) preserva histórico",
+            "Editar campos da obra"
+          ],
+          "edge_cases": [
+            "Excluir obra com concretagens: impede e oferece 'Inativar' com msg 'Esta obra possui concretagens e não pode ser excluída. Você pode inativá-la.'",
+            "socio_campo editando obra que não criou: 403"
+          ]
+        },
+        {
+          "id": "F-S004-4",
+          "user_story": "Como sócio (US01), quero fotografar a NF para o OCR extrair e preencher o formulário de concretagem.",
+          "criterios_aceite": [
+            "Campos extraídos: nf_numero, fck_projeto, volume_m3, concreteira, data_concretagem",
+            "Obrigatórios: nf_numero, fck_projeto, volume_m3",
+            "Fluxo Foto->IA->Formulário->Revisão->Salvar (usuário sempre revisa)",
+            "Timeout de OCR: 10s"
+          ],
+          "edge_cases": [
+            "Campo vazio ou confiança < 0.75: destacado em amarelo",
+            "Obrigatório vazio ao salvar: bloqueia com 'Preencha os campos obrigatórios destacados.'",
+            "Timeout/erro: 'Não foi possível processar. Preencha manualmente.' + habilita 'Preenchimento Manual' + loga erro",
+            "4a tentativa de OCR: 429 'Limite de 3 tentativas de leitura atingido. Preencha manualmente.'",
+            "Foto ruim: botão 'Refazer' antes de enviar"
+          ]
+        },
+        {
+          "id": "F-S004-5",
+          "user_story": "Como sócio (US02), quero editar dados extraídos e configurar a moldagem (nº de CPs e idades).",
+          "criterios_aceite": [
+            "Editar campo do OCR: valor manual prevalece e perde destaque amarelo",
+            "Configuração de CPs totalmente livre (quantidade e idade-alvo de cada um); atalhos rápidos opcionais",
+            "Ao salvar (RPC criar_concretagem_com_cps) gera N CPs com idade_alvo_dias e data_ruptura_planejada",
+            "Os 2 CPs de maior idade recebem mandatorio_28d=true",
+            "Slump armazenado em mm; UI converte cm->mm (x10) e mostra a unidade"
+          ],
+          "edge_cases": [
+            "Slump fora de slump_projeto +/- tolerância: aviso não bloqueante + marca ressalva no laudo",
+            "Valores fora das faixas de engenharia (PRD 7.4): aviso/confirmação"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S005",
+      "objetivo": "Corpos de prova: etiquetas Bluetooth (ESC/POS + QR), reimpressão, agenda de coletas (24h) e bipagem de QR para coleta.",
+      "coder_agent_id": "Agent-Mobile-RN",
+      "stack": ["react-native-ble-plx", "escpos-custom-generator", "qrcode", "expo-camera"],
+      "features": [
+        {
+          "id": "F-S005-1",
+          "user_story": "Como sócio (US03), quero imprimir via Bluetooth as etiquetas com QR Code da concretagem.",
+          "criterios_aceite": [
+            "N etiquetas (derivadas da config, não fixo em 4)",
+            "Cada etiqueta: QR (codigo_rastreio), Sigla da Obra, Data de Moldagem, Idade-Alvo, ID legível",
+            "Checklist visual por etiqueta: impressa/falhou/pendente"
+          ],
+          "edge_cases": [
+            "Impressora desconectada/sem papel: status de conexão + timeout 5s marca etiqueta como falhou",
+            "Mais de um dispositivo BT pareado: tela de seleção/confirmação antes de imprimir",
+            "BLE indisponível/permissão negada: 'Ative o Bluetooth e conceda as permissões para imprimir.'"
+          ]
+        },
+        {
+          "id": "F-S005-2",
+          "user_story": "Como sócio (US04), quero reimprimir uma etiqueta específica.",
+          "criterios_aceite": [
+            "Selecionar CP no histórico + 'Reimprimir' reenvia apenas aquela etiqueta"
+          ],
+          "edge_cases": [
+            "Reimpressão não duplica o codigo_rastreio"
+          ]
+        },
+        {
+          "id": "F-S005-3",
+          "user_story": "Como sócio (US05), quero ver os CPs que completaram 24h na obra.",
+          "criterios_aceite": [
+            "CP moldado há >=24h e ainda moldado aparece na agenda",
+            "CP com <24h ou já coletado não aparece"
+          ],
+          "edge_cases": [
+            "Coleta > 24h: marca CP para ressalva textual automática no laudo (coleta_atrasada=true), não bloqueia",
+            "Empty state: 'Nenhuma coleta pendente para hoje.'"
+          ]
+        },
+        {
+          "id": "F-S005-4",
+          "user_story": "Como sócio (US06), quero bipar o QR de um CP para marcá-lo como coletado.",
+          "criterios_aceite": [
+            "Bipar QR válido de CP moldado: status -> coletado, grava coletado_por e coletado_em (RPC coletar_cp)"
+          ],
+          "edge_cases": [
+            "QR sem CP correspondente: 'CP não encontrado.'",
+            "CP já coletado: 'CP já coletado.' (não altera nada)",
+            "CP em estado terminal: 'Este CP não pode ser coletado (status atual: {status}).'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S006",
+      "objetivo": "Prensa: lista de CPs a romper, registro de ruptura + cálculo de MPa, tipo de fratura, descarte/expurgo com motivo e fotos de evidência com marca d'água.",
+      "coder_agent_id": "Agent-Mobile-RN + Agent-Backend-Edge",
+      "stack": ["packages/shared", "react-native-view-shot", "expo-location", "Supabase-Storage"],
+      "features": [
+        {
+          "id": "F-S006-1",
+          "user_story": "Como engenheira (US07), quero ver os CPs que atingiram a idade de rompimento.",
+          "criterios_aceite": [
+            "CPs coletado com data_ruptura_planejada <= hoje aparecem, de todos os clientes juntos",
+            "Busca por QR localiza o CP imediatamente"
+          ],
+          "edge_cases": [
+            "Empty: 'Nenhum CP para romper hoje.'"
+          ]
+        },
+        {
+          "id": "F-S006-2",
+          "user_story": "Como engenheira (US08), quero inserir Peso/Diâmetro/Altura/Carga e o app calcular MPa.",
+          "criterios_aceite": [
+            "Cálculo usa diametro_nominal_mm (não o medido)",
+            "Carga=23562 e molde nominal 100: Área 7853.98 mm2, MPa 29.42 (2 casas, KGF inteiro)",
+            "Ao salvar (RPC registrar_ruptura): CP->rompido, grava executado_por e gera/atualiza rascunho do laudo",
+            "Exibe MPa calculado em tempo real, grande e de alto contraste"
+          ],
+          "edge_cases": [
+            "Valores fora das faixas (PRD 7.4): aviso/confirmação (não corrompe o cálculo)",
+            "Carga muito baixa: 'Valor muito baixo. Você digitou em kN em vez de kgf?'",
+            "Romper CP mandatorio_28d antes da idade: impedido com 'Este CP de {idade}d é obrigatório e não pode ser rompido antes da idade prevista ({data}).'"
+          ]
+        },
+        {
+          "id": "F-S006-3",
+          "user_story": "Como engenheira (US09), quero classificar o tipo de fratura por ícones.",
+          "criterios_aceite": [
+            "Opções exatas: Ruptura de Cabeça, Ruptura de Face, Ruptura Parcial, Ruptura Total, Ruptura de Cisalhamento, Ruptura de Trinca",
+            "Tipo salvo em rupturas.tipo_fratura"
+          ],
+          "edge_cases": [
+            "Salvar ruptura sem escolher fratura: 'Selecione o tipo de fratura.'"
+          ]
+        },
+        {
+          "id": "F-S006-4",
+          "user_story": "Como engenheira (US10), quero descartar um CP ou expurgar um resultado anômalo.",
+          "criterios_aceite": [
+            "rompido + 'Descartar Resultado' + motivo -> expurgado (sai da média)",
+            "CP danificado antes do ensaio + 'Descartar CP' + motivo -> descartado",
+            "Ação gera audit_log com motivo",
+            "Apenas eng_lab pode descartar/expurgar após coleta"
+          ],
+          "edge_cases": [
+            "Motivo vazio: 'Informe o motivo do descarte/expurgo.' (bloqueia)",
+            "Todos os CPs de uma idade descartado/expurgado: idade sinalizada expurgada e laudo daquela idade não é emitido"
+          ]
+        },
+        {
+          "id": "F-S006-5",
+          "user_story": "Como engenheira (US11), quero registrar fotos de evidência internas (Antes/Depois).",
+          "criterios_aceite": [
+            "Fotos enviadas direto do app ao Storage (bucket privado 'evidencias') com marca d'água (data, hora, cidade, GPS)",
+            "Fotos nunca aparecem no laudo do cliente nem são acessíveis por ele (anexo técnico interno)",
+            "Visíveis só a eng_lab/eng_escritorio"
+          ],
+          "edge_cases": [
+            "GPS negado: marca d'água sem coordenadas (não bloqueia)",
+            "Falha no upload: 'Falha ao enviar a foto. Tente novamente.' (mantém foto local para retry)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S007",
+      "objetivo": "Painel web do escritório: visualização em tempo real, edição de concretagem com optimistic locking e laudos pré-prontos (parcial/final/agrupado).",
+      "coder_agent_id": "Agent-Frontend-React",
+      "stack": ["React-18", "Vite-5", "react-query-5", "Supabase-Realtime", "recharts"],
+      "features": [
+        {
+          "id": "F-S007-1",
+          "user_story": "Como eng. de escritório (US12), quero ver as concretagens de campo em tempo real.",
+          "criterios_aceite": [
+            "Concretagem salva no mobile aparece no painel sem recarregar (Realtime postgres_changes) ou refresh <= poucos segundos"
+          ],
+          "edge_cases": [
+            "Loading: skeleton na tabela",
+            "Erro: 'Não foi possível carregar as concretagens.' + 'Tentar novamente'",
+            "Empty: 'Nenhuma concretagem cadastrada.'"
+          ]
+        },
+        {
+          "id": "F-S007-2",
+          "user_story": "Como eng. de escritório (US12b), quero editar dados de uma concretagem.",
+          "criterios_aceite": [
+            "Apenas eng_lab/eng_escritorio",
+            "Editar/salvar gera audit_log (old_value/new_value)"
+          ],
+          "edge_cases": [
+            "updated_at mudou desde a leitura: 409 'Dados foram alterados por outro usuário. Recarregue a página.' (não sobrescreve)"
+          ]
+        },
+        {
+          "id": "F-S007-3",
+          "user_story": "Como eng. de escritório (US13), quero visualizar laudos pré-prontos gerados após o rompimento.",
+          "criterios_aceite": [
+            ">=1 ruptura válida: existe rascunho de laudo por NF (padrão), pré-preenchido",
+            "Emitir parcial (7d/14d) sob solicitação; final (28d) consolida 7/14/28 + gráfico",
+            "Agrupamento opcional de várias NFs da mesma obra (laudo_concretagens)"
+          ],
+          "edge_cases": [
+            "Marcar pronto_assinatura com CPs pendentes: 'Existem CPs pendentes nesta(s) idade(s). Conclua os rompimentos antes de avançar.'",
+            "Empty: 'Nenhum laudo pré-pronto. Eles aparecem após o primeiro rompimento válido.'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S008",
+      "objetivo": "Geração do PDF do laudo travado (permissões + QR anti-fraude + gráfico), download/upload do PDF assinado e versionamento de correção.",
+      "coder_agent_id": "Agent-Backend-Edge + Agent-Frontend-React",
+      "stack": ["Deno-Edge-Function", "@cantoo/pdf-lib", "qrcode", "@resvg/resvg-wasm"],
+      "features": [
+        {
+          "id": "F-S008-1",
+          "user_story": "Como eng. de escritório (US14), quero gerar um PDF travado contra edição.",
+          "criterios_aceite": [
+            "Conteúdo do PRD Seção 11: cabeçalho+logo, dados cliente/obra, tabela DATA|QUADRA|LOTE|NF|LACRE|CP|KGF|MPa|FCM por idade, gráfico de resistência com linha do fck, considerações finais, assinaturas, QR no rodapé",
+            "Permissões: ReadOnly=true, AllowPrinting=true, AllowCopy=false",
+            "Salva em laudos/<id>/original.pdf e preenche pdf_original_url"
+          ],
+          "edge_cases": [
+            "Laudo não está pronto_assinatura: 409 'O laudo precisa estar pronto para assinatura antes de gerar o PDF.'",
+            "Sem resultados válidos: 'Não há resultados válidos para gerar o laudo.'",
+            "Coleta >24h ou slump fora da tolerância: ressalva textual automática nas considerações finais",
+            "Falha na rasterização do gráfico: 500 + log"
+          ]
+        },
+        {
+          "id": "F-S008-2",
+          "user_story": "Como eng. de escritório (US15), quero baixar o PDF não assinado e subir o assinado.",
+          "criterios_aceite": [
+            "'Baixar Laudo (PDF)' baixa o não assinado",
+            "Upload do PDF assinado preenche pdf_assinado_url e laudo -> assinado somente se o arquivo existir",
+            "Uma assinatura (RT) basta; campo separado para 2a assinatura (elaborador) opcional",
+            "Ao assinar dispara e-mail ao cliente (US24-CA1)"
+          ],
+          "edge_cases": [
+            "Marcar assinado sem pdf_assinado_url: 'Faça o upload do PDF assinado antes de publicar o laudo.'",
+            "Arquivo não-PDF: 'Envie um arquivo PDF válido.'"
+          ]
+        },
+        {
+          "id": "F-S008-3",
+          "user_story": "Como engenheiro (US22), quero corrigir um laudo assinado preservando a versão anterior.",
+          "criterios_aceite": [
+            "Corrigir laudo assinado: versão anterior vira substituido e nova versão (versao+1) referencia a anterior (substitui_laudo_id) via RPC corrigir_laudo",
+            "Página pública sempre resolve a versão vigente; histórico auditável e retido"
+          ],
+          "edge_cases": [
+            "Corrigir laudo não-assinado: 'Só é possível corrigir laudos já assinados.'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S009",
+      "objetivo": "Portal do cliente, página pública de validação (QR anti-fraude), exportação Excel de concreteiras e notificações por e-mail.",
+      "coder_agent_id": "Agent-Frontend-React + Agent-Backend-Edge",
+      "stack": ["React-18", "Vite-5", "Deno-Edge-Function", "exceljs", "Resend", "supabase-auth-invite"],
+      "features": [
+        {
+          "id": "F-S009-1",
+          "user_story": "Como cliente (US18), quero ver e baixar em PDF meus laudos assinados.",
+          "criterios_aceite": [
+            "Cliente lista e baixa apenas laudos assinado das suas obras (RLS por cliente_id)",
+            "Laudos rascunho/pronto_assinatura/substituido não aparecem",
+            "Filtro por obra"
+          ],
+          "edge_cases": [
+            "Empty: 'Você ainda não possui laudos disponíveis.'"
+          ]
+        },
+        {
+          "id": "F-S009-2",
+          "user_story": "Como cliente/fiscal (US19), quero apontar o celular ao QR do laudo e ver uma página pública de validação.",
+          "criterios_aceite": [
+            "Abrir página com codigo_verificacao (sem login) exibe laudo completo (dados cliente/obra, MPa/FCM por idade, autenticidade)",
+            "Sempre a versão vigente (não substituída)",
+            "Único endpoint anônimo, read-only, sem fotos de evidência"
+          ],
+          "edge_cases": [
+            "Código inexistente: 'Laudo não encontrado / não autêntico.'",
+            "Rate limit por IP: 429"
+          ]
+        },
+        {
+          "id": "F-S009-3",
+          "user_story": "Como engenheiro (US23), quero exportar um relatório consolidado por concreteira em Excel.",
+          "criterios_aceite": [
+            "Filtros: período, concreteira, fck alvo, obra",
+            "Excel compara MPa/FCM por concreteira e fck alvo no período",
+            "Apenas engenheiros"
+          ],
+          "edge_cases": [
+            "Sem dados no filtro: 'Nenhum dado encontrado para os filtros selecionados.'"
+          ]
+        },
+        {
+          "id": "F-S009-4",
+          "user_story": "Como sistema (US24), quero enviar e-mails automáticos nos eventos-chave.",
+          "criterios_aceite": [
+            "Laudo assinado/publicado -> cliente: 'Seu laudo está disponível para download.'",
+            "Laudo pronto_assinatura -> RT: 'Há laudo(s) aguardando sua assinatura.'",
+            "CPs moldado >24h sem coleta -> sócio: 'Existem X CPs pendentes de coleta.' (cron diário)",
+            "Novo cliente cadastrado -> boas-vindas com link do portal e definição de senha"
+          ],
+          "edge_cases": [
+            "Falha no envio: registra em email_events e re-tenta; não bloqueia o fluxo operacional (publicação do laudo prossegue)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S010",
+      "objetivo": "Hardening: dashboard operacional, cobertura de testes (unit/RLS/E2E), rate limiting e revisão de segurança.",
+      "coder_agent_id": "Agent-QA + Agent-DevOps",
+      "stack": ["Vitest", "React-Native-Testing-Library", "Playwright", "pgTAP", "ESLint", "Prettier"],
+      "features": [
+        {
+          "id": "F-S010-1",
+          "user_story": "Como engenheiro, quero um dashboard operacional na home do web.",
+          "criterios_aceite": [
+            "Contadores de CPs moldados/coletados/rompidos (hoje/semana)",
+            "Laudos pendentes de assinatura",
+            "Concretagens sem coleta > 24h",
+            "Próximos rompimentos programados"
+          ],
+          "edge_cases": [
+            "Empty/Loading/Error tratados em cada card"
+          ]
+        },
+        {
+          "id": "F-S010-2",
+          "user_story": "Como time, quero cobertura mínima de testes das funções e políticas críticas.",
+          "criterios_aceite": [
+            "calcMpa com os 4 vetores (21977->27.44, 24194->30.21, 20045->25.03, 23562->29.42)",
+            "estimateF28 (7d=0.70, 14d=0.90)",
+            "Transições das máquinas de estado (CP e Laudo), válidas e inválidas",
+            "Políticas RLS por papel (pgTAP)",
+            "E2E Playwright: login, validação pública, portal"
+          ],
+          "edge_cases": [
+            "OCR rate limit: 3 OK, 4a -> 429",
+            "Componentes: estados Loading/Error/Empty e botão disabled durante submit"
+          ]
+        },
+        {
+          "id": "F-S010-3",
+          "user_story": "Como responsável, quero revisão de segurança e rate limiting.",
+          "criterios_aceite": [
+            "Rate limit OCR (3/concretagem) e público (30 req/min/IP)",
+            "Headers CSP/nosniff/referrer na página pública",
+            "Revisão de RLS e sanitização (Zod em toda fronteira)"
+          ],
+          "edge_cases": [
+            "Segredos (OPENAI_API_KEY, RESEND_API_KEY, service_role) apenas em env das Edge Functions",
+            "Sem DELETE físico em tabelas críticas"
+          ]
+        }
+      ]
+    }
+  ]
+}
