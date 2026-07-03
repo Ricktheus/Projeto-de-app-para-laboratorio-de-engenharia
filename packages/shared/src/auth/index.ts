@@ -14,3 +14,4 @@ export {
 } from './login-throttle';
 export { type AuthErrorCode, type AuthErrorLike, mapSupabaseAuthError } from './auth-errors';
 export { authErrorMessage } from './auth-messages';
+export { loginCredentialsSchema, type LoginCredentials } from './login-schema';
