@@ -6,22 +6,51 @@ Este repositório contém os documentos de concepção e especificação para o 
 
 ## 📌 Status Atual do Projeto
 
-**Fase Atual:** PRD consolidado (v2.0) & Pronto para a Geração da SPEC Técnica.
+**Fase Atual:** ✅ SPEC Técnica gerada — **Pronto para iniciar o desenvolvimento (Sprint 001)**.
 
-1. **Revisão Crítica Realizada:** Foi mapeado um conjunto de gaps críticos e edge cases no PRD original, gerando o relatório [revisao_critica_prd.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/revisao_critica_prd.md).
+1. **Revisão Crítica Realizada:** Foi mapeado um conjunto de gaps críticos e edge cases no PRD original, gerando o relatório [revisao_critica_prd.md](./revisao_critica_prd.md).
 2. **Respostas da Engenheira Recebidas:** As 25 perguntas de validação foram respondidas pela engenheira e, junto com um laudo real de referência, usadas para atualizar o PRD.
-3. **7 Gaps Críticos Resolvidos:** O [PRD_MVP.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/PRD_MVP.md) (v2.0) resolve formalmente os 7 gaps — Critérios de Aceite em todas as User Stories, Matriz RBAC, Audit Trail, Máquinas de Estado (CP e Laudo), Normas Técnicas, Fórmula kgf→MPa e CRUD de Obras (ver o índice na Seção 1.1 do PRD).
-4. **Próximo Passo:** Rodar o prompt de geração de SPEC em uma nova sessão (Passo 2 abaixo), usando o PRD atualizado.
+3. **7 Gaps Críticos Resolvidos:** O [PRD_MVP.md](./PRD_MVP.md) (v2.0) resolve formalmente os 7 gaps — Critérios de Aceite em todas as User Stories, Matriz RBAC, Audit Trail, Máquinas de Estado (CP e Laudo), Normas Técnicas, Fórmula kgf→MPa e CRUD de Obras (ver o índice na Seção 1.1 do PRD).
+4. **✅ SPEC Técnica Gerada:** [SPEC_TECNICA.md](./SPEC_TECNICA.md) e [sprints.json](./sprints.json) traduzem o PRD em um manual de implementação determinístico — arquitetura (monorepo modular), **10 sprints** incrementais (S001–S010), **38 features** com Definition of Done/edge cases/mensagens de erro exatas, modelo de dados (DDL + RLS + auditoria + RPCs), contratos de API e requisitos não funcionais.
+5. **✅ Prompt de Desenvolvimento Pronto:** [prompt_desenvolver_sprint.md](./prompt_desenvolver_sprint.md) — prompt rigoroso do comando `/go`, configurado para a Sprint `S001`.
+
+### 🧭 Progresso das Sprints
+
+| Sprint | Objetivo | Status |
+|---|---|---|
+| **S001** | Fundação Supabase: schema, RLS/RBAC, auditoria, Auth | ⏳ A iniciar (próximo passo) |
+| **S002** | Núcleo de domínio (MPa, projeção, máquinas de estado) | 🔲 Planejado |
+| **S003** | Auth & navegação (mobile + web), UI kit | 🔲 Planejado |
+| **S004** | Clientes/Usuários/Obras + Concretagem + OCR da NF | 🔲 Planejado |
+| **S005** | Corpos de prova, etiquetas Bluetooth, coleta | 🔲 Planejado |
+| **S006** | Prensa: ruptura, MPa, fratura, descarte, fotos | 🔲 Planejado |
+| **S007** | Painel web escritório: realtime, edição, laudos pré-prontos | 🔲 Planejado |
+| **S008** | Geração de PDF travado, assinatura, versionamento | 🔲 Planejado |
+| **S009** | Portal do cliente, validação pública, Excel, e-mails | 🔲 Planejado |
+| **S010** | Hardening: dashboard, testes, segurança | 🔲 Planejado |
+
+### 🎯 Próximos Passos
+
+1. **Iniciar a Sprint 001** com o comando `/go`, usando [prompt_desenvolver_sprint.md](./prompt_desenvolver_sprint.md) (já configurado para `S001`). Entrega: monorepo base + migrations Supabase + RLS/RBAC + auditoria + Auth, com testes pgTAP passando.
+2. **Provisionar o projeto Supabase** (chaves, buckets `evidencias`/`laudos`, variáveis de ambiente `OPENAI_API_KEY`/`RESEND_API_KEY`) antes das sprints que os consomem (S004/S006/S008/S009).
+3. **Avançar sprint a sprint**, trocando o "Sprint alvo" no topo do prompt (`S002`, `S003`…) e atualizando a tabela de progresso acima ao concluir cada uma.
 
 ---
 
 ## 📂 Mapeamento de Arquivos do Projeto
 
-- 📄 [PRD_MVP.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/PRD_MVP.md) — Documento de Requisitos do Produto (MVP). Contém o escopo e regras de negócio simplificadas.
-- 📄 [revisao_critica_prd.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/revisao_critica_prd.md) — Análise implacável do PRD com **7 Gaps Críticos**, edge cases e as **25 perguntas de validação**.
-- 📄 [implementation_plan.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/implementation_plan.md) — Esboço inicial da modelagem lógica do banco de dados (PostgreSQL/Supabase) e fluxo de telas.
-- 📄 [roteiro_entrevista_laboratorio.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/roteiro_entrevista_laboratorio.md) — Mapeamento do fluxo operacional atual e gargalos detectados na entrevista inicial.
-- 📄 [MEMORIA_PROJETO.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/MEMORIA_PROJETO.md) — Histórico conceitual do projeto e diretrizes de desenvolvimento.
+**Especificação e execução (novos):**
+- 📐 [SPEC_TECNICA.md](./SPEC_TECNICA.md) — **Especificação Técnica** determinística: arquitetura, sprints, features/DoD, modelo de dados, API, segurança e testes.
+- 🗂️ [sprints.json](./sprints.json) — Sprints e features legíveis por máquina, consumidas pelo comando `/go`.
+- 🚀 [prompt_desenvolver_sprint.md](./prompt_desenvolver_sprint.md) — Prompt de desenvolvimento de sprint (Sprint alvo `S001`).
+- 📋 [prompt_gerar_spec.md](./prompt_gerar_spec.md) — Prompt usado para gerar a SPEC a partir do PRD.
+
+**Concepção e requisitos:**
+- 📄 [PRD_MVP.md](./PRD_MVP.md) — Documento de Requisitos do Produto (MVP). Contém o escopo e regras de negócio.
+- 📄 [revisao_critica_prd.md](./revisao_critica_prd.md) — Análise crítica do PRD com **7 Gaps Críticos**, edge cases e as **25 perguntas de validação**.
+- 📄 [implementation_plan.md](./implementation_plan.md) — Esboço inicial da modelagem lógica do banco de dados (PostgreSQL/Supabase) e fluxo de telas.
+- 📄 [roteiro_entrevista_laboratorio.md](./roteiro_entrevista_laboratorio.md) — Mapeamento do fluxo operacional atual e gargalos detectados na entrevista inicial.
+- 📄 [MEMORIA_PROJETO.md](./MEMORIA_PROJETO.md) — Histórico conceitual do projeto e diretrizes de desenvolvimento.
 
 ---
 
