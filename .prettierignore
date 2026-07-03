@@ -1,0 +1,10 @@
+node_modules/
+dist/
+pnpm-lock.yaml
+**/database.types.ts
+
+# Pre-existing project documentation & data (not maintained by Prettier)
+*.md
+sprints.json
+*.jpeg
+.agent/

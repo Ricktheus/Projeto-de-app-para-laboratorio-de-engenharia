@@ -6,6 +6,15 @@ jspm_packages/
 dist/
 build/
 
+# Monorepo tooling
+.turbo/
+
+# Supabase local stack
+supabase/.branches/
+supabase/.temp/
+.env
+.env.local
+
 # Operating System Files
 .DS_Store
 Thumbs.db
