@@ -61,19 +61,15 @@ Por favor, gere a SPEC completa com base nessas regras e no PRD abaixo.
 ```
 
 ### Passo 3: Executar a Sprint 001 (Usando o comando `/go` na nova sessão)
-Uma vez que o SPEC técnico estiver gerado e validado, você poderá usar o prompt abaixo na sua nova sessão para iniciar o desenvolvimento da Sprint 001.
+Uma vez que o SPEC técnico (`SPEC_TECNICA.md`) e o `sprints.json` estiverem gerados e validados, use o prompt de desenvolvimento de sprint para iniciar a construção.
 
-#### 🚀 Prompt para Desenvolvimento da [Sprint 001]:
-```text
-Construa EXATAMENTE a [Sprint 001] descrita no documento SPEC (ou arquivo sprints.json).
-A sua missão é atuar como o agente desenvolvedor e entregar apenas esta Sprint. Siga rigorosamente as instruções abaixo:
-1. Escopo e Referências: Use o documento PRD para entender o contexto de negócio. Siga rigorosamente todas as diretrizes de código definidas no arquivo cloud.md (ou gemini.md). Utilize as notas de arquitetura e modelos de dados mapeados na SPEC.
-2. Critérios de Aceite: Para cada Feature listada na [Sprint 001], você deve implementar e verificar todos os Critérios de Aceite (Definition of Done) e Cenários Alternativos (Edge Cases). O agente gerente deve validar se todas as mensagens de erro (ex: 401, campos inválidos) estão aparecendo corretamente na interface como definido na SPEC.
-3. Execução Autônoma: Use seus agentes (executor e gerente) para avaliar continuamente o seu próprio trabalho. Se algo falhar nos critérios de aceite, refaça antes de me devolver a resposta.
-4. Condição de Conclusão: O objetivo só deve ser considerado completo e a execução encerrada quando:
-- Todas as tarefas da [Sprint 001] estiverem implementadas.
-- O aplicativo estiver rodando localmente sem erros.
-- O melhor comando de validação disponível (como build ou typecheck) passar.
-- O resultado estiver perfeitamente alinhado com a SPEC e os Critérios de Aceite.
-```
+#### 🚀 Prompt para Desenvolvimento de Sprint:
+O prompt completo, rigoroso e determinístico está em **[`prompt_desenvolver_sprint.md`](./prompt_desenvolver_sprint.md)**. Ele já vem configurado com a **Sprint alvo `S001`**; para rodar outra sprint (`S002`, `S003`…), basta trocar o ID do "Sprint alvo" no topo do arquivo.
+
+Principais melhorias em relação ao prompt inicial:
+- Referencia os arquivos reais do projeto (`SPEC_TECNICA.md`, `sprints.json`, `PRD_MVP.md`, `MEMORIA_PROJETO.md`) em vez de `cloud.md`/`gemini.md` inexistentes.
+- Fixa o escopo exato (só a sprint alvo, sem antecipar features futuras) e lista as features de `S001`.
+- Traz as diretrizes de código obrigatórias (idioma, nomenclatura, DRY/SOLID, RLS default-deny, ergonomia).
+- Adapta a "condição de conclusão" a sprints de banco/infra (ex.: `supabase db reset`, `gen types`, pgTAP), já que a Sprint 001 não tem UI executável.
+- Define o ciclo executor→revisor, o Definition of Done em checklist, as regras de Git da branch designada e o formato do relatório final.
 
