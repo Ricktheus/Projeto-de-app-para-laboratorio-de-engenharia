@@ -1,0 +1,30 @@
+{
+  "name": "concreto-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP Laboratório de Controle Tecnológico de Concreto — monorepo",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > packages/supabase/src/database.types.ts",
+    "db:test": "supabase test db"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}

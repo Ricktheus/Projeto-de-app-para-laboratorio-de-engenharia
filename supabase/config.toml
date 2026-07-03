@@ -1,0 +1,41 @@
+# Supabase local configuration for the concrete-testing MVP.
+# Used by `supabase start`, `supabase db reset`, `supabase gen types`,
+# and `supabase test db`.
+project_id = "concreto-mvp"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# Match Supabase's managed Postgres major version.
+major_version = 15
+
+[db.migrations]
+# Apply files in supabase/migrations in lexicographic order.
+enabled = true
+
+[db.seed]
+# Seeds are shipped as migration 0006_seed.sql (idempotent), so no separate
+# seed file is needed here.
+enabled = true
+sql_paths = []
+
+[auth]
+enabled = true
+# Local test users are created via the standard Supabase auth flows; the
+# on_auth_user_created trigger (migration 0003) provisions the profile row.
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[studio]
+enabled = true
+port = 54323
