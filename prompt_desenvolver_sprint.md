@@ -12,8 +12,8 @@ Você atuará como **Agente Desenvolvedor Sênior** responsável por entregar **
 
 ### 0. Sprint alvo
 
-* **Construa EXATAMENTE a Sprint `S001`** ("Sprint 001") como definida em `sprints.json` (campo `id: "S001"`) e na seção correspondente de `SPEC_TECNICA.md` (§2, §3 e §4).
-* Entregue **todas** as features desta sprint e **nada além delas**. As features de `S001` são: `F-S001-1` (schema/enums/migrations), `F-S001-2` (RLS ↔ Matriz RBAC), `F-S001-3` (auditoria automática) e `F-S001-4` (Auth e provisionamento de papéis).
+* **Construa EXATAMENTE a Sprint `S00`** ("Sprint 00") como definida em `sprints.json` (campo `id: "S00"`) e na seção correspondente de `SPEC_TECNICA.md` (§2, §3 e §4).
+* Entregue **todas** as features desta sprint e **nada além delas**. 
 * Se identificar que uma feature depende de algo fora do escopo desta sprint, **pare e reporte** — não invente a dependência nem antecipe outra sprint.
 
 ### 1. Fontes de verdade (leia antes de codar; em caso de conflito, esta é a ordem de prioridade)
