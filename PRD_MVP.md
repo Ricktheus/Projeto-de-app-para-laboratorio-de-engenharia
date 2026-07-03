@@ -197,16 +197,19 @@ stateDiagram-v2
 |---|---|---|
 | **NBR 5738** — Moldagem e cura de CPs | Nº de CPs por idade (configurável), datas de moldagem/cura, prazo de coleta (24h). | ✅ Coberta |
 | **NBR 5739** — Ensaio de compressão | Cálculo de resistência (MPa) e classificação de fratura (nomenclatura própria do lab, mapeável à norma). Base do laudo. | ✅ Coberta |
-| **NBR 12655** — Preparo, controle e recebimento do concreto | Cálculo do **fck estimado (fck,est)** exibido no laudo; projeção de resistência (7/14 → 28 dias). | ✅ Coberta (ver 6.2) |
+| **NBR 12655** — Preparo, controle e recebimento do concreto | Referência conceitual. O **fck NÃO é calculado** pelo sistema: vem do projeto/NF e é transcrito ao laudo. Projeção 7/14→28d por fatores percentuais fixos (ver 6.2). | ✅ Coberta (ver 6.2) |
 | **NBR NM 67** — Slump Test (abatimento) | Registro do `slump_medido` e validação contra o slump de **projeto ± tolerância** (não por fck). | ✅ Coberta |
 | **NBR 7584** — Esclerometria (dureza superficial) | Fora do MVP; a modelagem deve permanecer **extensível** a novos tipos de ensaio. | ⛔ Fora do MVP (extensível) |
 
 ### 6.1. Fator de correção h/d
 Atualmente **não aplicado** (CPs padronizados, formas íntegras, relação h/d = 2 mantida). O laboratório **iniciou o uso de retífica**; o fator de correção h/d será adicionado **quando a retífica for plenamente adotada**. A modelagem deve reservar espaço para um fator de correção configurável (default = 1,00).
 
-### 6.2. fck estimado e projeção para 28 dias
-* O laudo exibe **tanto o resultado em MPa quanto o fck estimado**. O sistema calcula o `fck,est` conforme **NBR 12655 (amostragem parcial)**. Como a amostragem típica é pequena (ex.: 2 CPs por idade), o coeficiente de amostragem (ψ6, função de `n` e do tipo de cimento) deve ser um **parâmetro configurável** a ser confirmado com a engenheira na fase de SPEC; o default é o valor conservador da tabela da norma.
-* **Projeção (majoração) para 28 dias:** Quando o cliente solicita, os laudos de 7/14 dias exibem o **resultado esperado a 28 dias**, obtido por um **fator de crescimento configurável** (`f28_estimado = f_idade / fator_crescimento(idade)`), comparado ao **fck de projeto** para sinalizar, de imediato, eventual **necessidade de reforço**.
+### 6.2. fck e projeção para 28 dias
+* **fck — NÃO é calculado pelo sistema (dado capturado):** O fck é **definido em projeto** pelo engenheiro projetista, informado pelo cliente à concreteira e **emitido na Nota Fiscal**. O laboratório apenas **captura esse valor da NF** (via OCR — US01) e o **transcreve para o laudo** ("FCK especificado"). Portanto, o sistema **não** executa o cálculo estatístico da NBR 12655 (ψ6/amostragem parcial): o fck é um **dado**, não um cálculo. *(Confirmado pela engenheira.)*
+* **Projeção (majoração) para 28 dias:** Nos laudos de 7/14 dias (quando solicitado), o sistema **estima** a resistência esperada aos 28 dias por **fatores percentuais fixos, iguais para todos os tipos de cimento** (a equipe trabalha com cimentos variados, mas usa os mesmos percentuais), e compara ao fck para sinalizar de imediato eventual **necessidade de reforço**:
+  * 7 dias ≈ **65–70%** da resistência final;
+  * 14 dias ≈ **85–90%** da resistência final;
+  * `f28_estimado = f_idade / fator(idade)`. **Defaults configuráveis:** 7d = **0,70** e 14d = **0,90** (limite superior de cada faixa ⇒ estimativa mais conservadora, que sinaliza reforço mais cedo). Opcionalmente, exibir a **faixa** (mín–máx) usando também 0,65 e 0,85.
 
 ---
 
@@ -228,9 +231,10 @@ MPa (N/mm²) = Força_N / Área_mm²
 * Unidades: entrada em **kgf** e **mm**; saída em **MPa (N/mm²)**.
 * **Verificação numérica (CP 100×200, área = 7.853,98 mm²):** 21.977 kgf → **27,44 MPa** · 24.194 kgf → **30,21 MPa** · 20.045 kgf → **25,03 MPa** (idênticos ao laudo de exemplo).
 
-### 7.2. Médias e fck estimado
+### 7.2. Médias, fck e projeção
 * **FCM (média por idade/NF):** média aritmética dos MPa dos CPs **válidos** (excluindo `descartado`/`expurgado`) daquela idade.
-* **fck,est:** conforme Seção 6.2 (NBR 12655, amostragem parcial).
+* **fck:** **dado capturado da NF/projeto** (não calculado) — ver Seção 6.2.
+* **Projeção 28 dias:** `f28_estimado = f_idade / fator(idade)`, com fatores fixos da Seção 6.2 (7d = 0,70; 14d = 0,90 por padrão).
 
 ### 7.3. Arredondamento (resposta P10)
 * **MPa:** **2 casas decimais**.
