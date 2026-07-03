@@ -33,7 +33,7 @@ Seguindo a premissa de **simplicidade, mudanças cirúrgicas e foco na entrega**
 ### 2.1. Fluxo de Moldagem e Corpos de Prova (CPs)
 * **Quantidade de CPs e idades — TOTALMENTE CONFIGURÁVEL (sem padrão fixo):** O sócio/moldador define, a cada concretagem, **quantos** CPs serão moldados e a **idade-alvo de ruptura de cada um** (ex.: 7, 14, 28 dias — mas também 3, 63, 91 dias, se necessário). O sistema **não** impõe um número fixo. Para agilidade, a tela oferece atalhos rápidos (ex.: "2×7d + 2×14d + 2×28d", "2×7d + 2×28d"), mas nenhum é obrigatório. O número de etiquetas impressas e a agenda de coletas/rompimentos derivam **dinamicamente** dessa configuração.
 * **CPs mandatórios de 28 dias:** Ao romper CPs antecipadamente (ver 2.2), o sistema deve **preservar** os 2 CPs de maior idade-alvo (tipicamente 28 dias) obrigatórios pela norma, alertando a engenheira caso ela tente rompê-los antes da idade.
-* **Slump Test:** O slump **não** possui faixa de tolerância derivada do fck. O valor-alvo e a tolerância são **definidos em projeto** (ex.: "12 ± 2"). O sistema armazena `slump_projeto` e `slump_tolerancia` (informados na concretagem) e valida o `slump_medido` contra essa faixa. Fora da faixa ⇒ **aviso não bloqueante** + ressalva textual no laudo (não é bloqueio, pois a decisão de liberação é do sócio em campo).
+* **Slump Test:** O slump **não** possui faixa de tolerância derivada do fck. O valor-alvo e a tolerância são **definidos em projeto**. O sistema armazena `slump_projeto`, `slump_tolerancia` e `slump_medido` **em milímetros (mm)** — padrão da NBR NM 67 e consistente com as demais medidas do sistema (diâmetro/altura em mm). ⚠️ **Atenção de unidade:** projetos e NFs costumam informar o slump em **centímetros** (ex.: "12 ± 2"); a UI deve deixar a unidade explícita e **converter (× 10)** ao armazenar (12 ± 2 cm ⇒ 120 ± 20 mm). Valida `slump_medido` contra `slump_projeto ± slump_tolerancia`. Fora da faixa ⇒ **aviso não bloqueante** + ressalva textual no laudo (a decisão de liberação é do sócio em campo).
 * **Slump Test Reprovado:** O sistema só registra concretagens **aprovadas** e moldadas. Não há controle de devolução de caminhões.
 * **Perda ou Quebra de CPs:** Não há "CPs Reserva". CP danificado antes do ensaio ⇒ status **`descartado`** (com motivo obrigatório). O laudo calcula a média (MPa) apenas com os CPs válidos restantes.
 * **Registro de entrada no laboratório:** **NÃO existe** um registro de entrada separado. O CP é identificado na obra (na moldagem, com etiqueta QR Code impressa). Ao chegar ao laboratório, vai direto ao tanque de cura. A **coleta (US06)** — bipagem do QR — é suficiente para rastrear que o CP está em cura. O estado `coletado` significa, na prática, "em cura no laboratório".
@@ -114,7 +114,8 @@ Legenda: ✅ permitido · ⛔ negado · 🔒 escopo restrito (apenas registros v
 | **Concretagens** — visualizar | ✅ (as suas) | ✅ | ✅ | ⛔ |
 | **Corpos de Prova** — gerar/etiquetar | ✅ | ✅ | ✅ | ⛔ |
 | **Corpos de Prova** — marcar coletado | ✅ | ✅ | ⛔ | ⛔ |
-| **Corpos de Prova** — descartar (pré-ensaio) | ⛔ | ✅ | ⛔ | ⛔ |
+| **Corpos de Prova** — descartar CP com dano em campo (`moldado`) | ✅ (que criou) | ✅ | ⛔ | ⛔ |
+| **Corpos de Prova** — descartar/expurgar após coleta | ⛔ | ✅ | ⛔ | ⛔ |
 | **Rupturas** — registrar (prensa) | ⛔ | ✅ | ⛔ | ⛔ |
 | **Rupturas** — expurgar resultado | ⛔ | ✅ | ⛔ | ⛔ |
 | **Fotos de evidência** — enviar/ver | ⛔ | ✅ | ✅ | ⛔ |
@@ -292,7 +293,7 @@ MPa (N/mm²) = Força_N / Área_mm²
 - **CA1:** *Dado* o histórico de concretagens, *quando* o sócio seleciona um CP e "Reimprimir", *então* apenas aquela etiqueta é reenviada, sem duplicar o `codigo_rastreio`.
 
 **US05 — Agenda de Coletas:** Como Sócio, quero ver os CPs que completaram 24h na obra.
-- **CA1:** *Dado* um CP moldado há **exatamente ≥ 24h** e ainda `moldado`, *quando* o sócio abre a Agenda de Coletas, *então* o CP aparece na lista. CPs com **< 24h** ou já `coletado` **não** aparecem.
+- **CA1:** *Dado* um CP moldado há **24h ou mais** e ainda `moldado`, *quando* o sócio abre a Agenda de Coletas, *então* o CP aparece na lista. CPs com **< 24h** ou já `coletado` **não** aparecem.
 - **CA2:** *Dado* que a coleta ultrapassa 24h, *então* o sistema marca o CP para **ressalva textual automática** no laudo (não bloqueia).
 
 **US06 — Coleta (bipar QR):** Como Sócio, quero bipar o QR de um CP para marcá-lo como coletado/encaminhado à cura.
@@ -341,7 +342,7 @@ MPa (N/mm²) = Força_N / Área_mm²
 - **CA3 (agrupamento opcional):** *Dado* várias NFs da **mesma obra**, *quando* o engenheiro seleciona "Agrupar em um laudo", *então* é gerado um laudo consolidado (como no exemplo AGEHAB) — sem deixar de ser possível o padrão 1-laudo-por-NF.
 
 **US14 — Geração do PDF bloqueado:** Como Eng. de Escritório, quero gerar um PDF travado contra edição.
-- **CA1:** *Dado* um laudo `pronto_assinatura`, *quando* o engenheiro gera o PDF, *então* o arquivo contém: cabeçalho com logo, dados do cliente/obra, tabela de resultados (DATA, QUADRA, LOTE, NF, LACRE, CP, KGF/MPa por idade, FCM por idade), **gráfico de resistência**, considerações finais, campos de assinatura (RT + CREA) e **QR Code no rodapé**; com permissões `ReadOnly=true, AllowPrinting=true, AllowCopy=false`.
+- **CA1:** *Dado* um laudo `pronto_assinatura`, *quando* o engenheiro gera o PDF, *então* o arquivo contém: cabeçalho com logo, dados do cliente/obra, tabela de resultados (DATA, QUADRA, LOTE, NF, LACRE, CP, KGF/MPa por idade, FCM por idade), **gráfico de resistência**, considerações finais, campos de assinatura (Responsável Técnica com CREA + campos de Laboratorista/Moldador) e **QR Code no rodapé**; com permissões `ReadOnly=true, AllowPrinting=true, AllowCopy=false`.
 - **CA2:** *Dado* o layout de referência (PDF de exemplo), *então* o gráfico mostra a **curva de crescimento entre idades** e uma **linha de referência do fck de projeto** (melhoria solicitada na P15).
 - **CA3:** *Dado* que a coleta ultrapassou 24h ou o slump ficou fora da tolerância, *então* a **ressalva textual** correspondente aparece nas considerações finais.
 
@@ -351,7 +352,7 @@ MPa (N/mm²) = Força_N / Área_mm²
 - **CA3:** *Dado* que ainda não há PDF assinado, *então* o status **não** pode ser marcado como `assinado`.
 
 **US16 — Cadastro de clientes e usuários:** Como Admin (`eng_lab`/`eng_escritorio`), quero cadastrar clientes e as credenciais/usuários do sistema.
-- **CA1:** *Dado* um admin, *quando* cadastra um cliente (nome, CNPJ, e-mail), *então* o cliente pode acessar o portal.
+- **CA1:** *Dado* um admin, *quando* cadastra um cliente (nome, CNPJ, e-mail), *então* é criada a credencial e o sistema envia um **e-mail de convite/boas-vindas** com link do portal e definição de senha inicial (ver US24). O cliente passa a acessar o portal após definir a senha.
 - **CA2:** *Dado* um **não-admin** (ex.: `socio_campo`), *quando* tenta acessar o cadastro de usuários, *então* a ação é negada (RBAC).
 - **CA3:** Criação de usuário/cliente gera **registro de auditoria**.
 
@@ -377,6 +378,15 @@ MPa (N/mm²) = Força_N / Área_mm²
 - **CA2:** *Dado* que o laudo foi corrigido, *então* a página exibe a **versão vigente** e indica que é a versão mais recente.
 - **CA3:** *Dado* um código inexistente, *então* exibe "Laudo não encontrado / não autêntico".
 
+### 8.5. Notificações por E-mail (substituem o push nativo)
+
+**US24 — Notificações por e-mail:** Como sistema, quero enviar e-mails automáticos nos eventos-chave (substituindo notificações push, que estão fora do escopo).
+- **CA1:** *Dado* que um laudo passa a `assinado`/publicado, *então* o **cliente** recebe "Seu laudo está disponível para download." com link do portal.
+- **CA2:** *Dado* que um laudo entra em `pronto_assinatura`, *então* a **Responsável Técnica** recebe "Há laudo(s) aguardando sua assinatura."
+- **CA3:** *Dado* que existem CPs `moldado` há > 24h sem coleta, *então* o **sócio** recebe "Existem X CPs pendentes de coleta."
+- **CA4:** *Dado* que um novo cliente é cadastrado (US16), *então* o **cliente** recebe e-mail de boas-vindas com link do portal e definição de senha.
+- **CA5:** *Dado* falha no envio (provedor de e-mail indisponível), *então* o evento é registrado (log) e re-tentado; a falha **não** bloqueia o fluxo operacional (ex.: publicação do laudo).
+
 ---
 
 ## 9. Auditoria e Rastreabilidade — *Resolve o Gap 3*
@@ -399,7 +409,7 @@ Campos: `id`, `user_id`, `action` (`INSERT|UPDATE|DELETE`), `table_name`, `recor
 | Requisito | Definição no MVP |
 |---|---|
 | Retenção de dados | **Vitalícia** para laudos e dados de ensaio (P22). Sem expurgo automático. |
-| Controlador vs. operador | **Controlador:** o laboratório (ELI Labtech). **Operador:** provedor de infraestrutura (Supabase). |
+| Controlador vs. operador | **Controlador:** o laboratório (razão social a confirmar no cadastro do laboratório). **Operador:** provedor de infraestrutura (Supabase). |
 | Consentimento de geolocalização | Solicitada no app para marca d'água/GPS de obra; se negada, o fluxo prossegue **sem** GPS. |
 | Direito de exclusão | Ponderado contra a obrigação legal de **retenção do laudo** (documento jurídico): dados de laudo **não** são apagáveis; dados de contato podem ser anonimizados mediante solicitação, preservando o laudo. |
 | Criptografia | Em trânsito (HTTPS/TLS) e em repouso (Supabase). |
@@ -427,10 +437,10 @@ Baseado no PDF de exemplo (`...ENSAIO_7_DIAS_REBRASCOM_assinado.pdf`). Layout **
 
 Ajustes derivados desta consolidação (detalhamento na SPEC / `implementation_plan.md`):
 
-* **`corpos_prova.status`:** ampliar para `moldado | coletado | rompido | descartado | expurgado`; adicionar `idade_alvo_dias` livre (não restrito a 7/28) e `motivo_descarte`.
-* **`concretagens`:** adicionar `slump_projeto`, `slump_tolerancia`, `coletado_em`/flag de coleta > 24h; `updated_at` para optimistic locking.
-* **`obras`:** confirmar `sigla`, `gps_*`, `criado_por`, `ativo` (soft-delete) — CRUD exposto (US20/US21).
-* **`rupturas`:** `tipo_fratura` com os 6 rótulos do lab; `diametro_nominal_mm` (base do cálculo) além dos medidos; `fator_correcao_hd` (default 1,00, extensível); `motivo_expurgo`.
-* **`laudos`:** adicionar `versao`, `substitui_laudo_id`, `status` incluindo `substituido`; `assinatura_rt_url` (obrigatória) e `assinatura_elaborador_url` (opcional); suporte a agrupamento de múltiplas concretagens (tabela de junção `laudo_concretagens`).
+* **`corpos_prova.status`:** ampliar para `moldado | coletado | rompido | descartado | expurgado`; adicionar `idade_alvo_dias` livre (não restrito a 7/28), `motivo_descarte`, `coletado_por`, `coletado_em`, `mandatorio_28d` (bool, para a guarda de preservação).
+* **`concretagens`:** adicionar `slump_projeto`, `slump_tolerancia`, `slump_medido` (**todos em mm**); `quadra`, `lote`, `traco` (usados no laudo e na numeração; opcionais); `medida_cp`/`diametro_nominal_mm` (medida do molde, ex.: 100×200 — **base do cálculo de MPa**, definida na moldagem); flag/derivação de coleta > 24h; `updated_at` para optimistic locking.
+* **`obras`:** confirmar `sigla` (**única por cliente**), `gps_*`, `criado_por`, `ativo` (soft-delete) — CRUD exposto (US20/US21).
+* **`rupturas`:** `tipo_fratura` com os 6 rótulos do lab; `diametro_nominal_mm` **herdado da concretagem/CP** (base do cálculo) além dos valores medidos; `fator_correcao_hd` (default 1,00, extensível); `motivo_expurgo`.
+* **`laudos`:** adicionar `versao`, `substitui_laudo_id`, `status` incluindo `substituido`; `assinatura_rt_url` (obrigatória) e `assinatura_elaborador_url` (opcional); `updated_at` (optimistic locking); suporte a agrupamento de múltiplas concretagens (tabela de junção `laudo_concretagens`).
 * **`audit_log`:** nova tabela (Seção 9).
-* **`usuarios.role`:** `socio_campo | eng_lab | eng_escritorio | cliente`; flag/《claim》 `is_admin` para os dois sócios.
+* **`usuarios.role`:** `socio_campo | eng_lab | eng_escritorio | cliente`; flag/《claim》 `is_admin` para os dois sócios. *(Obs.: `socio_campo` designa o operador de campo/moldador — pode ser funcionário, não necessariamente sócio.)*
