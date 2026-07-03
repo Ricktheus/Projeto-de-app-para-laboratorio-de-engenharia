@@ -6,11 +6,12 @@ Este repositório contém os documentos de concepção e especificação para o 
 
 ## 📌 Status Atual do Projeto
 
-**Fase Atual:** Finalização do PRD (Product Requirements Document) & Preparação para a Geração da SPEC Técnica.
+**Fase Atual:** PRD consolidado (v2.0) & Pronto para a Geração da SPEC Técnica.
 
 1. **Revisão Crítica Realizada:** Foi mapeado um conjunto de gaps críticos e edge cases no PRD original, gerando o relatório [revisao_critica_prd.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/revisao_critica_prd.md).
-2. **Aguardando Respostas da Engenheira:** O usuário enviou as 25 perguntas de validação (listadas no fim de [revisao_critica_prd.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/revisao_critica_prd.md)) para a engenheira responsável.
-3. **Próximo Passo:** Assim que as respostas forem recebidas, elas serão usadas para resolver os gaps do PRD e, em seguida, rodar o prompt de geração de SPEC em uma nova sessão.
+2. **Respostas da Engenheira Recebidas:** As 25 perguntas de validação foram respondidas pela engenheira e, junto com um laudo real de referência, usadas para atualizar o PRD.
+3. **7 Gaps Críticos Resolvidos:** O [PRD_MVP.md](file:///c:/Users/rickt/OneDrive/Desktop/Criação de app/PRD_MVP.md) (v2.0) resolve formalmente os 7 gaps — Critérios de Aceite em todas as User Stories, Matriz RBAC, Audit Trail, Máquinas de Estado (CP e Laudo), Normas Técnicas, Fórmula kgf→MPa e CRUD de Obras (ver o índice na Seção 1.1 do PRD).
+4. **Próximo Passo:** Rodar o prompt de geração de SPEC em uma nova sessão (Passo 2 abaixo), usando o PRD atualizado.
 
 ---
 

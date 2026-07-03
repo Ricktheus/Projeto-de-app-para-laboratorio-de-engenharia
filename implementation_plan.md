@@ -35,6 +35,7 @@ erDiagram
         uuid id PK
         string email
         string role "socio_campo | eng_lab | eng_escritorio | cliente"
+        bool is_admin "true p/ os 2 sócios (gestão de usuários)"
     }
     CLIENTES {
         uuid id PK
@@ -46,15 +47,19 @@ erDiagram
         uuid id PK
         uuid cliente_id FK
         string nome
-        string sigla
+        string sigla "único por cliente"
         string gps_latitude
         string gps_longitude
+        uuid criado_por FK
+        bool ativo "soft-delete (retenção vitalícia)"
     }
     CONCRETAGENS {
         uuid id PK
         uuid obra_id FK
         date data_concretagem
         float slump_medido
+        float slump_projeto "alvo definido em projeto"
+        float slump_tolerancia "ex: 2 (±)"
         string placa_caminhao
         string lacre_caminhao
         string aditivo
@@ -64,42 +69,67 @@ erDiagram
         float volume_m3
         string concreteira
         uuid cadastrado_por FK
+        timestamp updated_at "optimistic locking"
     }
     CORPOS_PROVA {
         uuid id PK
         uuid concretagem_id FK
         string codigo_rastreio "QR Code"
         date data_moldagem
-        int idade_alvo_dias "7 | 28"
+        int idade_alvo_dias "livre: 3|7|14|28|63|91..."
         date data_ruptura_planejada
-        string status "moldado | coletado | rompido"
+        string status "moldado | coletado | rompido | descartado | expurgado"
+        string motivo_descarte "obrigatório em descarte/expurgo"
+        uuid coletado_por FK
+        timestamp coletado_em
     }
     RUPTURAS {
         uuid id PK
         uuid corpo_prova_id FK "1 para 1"
         date data_ruptura_real
         float peso_g
-        float diametro_mm
-        float altura_mm
+        float diametro_mm "medido (rastreabilidade)"
+        float altura_mm "medido (rastreabilidade)"
+        float diametro_nominal_mm "base do cálculo de MPa"
+        float fator_correcao_hd "default 1.00 (retífica futura)"
         float carga_ruptura_kgf
         float mpa_calculado
-        string tipo_fratura "cônica | cisalhamento | colunar | fenda"
+        string tipo_fratura "cabeça|face|parcial|total|cisalhamento|trinca"
         string foto_antes_url
         string foto_depois_url
         uuid executado_por FK
     }
     LAUDOS {
         uuid id PK
-        uuid concretagem_id FK "Origem dos dados"
-        uuid cliente_id FK "Para facilitar consultas do portal"
-        string tipo_laudo "parcial_7d | final_28d"
+        uuid cliente_id FK "Para consultas do portal"
+        string tipo_laudo "parcial_7d | parcial_14d | final_28d"
+        int versao "versionamento (correção)"
+        uuid substitui_laudo_id FK "aponta p/ versão anterior"
         string codigo_verificacao UK "Código Anti-Fraude"
         date data_emissao
         string pdf_original_url
-        string pdf_assinado_url
-        string status "rascunho | pronto_assinatura | assinado"
+        string assinatura_rt_url "obrigatória p/ publicar"
+        string assinatura_elaborador_url "2ª assinatura (opcional)"
+        string status "rascunho | pronto_assinatura | assinado | substituido"
+    }
+    LAUDO_CONCRETAGENS {
+        uuid laudo_id FK "junção: 1 laudo por NF (padrão) ou agrupado"
+        uuid concretagem_id FK
+    }
+    AUDIT_LOG {
+        uuid id PK
+        uuid user_id FK
+        string action "INSERT | UPDATE | DELETE"
+        string table_name
+        uuid record_id
+        json old_value
+        json new_value
+        string motivo
+        timestamp created_at
     }
 ```
+
+> **Nota:** o vínculo laudo↔concretagem passou de FK direta para a tabela de junção `LAUDO_CONCRETAGENS`, suportando o padrão **1 laudo por NF** e o **agrupamento opcional** de várias NFs da mesma obra (ver PRD, Seção 2.3).
 
 ---
 
