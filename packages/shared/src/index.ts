@@ -29,5 +29,8 @@ export * from './constants';
 // Message catalog (PT).
 export * from './messages';
 
+// Auth & role-based navigation (login throttle, error mapping, route guards).
+export * from './auth';
+
 // Pure utilities (dates, CNPJ).
 export * from './lib';
