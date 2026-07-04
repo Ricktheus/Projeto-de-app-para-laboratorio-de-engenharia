@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Laboratório de Concreto",
+    "slug": "concreto-lab",
+    "scheme": "concretolab",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "platforms": ["ios", "android"],
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

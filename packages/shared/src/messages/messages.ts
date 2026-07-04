@@ -26,6 +26,18 @@ const HTTP_MESSAGES = {
   offline: 'Sem conexão com a internet.',
 } as const;
 
+/** Authentication & role-routing copy (SPEC §3, F-S003-1 / F-S003-2). */
+const AUTH_MESSAGES = {
+  /** Generic sign-in failure — never reveals whether the e-mail exists (US17-CA2). */
+  invalidCredentials: 'E-mail ou senha inválidos.',
+  /** Client-side login throttle: 3+ failures in 5 min. */
+  tooManyAttempts: 'Muitas tentativas. Aguarde 1 minuto e tente novamente.',
+  /** 401 / expired session on any authenticated call. */
+  sessionExpired: 'Sua sessão expirou. Faça login novamente.',
+  /** Role tried to open a page it is not allowed to (route guard toast). */
+  forbiddenPage: 'Você não tem permissão para acessar esta página.',
+} as const;
+
 /** Standard UI-state copy (SPEC §3.0). */
 const UI_STATE_MESSAGES = {
   /** Fallback copy for the global ErrorBoundary. */
@@ -73,6 +85,7 @@ const DOMAIN_MESSAGES = {
 /** The full catalog, grouped by concern. */
 export const MESSAGES = {
   http: HTTP_MESSAGES,
+  auth: AUTH_MESSAGES,
   uiState: UI_STATE_MESSAGES,
   domain: DOMAIN_MESSAGES,
 } as const;

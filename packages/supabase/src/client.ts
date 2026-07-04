@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient, type SupportedStorage } from '@supabase/supabase-js';
 
 import type { Database } from './database.types';
 
@@ -7,6 +7,16 @@ export interface SupabaseClientConfig {
   url: string;
   /** Public anon key. NEVER pass the service_role key here. */
   anonKey: string;
+  /**
+   * Auth session storage. Web uses the platform default (localStorage); React
+   * Native injects AsyncStorage here so the session survives app restarts.
+   */
+  authStorage?: SupportedStorage;
+  /**
+   * Whether to parse the session from the URL (web OAuth/magic-link redirects).
+   * Defaults to `false` — the MVP uses e-mail + password only.
+   */
+  detectSessionInUrl?: boolean;
 }
 
 /**
@@ -22,7 +32,8 @@ export function createSupabaseClient(config: SupabaseClientConfig): SupabaseClie
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: config.detectSessionInUrl ?? false,
+      ...(config.authStorage ? { storage: config.authStorage } : {}),
     },
   });
 }
