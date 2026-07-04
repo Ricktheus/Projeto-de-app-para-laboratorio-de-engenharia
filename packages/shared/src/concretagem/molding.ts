@@ -81,7 +81,10 @@ export function selectMandatory28d(ages: readonly number[]): boolean[] {
  * whether it is a mandatory 28-day specimen. Pure — used both to preview the
  * plan in the UI and to assemble the RPC payload.
  */
-export function buildCpPlan(dataMoldagem: DateInput, items: readonly MoldingConfigItem[]): CpPlanEntry[] {
+export function buildCpPlan(
+  dataMoldagem: DateInput,
+  items: readonly MoldingConfigItem[],
+): CpPlanEntry[] {
   const ages = expandMoldingConfig(items);
   const mandatory = selectMandatory28d(ages);
   return ages.map((idadeAlvoDias, index) => ({

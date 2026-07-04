@@ -48,9 +48,7 @@ export function messageForSupabaseError(error: SupabaseErrorLike): string {
   const code = error.code ?? undefined;
 
   if (code === UNIQUE_VIOLATION) {
-    return mentionsObraSigla(error)
-      ? MESSAGES.feature.obraSiglaDuplicada
-      : MESSAGES.http.conflict;
+    return mentionsObraSigla(error) ? MESSAGES.feature.obraSiglaDuplicada : MESSAGES.http.conflict;
   }
   if (code === INSUFFICIENT_PRIVILEGE) {
     return MESSAGES.http.forbidden;
