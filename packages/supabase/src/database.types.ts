@@ -667,6 +667,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: string;
       };
+      criar_concretagem_com_cps: {
+        Args: { concretagem: Json; cps: Json[] };
+        Returns: Json;
+      };
     };
     Enums: {
       user_role: 'socio_campo' | 'eng_lab' | 'eng_escritorio' | 'cliente';
