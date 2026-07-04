@@ -26,6 +26,12 @@ export * from './schemas';
 // Constants (fracture types, projection factors, molds).
 export * from './constants';
 
+// Concretagem (molding-config + OCR-form derivation, S004).
+export * from './concretagem';
+
+// Network error mapping (Supabase/PostgREST → PT messages).
+export * from './net';
+
 // Message catalog (PT).
 export * from './messages';
 

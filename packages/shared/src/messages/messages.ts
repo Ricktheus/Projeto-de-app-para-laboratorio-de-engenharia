@@ -47,6 +47,38 @@ const UI_STATE_MESSAGES = {
 } as const;
 
 /**
+ * Feature-specific copy for Sprint S004 (Clientes/Usuários, Obras, Concretagem,
+ * OCR). Kept in the shared catalog so the mobile app, the web app and the Edge
+ * Functions render the EXACT strings the SPEC prescribes — the wording never
+ * drifts between platforms (DRY).
+ */
+const FEATURE_MESSAGES = {
+  // Clientes / Usuários (F-S004-1).
+  clienteCriado: 'Cliente cadastrado e convite enviado.',
+  usuarioCriado: 'Usuário cadastrado e convite enviado.',
+  emailJaCadastrado: 'Já existe um usuário com este e-mail.',
+  cnpjInvalido: 'CNPJ inválido.',
+  emptyClientes: 'Nenhum cliente cadastrado.',
+  emptyUsuarios: 'Nenhum usuário cadastrado além dos administradores.',
+
+  // Obras (F-S004-2 / F-S004-3).
+  obraSiglaDuplicada: 'Já existe uma obra com esta sigla para este cliente.',
+  obraComConcretagens:
+    'Esta obra possui concretagens e não pode ser excluída. Você pode inativá-la.',
+  obraCriada: 'Obra cadastrada com sucesso.',
+  obraAtualizada: 'Obra atualizada com sucesso.',
+  obraInativada: 'Obra inativada. O histórico foi preservado.',
+  emptyObras: 'Nenhuma obra cadastrada. Toque em + para criar.',
+
+  // OCR da NF / concretagem (F-S004-4 / F-S004-5).
+  ocrLendo: 'Lendo nota fiscal…',
+  ocrPreenchimentoManual: 'Preenchimento Manual',
+  ocrRefazer: 'Refazer',
+  camposObrigatorios: 'Preencha os campos obrigatórios destacados.',
+  concretagemSalva: 'Concretagem salva com sucesso.',
+} as const;
+
+/**
  * Domain / Edge-Function error codes → exact Portuguese messages. Codes cover
  * the domain errors and state-machine guard reasons defined in this sprint,
  * plus the RPC/Edge error strings from SPEC §5 (kept here so later sprints reuse
@@ -87,6 +119,7 @@ export const MESSAGES = {
   http: HTTP_MESSAGES,
   auth: AUTH_MESSAGES,
   uiState: UI_STATE_MESSAGES,
+  feature: FEATURE_MESSAGES,
   domain: DOMAIN_MESSAGES,
 } as const;
 
