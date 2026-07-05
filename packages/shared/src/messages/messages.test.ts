@@ -38,12 +38,16 @@ describe('message catalog & constants (F-S002-4)', () => {
     expect(messageForDomainCode('DESCONHECIDO')).toBe(MESSAGES.http.serverError);
   });
 
-  it('builds the mandatory-28d message with an optional date', () => {
+  it('builds the mandatory-specimen message with an optional age and date', () => {
     expect(cpMandatorio28dMessage()).toBe(
       'Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista.',
     );
-    expect(cpMandatorio28dMessage('2026-06-17')).toBe(
+    expect(cpMandatorio28dMessage({ data: '2026-06-17' })).toBe(
       'Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista (2026-06-17).',
+    );
+    // The mandatory specimens can be the highest non-28 ages (e.g. 63d).
+    expect(cpMandatorio28dMessage({ idade: 63, data: '2026-08-01' })).toBe(
+      'Este CP de 63d é obrigatório e não pode ser rompido antes da idade prevista (2026-08-01).',
     );
   });
 
