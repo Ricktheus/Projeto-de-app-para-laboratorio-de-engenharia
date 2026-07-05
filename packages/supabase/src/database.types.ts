@@ -675,6 +675,18 @@ export type Database = {
         Args: { cp_id: string };
         Returns: Json;
       };
+      registrar_ruptura: {
+        Args: { cp_id: string; dados: Json };
+        Returns: Json;
+      };
+      descartar_cp: {
+        Args: { cp_id: string; motivo: string };
+        Returns: Json;
+      };
+      expurgar_resultado: {
+        Args: { cp_id: string; motivo: string };
+        Returns: Json;
+      };
     };
     Enums: {
       user_role: 'socio_campo' | 'eng_lab' | 'eng_escritorio' | 'cliente';
