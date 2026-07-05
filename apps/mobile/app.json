@@ -10,20 +10,35 @@
     "platforms": ["ios", "android"],
     "ios": {
       "infoPlist": {
-        "NSCameraUsageDescription": "O app usa a câmera para fotografar a nota fiscal e ler os dados da concretagem.",
+        "NSCameraUsageDescription": "O app usa a câmera para fotografar a nota fiscal e ler o QR Code dos corpos de prova.",
         "NSPhotoLibraryUsageDescription": "O app acessa suas fotos para você selecionar a imagem da nota fiscal.",
-        "NSLocationWhenInUseUsageDescription": "O app usa sua localização para preencher automaticamente o GPS da obra."
+        "NSLocationWhenInUseUsageDescription": "O app usa sua localização para preencher automaticamente o GPS da obra.",
+        "NSBluetoothAlwaysUsageDescription": "O app usa o Bluetooth para imprimir as etiquetas dos corpos de prova na impressora térmica."
       }
     },
     "android": {
-      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN"
+      ]
     },
     "plugins": [
       "expo-router",
       [
         "expo-camera",
         {
-          "cameraPermission": "O app usa a câmera para fotografar a nota fiscal e ler os dados da concretagem."
+          "cameraPermission": "O app usa a câmera para fotografar a nota fiscal e ler o QR Code dos corpos de prova."
+        }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": ["central"],
+          "bluetoothAlwaysPermission": "O app usa o Bluetooth para imprimir as etiquetas dos corpos de prova na impressora térmica."
         }
       ],
       [

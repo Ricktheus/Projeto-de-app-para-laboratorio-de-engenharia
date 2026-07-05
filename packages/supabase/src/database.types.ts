@@ -671,6 +671,10 @@ export type Database = {
         Args: { concretagem: Json; cps: Json[] };
         Returns: Json;
       };
+      coletar_cp: {
+        Args: { cp_id: string };
+        Returns: Json;
+      };
     };
     Enums: {
       user_role: 'socio_campo' | 'eng_lab' | 'eng_escritorio' | 'cliente';

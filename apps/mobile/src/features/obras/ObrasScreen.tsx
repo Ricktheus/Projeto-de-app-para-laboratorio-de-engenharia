@@ -76,6 +76,11 @@ export function ObrasScreen() {
 
   return (
     <View className="flex-1 gap-4">
+      <BigButton
+        label="📅 Agenda de Coletas"
+        variant="neutral"
+        onPress={() => router.push('/agenda')}
+      />
       <BigButton label="+ Nova obra" onPress={openCreate} />
 
       {isLoading ? (
@@ -109,6 +114,11 @@ export function ObrasScreen() {
                   Nova concretagem
                 </Text>
               </Pressable>
+              <BigButton
+                variant="neutral"
+                label="🏷️ Etiquetas"
+                onPress={() => router.push({ pathname: '/etiquetas', params: { obraId: obra.id } })}
+              />
             </View>
           ))}
         </ScrollView>
