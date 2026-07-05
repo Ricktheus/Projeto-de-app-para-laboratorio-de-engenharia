@@ -26,3 +26,18 @@ export function toUtcDayNumber(value: DateInput): number {
 export function addDaysUtcDayNumber(value: DateInput, days: number): number {
   return toUtcDayNumber(value) + days;
 }
+
+/**
+ * Adds `days` to a date and formats the result as an ISO calendar date
+ * ('YYYY-MM-DD') in UTC. Used to preview each CP's `data_ruptura_planejada`
+ * (= data_moldagem + idade_alvo_dias) client-side; the authoritative value is
+ * still computed server-side by the `criar_concretagem_com_cps` RPC (SPEC §4.6).
+ * Returns the empty string for an unparseable date.
+ */
+export function addDaysIso(value: DateInput, days: number): string {
+  const dayNumber = addDaysUtcDayNumber(value, days);
+  if (Number.isNaN(dayNumber)) {
+    return '';
+  }
+  return new Date(dayNumber * 86_400_000).toISOString().slice(0, 10);
+}
