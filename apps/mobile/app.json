@@ -8,7 +8,37 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "platforms": ["ios", "android"],
-    "plugins": ["expo-router"],
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "O app usa a câmera para fotografar a nota fiscal e ler os dados da concretagem.",
+        "NSPhotoLibraryUsageDescription": "O app acessa suas fotos para você selecionar a imagem da nota fiscal.",
+        "NSLocationWhenInUseUsageDescription": "O app usa sua localização para preencher automaticamente o GPS da obra."
+      }
+    },
+    "android": {
+      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O app usa a câmera para fotografar a nota fiscal e ler os dados da concretagem."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app acessa suas fotos para você selecionar a imagem da nota fiscal."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O app usa sua localização para preencher automaticamente o GPS da obra."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": false
     }
