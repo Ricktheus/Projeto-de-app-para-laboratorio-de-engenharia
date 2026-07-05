@@ -123,7 +123,8 @@ describe('ObrasPage (F-S004-2/3)', () => {
     );
     renderPage();
 
-    await userEvent.click((await screen.findAllByRole('button', { name: /Nova obra/ }))[0]);
+    const [novaObraButton] = await screen.findAllByRole('button', { name: /Nova obra/ });
+    await userEvent.click(novaObraButton as HTMLElement);
     await userEvent.selectOptions(await screen.findByLabelText('Cliente'), CLIENTE_ID);
     await userEvent.type(screen.getByLabelText('Nome da obra'), 'Obra A');
     await userEvent.type(screen.getByLabelText('Sigla'), 'OBRA-A');
