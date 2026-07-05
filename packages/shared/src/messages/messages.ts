@@ -76,6 +76,20 @@ const FEATURE_MESSAGES = {
   ocrRefazer: 'Refazer',
   camposObrigatorios: 'Preencha os campos obrigatórios destacados.',
   concretagemSalva: 'Concretagem salva com sucesso.',
+
+  // Etiquetas Bluetooth (F-S005-1 / F-S005-2).
+  bluetoothIndisponivel: 'Ative o Bluetooth e conceda as permissões para imprimir.',
+  impressoraNaoRespondeu: 'A impressora não respondeu. Verifique a conexão e o papel.',
+  impressoraNaoEncontrada: 'Nenhuma impressora Bluetooth encontrada. Verifique se está ligada.',
+  etiquetasEnviadas: 'Etiquetas enviadas para a impressora.',
+  etiquetaReenviada: 'Etiqueta reenviada.',
+  selecioneImpressora: 'Selecione a impressora Bluetooth.',
+  emptyEtiquetas: 'Nenhuma concretagem para etiquetar nesta obra.',
+
+  // Agenda de coletas / bipagem (F-S005-3 / F-S005-4).
+  emptyAgendaColeta: 'Nenhuma coleta pendente para hoje.',
+  coletaConfirmada: 'CP coletado com sucesso.',
+  coletaAtrasadaAviso: 'Coleta após 24h: será registrada uma ressalva no laudo.',
 } as const;
 
 /**
@@ -94,6 +108,12 @@ const DOMAIN_MESSAGES = {
   TRANSICAO_INVALIDA: 'Esta transição de estado não é permitida.',
   CP_ESTADO_INVALIDO: 'Este CP não está disponível para ruptura.',
   MOTIVO_OBRIGATORIO: 'Informe o motivo para continuar.',
+
+  // Coleta / bipagem de QR (F-S005-4). CP_NAO_COLETAVEL is the base copy; the
+  // scanner appends "(status atual: {status})." via cpNaoColetavelMessage().
+  CP_NAO_ENCONTRADO: 'CP não encontrado.',
+  CP_JA_COLETADO: 'CP já coletado.',
+  CP_NAO_COLETAVEL: 'Este CP não pode ser coletado.',
   CP_MANDATORIO_28D: 'Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista.',
   CPS_PENDENTES:
     'Há corpos de prova pendentes. Conclua todos antes de marcar como pronto para assinatura.',
@@ -156,4 +176,14 @@ export function messageForDomainCode(code: string): string {
 export function cpMandatorio28dMessage(dataPrevista?: string): string {
   const base = 'Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista';
   return dataPrevista ? `${base} (${dataPrevista}).` : `${base}.`;
+}
+
+/**
+ * Builds the "cannot collect" message for a specimen in a non-collectable state,
+ * appending the current status, e.g. "…(status atual: rompido)." (F-S005-4).
+ * Falls back to the base copy when the status is unknown.
+ */
+export function cpNaoColetavelMessage(status?: string): string {
+  const base = DOMAIN_MESSAGES.CP_NAO_COLETAVEL.replace(/\.$/, '');
+  return status ? `${base} (status atual: ${status}).` : `${base}.`;
 }

@@ -29,6 +29,12 @@ export * from './constants';
 // Concretagem (molding-config + OCR-form derivation, S004).
 export * from './concretagem';
 
+// Coleta (24h collection agenda + collect-error mapping, S005).
+export * from './coleta';
+
+// Etiquetas (printable label model, S005).
+export * from './etiquetas';
+
 // Network error mapping (Supabase/PostgREST → PT messages).
 export * from './net';
 
