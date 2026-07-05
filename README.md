@@ -6,7 +6,7 @@ Este repositório contém os documentos de concepção e especificação para o 
 
 ## 📌 Status Atual do Projeto
 
-**Fase Atual:** 🚧 Em desenvolvimento — **S001 (Fundação Supabase), S002 (Núcleo de Domínio), S003 (Auth & Navegação) e S004 (Clientes/Usuários/Obras + Concretagem + OCR) concluídas; próxima: Sprint 005**.
+**Fase Atual:** 🚧 Em desenvolvimento — **S001 (Fundação Supabase), S002 (Núcleo de Domínio), S003 (Auth & Navegação), S004 (Clientes/Usuários/Obras + Concretagem + OCR) e S005 (Corpos de prova: etiquetas Bluetooth, agenda de coleta, bipagem QR) concluídas; próxima: Sprint 006**.
 
 1. **Revisão Crítica Realizada:** Foi mapeado um conjunto de gaps críticos e edge cases no PRD original, gerando o relatório [revisao_critica_prd.md](./revisao_critica_prd.md).
 2. **Respostas da Engenheira Recebidas:** As 25 perguntas de validação foram respondidas pela engenheira e, junto com um laudo real de referência, usadas para atualizar o PRD.
@@ -22,7 +22,7 @@ Este repositório contém os documentos de concepção e especificação para o 
 | **S002** | Núcleo de domínio (MPa, projeção, máquinas de estado) | ✅ Concluída |
 | **S003** | Auth & navegação (mobile + web), UI kit | ✅ Concluída |
 | **S004** | Clientes/Usuários/Obras + Concretagem + OCR da NF | ✅ Concluída |
-| **S005** | Corpos de prova, etiquetas Bluetooth, coleta | 🔲 Planejado |
+| **S005** | Corpos de prova, etiquetas Bluetooth, coleta | ✅ Concluída |
 | **S006** | Prensa: ruptura, MPa, fratura, descarte, fotos | 🔲 Planejado |
 | **S007** | Painel web escritório: realtime, edição, laudos pré-prontos | 🔲 Planejado |
 | **S008** | Geração de PDF travado, assinatura, versionamento | 🔲 Planejado |
