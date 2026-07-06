@@ -9,6 +9,13 @@ export {
 } from './consolidacao';
 export { LAUDO_RPC_TOKENS, messageForLaudoRpcError, type LaudoRpcToken } from './laudo-errors';
 export {
+  buildValidacaoPublica,
+  resolveVigenteLaudoId,
+  type ValidacaoPublicaInput,
+  type ValidacaoPublicaResponse,
+  type ValidacaoPublicaResultado,
+} from './validacao-publica';
+export {
   CONSIDERACOES_FINAIS_PADRAO,
   RESSALVA_COLETA_ATRASADA,
   RESSALVA_SLUMP_FORA_TOLERANCIA,

@@ -6,7 +6,7 @@ Este repositório contém os documentos de concepção e especificação para o 
 
 ## 📌 Status Atual do Projeto
 
-**Fase Atual:** 🚧 Em desenvolvimento — **S001 (Fundação Supabase), S002 (Núcleo de Domínio), S003 (Auth & Navegação), S004 (Clientes/Usuários/Obras + Concretagem + OCR), S005 (Corpos de prova: etiquetas Bluetooth, agenda de coleta, bipagem QR), S006 (Prensa: lista de ruptura, cálculo de MPa, tipo de fratura, descarte/expurgo, fotos de evidência com marca d'água), S007 (Painel web do escritório: concretagens em tempo real, edição com optimistic locking, laudos pré-prontos) e S008 (Geração do PDF travado, download/upload do PDF assinado e versionamento de correção) concluídas; próxima: Sprint 009**.
+**Fase Atual:** 🚧 Em desenvolvimento — **S001 (Fundação Supabase), S002 (Núcleo de Domínio), S003 (Auth & Navegação), S004 (Clientes/Usuários/Obras + Concretagem + OCR), S005 (Corpos de prova: etiquetas Bluetooth, agenda de coleta, bipagem QR), S006 (Prensa: lista de ruptura, cálculo de MPa, tipo de fratura, descarte/expurgo, fotos de evidência com marca d'água), S007 (Painel web do escritório: concretagens em tempo real, edição com optimistic locking, laudos pré-prontos), S008 (Geração do PDF travado, download/upload do PDF assinado e versionamento de correção) e S009 (Portal do cliente, página pública de validação por QR, exportação Excel por concreteira e notificações por e-mail) concluídas; próxima: Sprint 010**.
 
 1. **Revisão Crítica Realizada:** Foi mapeado um conjunto de gaps críticos e edge cases no PRD original, gerando o relatório [revisao_critica_prd.md](./revisao_critica_prd.md).
 2. **Respostas da Engenheira Recebidas:** As 25 perguntas de validação foram respondidas pela engenheira e, junto com um laudo real de referência, usadas para atualizar o PRD.
@@ -26,7 +26,7 @@ Este repositório contém os documentos de concepção e especificação para o 
 | **S006** | Prensa: ruptura, MPa, fratura, descarte, fotos | ✅ Concluída |
 | **S007** | Painel web escritório: realtime, edição, laudos pré-prontos | ✅ Concluída |
 | **S008** | Geração de PDF travado, assinatura, versionamento | ✅ Concluída |
-| **S009** | Portal do cliente, validação pública, Excel, e-mails | 🔲 Planejado |
+| **S009** | Portal do cliente, validação pública, Excel, e-mails | ✅ Concluída |
 | **S010** | Hardening: dashboard, testes, segurança | 🔲 Planejado |
 
 ### 🎯 Próximos Passos

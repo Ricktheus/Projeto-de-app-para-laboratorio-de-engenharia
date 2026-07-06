@@ -44,6 +44,7 @@ export {
   uploadLaudoAssinadoFieldsSchema,
   uploadLaudoAssinadoResponseSchema,
   validarLaudoQuerySchema,
+  validarLaudoResponseSchema,
   exportarExcelRequestSchema,
   enviarEmailRequestSchema,
   type OcrNotaFiscalRequest,
@@ -54,6 +55,7 @@ export {
   type UploadLaudoAssinadoFields,
   type UploadLaudoAssinadoResponse,
   type ValidarLaudoQuery,
+  type ValidarLaudoResponse,
   type ExportarExcelRequest,
   type EnviarEmailRequest,
 } from './edge-functions';

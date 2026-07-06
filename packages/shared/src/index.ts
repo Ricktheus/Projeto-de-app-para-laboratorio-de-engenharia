@@ -40,8 +40,14 @@ export * from './etiquetas';
 export * from './prensa';
 
 // Laudo (report consolidation: FCM per age, resistance curve, RPC error
-// mapping — S007).
+// mapping — S007; public validation view model — S009).
 export * from './laudo';
+
+// Export (per-concreteira Excel comparison aggregation — S009).
+export * from './export';
+
+// E-mail (transactional templates — S009).
+export * from './email';
 
 // Network error mapping (Supabase/PostgREST → PT messages).
 export * from './net';

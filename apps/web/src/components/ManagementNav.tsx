@@ -15,6 +15,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { to: '/laudos', label: 'Laudos', area: 'laudos' },
   { to: '/obras', label: 'Obras', area: 'painel' },
   { to: '/usuarios', label: 'Clientes e Usuários', area: 'usuarios' },
+  { to: '/exportacao', label: 'Exportar Excel', area: 'exportacao' },
 ];
 
 /**

@@ -63,3 +63,21 @@ import_map = "./functions/_shared/deno.json"
 [functions.upload-laudo-assinado]
 verify_jwt = true
 import_map = "./functions/_shared/deno.json"
+
+# S009 — public validation, Excel export and the transactional e-mail worker.
+# `validar-laudo` is the ONLY anonymous surface (verify_jwt = false); it is
+# read-only and rate-limited per IP inside the function (SPEC §5.5 / §7.1).
+[functions.validar-laudo]
+verify_jwt = false
+import_map = "./functions/_shared/deno.json"
+
+# Engineers only — the RBAC guard runs inside the function.
+[functions.exportar-excel]
+verify_jwt = true
+import_map = "./functions/_shared/deno.json"
+
+# Internal worker — authorizes via EMAIL_CRON_SECRET or an admin JWT inside the
+# function (RESEND_API_KEY / EMAIL_CRON_SECRET live only in the function env).
+[functions.enviar-email]
+verify_jwt = false
+import_map = "./functions/_shared/deno.json"
