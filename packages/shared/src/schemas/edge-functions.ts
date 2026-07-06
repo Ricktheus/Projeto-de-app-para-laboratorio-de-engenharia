@@ -55,6 +55,24 @@ export type RegistrarRupturaRequest = z.infer<typeof registrarRupturaRequestSche
 export const gerarLaudoPdfRequestSchema = z.object({ laudo_id: uuidSchema });
 export type GerarLaudoPdfRequest = z.infer<typeof gerarLaudoPdfRequestSchema>;
 
+export const gerarLaudoPdfResponseSchema = z.object({
+  pdf_original_url: z.string().min(1),
+  codigo_verificacao: z.string().min(1),
+});
+export type GerarLaudoPdfResponse = z.infer<typeof gerarLaudoPdfResponseSchema>;
+
+// ---- §5.4 upload-laudo-assinado (multipart: pdf + laudo_id) ----------------
+
+/** The non-file form fields of the signed-PDF upload (the PDF is a Blob part). */
+export const uploadLaudoAssinadoFieldsSchema = z.object({ laudo_id: uuidSchema });
+export type UploadLaudoAssinadoFields = z.infer<typeof uploadLaudoAssinadoFieldsSchema>;
+
+export const uploadLaudoAssinadoResponseSchema = z.object({
+  status: z.literal('assinado'),
+  pdf_assinado_url: z.string().min(1),
+});
+export type UploadLaudoAssinadoResponse = z.infer<typeof uploadLaudoAssinadoResponseSchema>;
+
 // ---- §5.5 validar-laudo (public) -------------------------------------------
 
 export const validarLaudoQuerySchema = z.object({ codigo: z.string().min(1) });
