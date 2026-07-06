@@ -16,6 +16,7 @@ export const LAUDO_RPC_TOKENS = [
   'POUCAS_CONCRETAGENS',
   'LAUDO_NAO_ENCONTRADO',
   'LAUDO_NAO_RASCUNHO',
+  'LAUDO_NAO_ASSINADO',
 ] as const;
 export type LaudoRpcToken = (typeof LAUDO_RPC_TOKENS)[number];
 
@@ -29,6 +30,7 @@ export type LaudoRpcToken = (typeof LAUDO_RPC_TOKENS)[number];
  *  - `POUCAS_CONCRETAGENS`    ⇒ grouping requires ≥ 2 NFs.
  *  - `LAUDO_NAO_ENCONTRADO`   ⇒ generic 404 "Registro não encontrado.".
  *  - `LAUDO_NAO_RASCUNHO`     ⇒ the draft moved on; reload.
+ *  - `LAUDO_NAO_ASSINADO`     ⇒ only a signed report can be corrected (F-S008-3).
  *  - anything else            ⇒ the generic Supabase/HTTP mapping (401/403/500…).
  */
 export function messageForLaudoRpcError(error: SupabaseErrorLike): string {
@@ -48,6 +50,8 @@ export function messageForLaudoRpcError(error: SupabaseErrorLike): string {
       return MESSAGES.http.notFound;
     case 'LAUDO_NAO_RASCUNHO':
       return MESSAGES.feature.laudoNaoRascunho;
+    case 'LAUDO_NAO_ASSINADO':
+      return MESSAGES.domain.LAUDO_NAO_ASSINADO;
     default:
       return messageForSupabaseError(error);
   }

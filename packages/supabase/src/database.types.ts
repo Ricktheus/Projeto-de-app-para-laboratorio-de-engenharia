@@ -699,6 +699,10 @@ export type Database = {
         Args: { concretagem_ids: string[] };
         Returns: Json;
       };
+      corrigir_laudo: {
+        Args: { laudo_id: string };
+        Returns: Json;
+      };
     };
     Enums: {
       user_role: 'socio_campo' | 'eng_lab' | 'eng_escritorio' | 'cliente';

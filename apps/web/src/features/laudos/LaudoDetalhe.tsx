@@ -1,4 +1,5 @@
-import { type CpStatus, type LaudoTipo } from '@concreto/shared';
+import { MESSAGES, type CpStatus, type LaudoStatus, type LaudoTipo } from '@concreto/shared';
+import { useState } from 'react';
 
 import { BigButton, LoadingButton, StatusPill } from '../../components/ui';
 
@@ -19,6 +20,15 @@ const CP_STATUS_LABELS: Readonly<Record<CpStatus, string>> = {
   expurgado: 'Expurgado',
 };
 
+const LAUDO_STATUS: Readonly<
+  Record<LaudoStatus, { label: string; tone: 'info' | 'warning' | 'success' | 'danger' }>
+> = {
+  rascunho: { label: 'Rascunho', tone: 'warning' },
+  pronto_assinatura: { label: 'Pronto para assinatura', tone: 'info' },
+  assinado: { label: 'Assinado', tone: 'success' },
+  substituido: { label: 'Substituído', tone: 'danger' },
+};
+
 /** The partial ages a report can be emitted for on demand (US13-CA2). */
 const PARTIAL_AGES = [7, 14] as const;
 
@@ -28,27 +38,31 @@ export interface LaudoDetalheViewProps {
   marcandoPronto: boolean;
   onEmitirParcial: (concretagemId: string, idadeDias: number) => void;
   emitindoParcial: boolean;
+  onGerarPdf: () => void;
+  gerandoPdf: boolean;
+  onBaixarPdf: () => void;
+  baixandoPdf: boolean;
+  onUploadAssinado: (pdf: File, elaborador: File | null) => void;
+  enviandoAssinado: boolean;
+  onCorrigir: () => void;
+  corrigindo: boolean;
 }
 
 /**
- * Read-only, pre-filled view of a report draft (F-S007-3 / US13): client/obra +
- * NF header, per-age KGF/MPa/FCM table and the resistance curve. Offers the
- * on-demand partial emission (single-NF finals) and "marcar pronto para
- * assinatura" — whose CPS_PENDENTES guard is enforced server-side.
+ * Read-only, pre-filled view of a report (F-S007-3 + S008): client/obra + NF
+ * header, per-age KGF/MPa/FCM table and the resistance curve, followed by the
+ * STATUS-AWARE actions — draft (emitir parcial / marcar pronto), pronto (gerar
+ * PDF, baixar, enviar assinado), assinado (baixar, corrigir). Guards and error
+ * copy are enforced/rendered exactly as the SPEC prescribes.
  */
-export function LaudoDetalheView({
-  detalhe,
-  onMarcarPronto,
-  marcandoPronto,
-  onEmitirParcial,
-  emitindoParcial,
-}: LaudoDetalheViewProps) {
-  const singleConcretagem =
-    detalhe.concretagens.length === 1 ? detalhe.concretagens[0]! : null;
+export function LaudoDetalheView(props: LaudoDetalheViewProps) {
+  const { detalhe } = props;
+  const singleConcretagem = detalhe.concretagens.length === 1 ? detalhe.concretagens[0]! : null;
   const idadesComResultado = new Set(
     detalhe.consolidado.idades.filter((i) => i.fcm !== null).map((i) => i.idadeAlvoDias),
   );
   const podeParcial = detalhe.tipo_laudo === 'final_28d' && singleConcretagem !== null;
+  const statusInfo = LAUDO_STATUS[detalhe.status];
 
   return (
     <section className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6">
@@ -56,13 +70,17 @@ export function LaudoDetalheView({
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-bold text-gray-900">{detalhe.numero}</h2>
           <StatusPill label={LAUDO_TIPO_LABELS[detalhe.tipo_laudo]} tone="info" />
-          <StatusPill label="Rascunho" tone="warning" />
+          <StatusPill label={statusInfo.label} tone={statusInfo.tone} />
+          {detalhe.versao > 1 ? (
+            <StatusPill label={`Versão ${detalhe.versao}`} tone="info" />
+          ) : null}
         </div>
         <p className="text-field text-gray-700">
           {detalhe.obra_sigla ?? 'Obra'} · {detalhe.obra_nome ?? '—'}
         </p>
         <p className="text-sm text-gray-500">
-          {detalhe.cliente_nome ?? 'Cliente'} · NF {detalhe.concretagens.map((c) => c.nf_numero).join(', ') || '—'}
+          {detalhe.cliente_nome ?? 'Cliente'} · NF{' '}
+          {detalhe.concretagens.map((c) => c.nf_numero).join(', ') || '—'}
         </p>
       </header>
 
@@ -122,28 +140,186 @@ export function LaudoDetalheView({
         <ResistenciaChart curva={detalhe.consolidado.curva} fckProjeto={detalhe.fckProjeto} />
       </div>
 
-      {/* Actions. */}
-      <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
-        {podeParcial
-          ? PARTIAL_AGES.filter((age) => idadesComResultado.has(age)).map((age) => (
-              <BigButton
-                key={age}
-                variant="neutral"
-                disabled={emitindoParcial}
-                onClick={() => onEmitirParcial(singleConcretagem!.id, age)}
-              >
-                Emitir parcial {age}d
-              </BigButton>
-            ))
-          : null}
-        <LoadingButton
-          loading={marcandoPronto}
-          loadingLabel="Marcando..."
-          onClick={onMarcarPronto}
-        >
-          Marcar pronto para assinatura
-        </LoadingButton>
+      {/* Status-aware actions. */}
+      <div className="flex flex-col gap-4 border-t border-gray-100 pt-4">
+        {detalhe.status === 'rascunho' ? (
+          <RascunhoActions
+            {...props}
+            podeParcial={podeParcial}
+            singleConcretagem={singleConcretagem}
+            idadesComResultado={idadesComResultado}
+          />
+        ) : null}
+        {detalhe.status === 'pronto_assinatura' ? <ProntoActions {...props} /> : null}
+        {detalhe.status === 'assinado' ? <AssinadoActions {...props} /> : null}
       </div>
     </section>
+  );
+}
+
+/** Draft actions: emit partial (single-NF finals) + mark ready for signature. */
+function RascunhoActions({
+  onMarcarPronto,
+  marcandoPronto,
+  onEmitirParcial,
+  emitindoParcial,
+  podeParcial,
+  singleConcretagem,
+  idadesComResultado,
+}: LaudoDetalheViewProps & {
+  podeParcial: boolean;
+  singleConcretagem: LaudoDetalheData['concretagens'][number] | null;
+  idadesComResultado: Set<number>;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {podeParcial && singleConcretagem
+        ? PARTIAL_AGES.filter((age) => idadesComResultado.has(age)).map((age) => (
+            <BigButton
+              key={age}
+              variant="neutral"
+              disabled={emitindoParcial}
+              onClick={() => onEmitirParcial(singleConcretagem.id, age)}
+            >
+              Emitir parcial {age}d
+            </BigButton>
+          ))
+        : null}
+      <LoadingButton loading={marcandoPronto} loadingLabel="Marcando..." onClick={onMarcarPronto}>
+        Marcar pronto para assinatura
+      </LoadingButton>
+    </div>
+  );
+}
+
+/** Pronto-assinatura actions: generate PDF, download, upload signed. */
+function ProntoActions({
+  detalhe,
+  onGerarPdf,
+  gerandoPdf,
+  onBaixarPdf,
+  baixandoPdf,
+  onUploadAssinado,
+  enviandoAssinado,
+}: LaudoDetalheViewProps) {
+  const temPdf = Boolean(detalhe.pdf_original_url);
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-2">
+        <LoadingButton
+          loading={gerandoPdf}
+          loadingLabel={MESSAGES.feature.laudoGerandoPdf}
+          onClick={onGerarPdf}
+        >
+          {temPdf ? 'Regerar PDF' : MESSAGES.feature.laudoGerarPdf}
+        </LoadingButton>
+        {temPdf ? (
+          <LoadingButton
+            variant="neutral"
+            loading={baixandoPdf}
+            loadingLabel={MESSAGES.feature.laudoBaixandoPdf}
+            onClick={onBaixarPdf}
+          >
+            {MESSAGES.feature.laudoBaixarPdf}
+          </LoadingButton>
+        ) : null}
+      </div>
+      {temPdf ? (
+        <UploadAssinadoBlock
+          onUploadAssinado={onUploadAssinado}
+          enviandoAssinado={enviandoAssinado}
+        />
+      ) : (
+        <p className="text-sm text-gray-500">
+          Gere o PDF, assine-o no gov.br e envie o arquivo assinado para publicar o laudo.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Assinado actions: download the report + correct (new version). */
+function AssinadoActions({
+  detalhe,
+  onBaixarPdf,
+  baixandoPdf,
+  onCorrigir,
+  corrigindo,
+}: LaudoDetalheViewProps) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {detalhe.pdf_original_url ? (
+        <LoadingButton
+          variant="neutral"
+          loading={baixandoPdf}
+          loadingLabel={MESSAGES.feature.laudoBaixandoPdf}
+          onClick={onBaixarPdf}
+        >
+          {MESSAGES.feature.laudoBaixarPdf}
+        </LoadingButton>
+      ) : null}
+      <LoadingButton
+        loading={corrigindo}
+        loadingLabel={MESSAGES.feature.laudoCorrigindo}
+        onClick={onCorrigir}
+      >
+        {MESSAGES.feature.laudoCorrigir}
+      </LoadingButton>
+    </div>
+  );
+}
+
+/** Signed-PDF upload block: required PDF + optional 2nd (elaborador) signature. */
+function UploadAssinadoBlock({
+  onUploadAssinado,
+  enviandoAssinado,
+}: Pick<LaudoDetalheViewProps, 'onUploadAssinado' | 'enviandoAssinado'>) {
+  const [pdf, setPdf] = useState<File | null>(null);
+  const [elaborador, setElaborador] = useState<File | null>(null);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl bg-gray-50 p-4">
+      <p className="text-field font-semibold text-gray-800">Publicar laudo assinado</p>
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-gray-700">
+          PDF assinado (gov.br) — obrigatório
+        </span>
+        <input
+          type="file"
+          accept="application/pdf"
+          aria-label="PDF assinado"
+          disabled={enviandoAssinado}
+          onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
+          className="text-sm"
+        />
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-gray-700">
+          {MESSAGES.feature.laudoUploadElaborador}
+        </span>
+        <input
+          type="file"
+          accept="application/pdf"
+          aria-label="2ª assinatura (elaborador)"
+          disabled={enviandoAssinado}
+          onChange={(e) => setElaborador(e.target.files?.[0] ?? null)}
+          className="text-sm"
+        />
+      </label>
+      <div>
+        <LoadingButton
+          loading={enviandoAssinado}
+          loadingLabel={MESSAGES.feature.laudoEnviandoAssinado}
+          disabled={pdf === null}
+          onClick={() => {
+            if (pdf) {
+              onUploadAssinado(pdf, elaborador);
+            }
+          }}
+        >
+          {MESSAGES.feature.laudoUploadAssinado}
+        </LoadingButton>
+      </div>
+    </div>
   );
 }

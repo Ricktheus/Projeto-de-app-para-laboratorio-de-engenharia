@@ -127,6 +127,20 @@ const FEATURE_MESSAGES = {
   laudoAgruparObrasDiferentes: 'Só é possível agrupar concretagens da mesma obra.',
   laudoAgruparPoucas: 'Selecione ao menos duas concretagens para agrupar.',
   laudoNaoRascunho: 'Este laudo não está mais em rascunho. Recarregue a página.',
+
+  // Geração de PDF / assinatura / versionamento (F-S008-1 / F-S008-2 / F-S008-3).
+  laudoGerarPdf: 'Gerar PDF',
+  laudoGerandoPdf: 'Gerando laudo…',
+  laudoPdfGerado: 'PDF gerado com sucesso.',
+  laudoBaixarPdf: 'Baixar Laudo (PDF)',
+  laudoBaixandoPdf: 'Baixando…',
+  laudoUploadAssinado: 'Enviar PDF assinado',
+  laudoEnviandoAssinado: 'Enviando…',
+  laudoAssinadoPublicado: 'Laudo assinado e publicado ao cliente.',
+  laudoUploadElaborador: 'Enviar 2ª assinatura (elaborador) — opcional',
+  laudoCorrigir: 'Corrigir laudo',
+  laudoCorrigindo: 'Criando correção…',
+  laudoCorrigido: 'Correção criada. Nova versão gerada em rascunho.',
 } as const;
 
 /**
@@ -169,6 +183,8 @@ const DOMAIN_MESSAGES = {
   SEM_RESULTADOS: 'Não há resultados válidos para gerar o laudo.',
   ARQUIVO_INVALIDO: 'Envie um arquivo PDF válido.',
   LAUDO_NAO_ENCONTRADO: 'Laudo não encontrado / não autêntico.',
+  // Versionamento / correção (F-S008-3 / US22).
+  LAUDO_NAO_ASSINADO: 'Só é possível corrigir laudos já assinados.',
 
   // Export (SPEC §5.6).
   SEM_DADOS: 'Nenhum dado encontrado para os filtros selecionados.',

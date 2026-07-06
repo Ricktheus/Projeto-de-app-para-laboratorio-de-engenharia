@@ -12,7 +12,9 @@ describe('messageForLaudoRpcError (F-S007-3)', () => {
   });
 
   it('maps the partial/group guard tokens to their exact messages', () => {
-    expect(messageForLaudoRpcError({ message: 'SEM_RESULTADOS' })).toBe(MESSAGES.domain.SEM_RESULTADOS);
+    expect(messageForLaudoRpcError({ message: 'SEM_RESULTADOS' })).toBe(
+      MESSAGES.domain.SEM_RESULTADOS,
+    );
     expect(messageForLaudoRpcError({ message: 'IDADE_PARCIAL_INVALIDA' })).toBe(
       MESSAGES.feature.laudoParcialIdadeInvalida,
     );
@@ -28,7 +30,15 @@ describe('messageForLaudoRpcError (F-S007-3)', () => {
   });
 
   it('maps a missing laudo to the generic 404 copy', () => {
-    expect(messageForLaudoRpcError({ message: 'LAUDO_NAO_ENCONTRADO' })).toBe(MESSAGES.http.notFound);
+    expect(messageForLaudoRpcError({ message: 'LAUDO_NAO_ENCONTRADO' })).toBe(
+      MESSAGES.http.notFound,
+    );
+  });
+
+  it('maps LAUDO_NAO_ASSINADO to the exact correction sad-path copy (F-S008-3)', () => {
+    expect(messageForLaudoRpcError({ message: 'LAUDO_NAO_ASSINADO' })).toBe(
+      'Só é possível corrigir laudos já assinados.',
+    );
   });
 
   it('falls back to the generic HTTP/permission mapping for unknown errors', () => {
