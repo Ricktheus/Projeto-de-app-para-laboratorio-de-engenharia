@@ -52,3 +52,14 @@ import_map = "./functions/_shared/deno.json"
 [functions.admin-provisionar-usuario]
 verify_jwt = true
 import_map = "./functions/_shared/deno.json"
+
+# S008 — report PDF generation and signed-PDF upload. Engineers only (the eng
+# guard runs inside each function). LAUDO_VERIFICATION_SECRET / PUBLIC_SITE_URL
+# live only in the function environment (SPEC §7.1).
+[functions.gerar-laudo-pdf]
+verify_jwt = true
+import_map = "./functions/_shared/deno.json"
+
+[functions.upload-laudo-assinado]
+verify_jwt = true
+import_map = "./functions/_shared/deno.json"
