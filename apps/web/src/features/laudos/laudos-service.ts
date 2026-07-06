@@ -2,19 +2,27 @@ import {
   consolidarLaudo,
   messageForLaudoRpcError,
   messageForSupabaseError,
+  type GerarLaudoPdfResponse,
   type LaudoConsolidado,
   type LaudoCpResultado,
   type LaudoStatus,
   type LaudoTipo,
+  type UploadLaudoAssinadoResponse,
 } from '@concreto/shared';
 
+import { invokeFunction } from '../../services/functions';
 import { supabase } from '../../services/supabase';
 
-/** A draft report as listed on the laudos screen (F-S007-3 / US13-CA1). */
-export interface LaudoRascunhoRow {
+/** Statuses shown on the laudos workspace (substituído versions are hidden). */
+const ACTIVE_STATUSES: LaudoStatus[] = ['rascunho', 'pronto_assinatura', 'assinado'];
+
+/** A report as listed on the laudos screen (F-S007-3 / S008). */
+export interface LaudoListRow {
   id: string;
   tipo_laudo: LaudoTipo;
   numero: string;
+  status: LaudoStatus;
+  versao: number;
   obra_id: string;
   obra_nome: string | null;
   obra_sigla: string | null;
@@ -23,6 +31,10 @@ export interface LaudoRascunhoRow {
   nfs: string[];
   /** Concretagem ids the report links (drives the grouping action). */
   concretagem_ids: string[];
+  /** Set once the locked PDF has been generated (F-S008-1). */
+  pdf_original_url: string | null;
+  /** Set once the signed PDF has been uploaded (F-S008-2). */
+  pdf_assinado_url: string | null;
   updated_at: string;
 }
 
@@ -35,17 +47,22 @@ export interface LaudoConcretagemInfo {
   fck_projeto: number;
 }
 
-/** A fully loaded, consolidated report draft (F-S007-3). */
+/** A fully loaded, consolidated report (F-S007-3 / S008). */
 export interface LaudoDetalhe {
   id: string;
   tipo_laudo: LaudoTipo;
   numero: string;
   status: LaudoStatus;
+  versao: number;
   obra_nome: string | null;
   obra_sigla: string | null;
   cliente_nome: string | null;
   /** Reference fck for the resistance chart (the linked NFs' project strength). */
   fckProjeto: number | null;
+  /** Set once the locked PDF has been generated (F-S008-1). */
+  pdf_original_url: string | null;
+  /** Set once the signed PDF has been uploaded (F-S008-2). */
+  pdf_assinado_url: string | null;
   concretagens: LaudoConcretagemInfo[];
   consolidado: LaudoConsolidado;
   updated_at: string;
@@ -73,7 +90,11 @@ interface LaudoListJoinRow {
   id: string;
   tipo_laudo: LaudoTipo;
   numero: string;
+  status: LaudoStatus;
+  versao: number;
   obra_id: string;
+  pdf_original_url: string | null;
+  pdf_assinado_url: string | null;
   updated_at: string;
   obras: ObraJoin | ObraJoin[] | null;
   laudo_concretagens: LaudoConcretagemJoin[] | null;
@@ -83,6 +104,9 @@ interface LaudoDetalheJoinRow {
   tipo_laudo: LaudoTipo;
   numero: string;
   status: LaudoStatus;
+  versao: number;
+  pdf_original_url: string | null;
+  pdf_assinado_url: string | null;
   updated_at: string;
   obras: ObraJoin | ObraJoin[] | null;
   laudo_concretagens: LaudoConcretagemJoin[] | null;
@@ -112,24 +136,25 @@ function concretagensOf(rows: LaudoConcretagemJoin[] | null): ConcretagemJoin[] 
 }
 
 const LIST_SELECT =
-  'id, tipo_laudo, numero, obra_id, updated_at, ' +
+  'id, tipo_laudo, numero, status, versao, obra_id, pdf_original_url, pdf_assinado_url, updated_at, ' +
   'obras(nome, sigla, clientes(nome)), ' +
   'laudo_concretagens(concretagens(id, nf_numero))';
 
 const DETALHE_SELECT =
-  'id, tipo_laudo, numero, status, updated_at, ' +
+  'id, tipo_laudo, numero, status, versao, pdf_original_url, pdf_assinado_url, updated_at, ' +
   'obras(nome, sigla, clientes(nome)), ' +
   'laudo_concretagens(concretagens(id, nf_numero, quadra, lote, fck_projeto))';
 
 /**
- * Lists the pre-filled report DRAFTS (status `rascunho`), newest first
- * (F-S007-3 / US13-CA1). RLS (`laudos_eng_all`) scopes this to the engineers.
+ * Lists the active reports (rascunho / pronto_assinatura / assinado), newest
+ * first (F-S007-3 / US13-CA1 + S008); superseded (`substituido`) versions are
+ * hidden. RLS (`laudos_eng_all`) scopes this to the engineers.
  */
-export async function listLaudoRascunhos(): Promise<LaudoRascunhoRow[]> {
+export async function listLaudos(): Promise<LaudoListRow[]> {
   const { data, error } = await supabase
     .from('laudos')
     .select(LIST_SELECT)
-    .eq('status', 'rascunho')
+    .in('status', ACTIVE_STATUSES)
     .order('updated_at', { ascending: false });
   if (error) {
     throw new Error(messageForSupabaseError(error));
@@ -142,12 +167,16 @@ export async function listLaudoRascunhos(): Promise<LaudoRascunhoRow[]> {
       id: row.id,
       tipo_laudo: row.tipo_laudo,
       numero: row.numero,
+      status: row.status,
+      versao: row.versao,
       obra_id: row.obra_id,
       obra_nome: obra?.nome ?? null,
       obra_sigla: obra?.sigla ?? null,
       cliente_nome: cliente?.nome ?? null,
       nfs: concretagens.map((c) => c.nf_numero),
       concretagem_ids: concretagens.map((c) => c.id),
+      pdf_original_url: row.pdf_original_url,
+      pdf_assinado_url: row.pdf_assinado_url,
       updated_at: row.updated_at,
     };
   });
@@ -185,10 +214,13 @@ export async function getLaudoDetalhe(laudoId: string): Promise<LaudoDetalhe> {
     tipo_laudo: row.tipo_laudo,
     numero: row.numero,
     status: row.status,
+    versao: row.versao,
     obra_nome: obra?.nome ?? null,
     obra_sigla: obra?.sigla ?? null,
     cliente_nome: cliente?.nome ?? null,
     fckProjeto: concretagens[0]?.fck_projeto ?? null,
+    pdf_original_url: row.pdf_original_url,
+    pdf_assinado_url: row.pdf_assinado_url,
     concretagens: concretagens.map((c) => ({
       id: c.id,
       nf_numero: c.nf_numero,
@@ -248,6 +280,62 @@ export async function emitirLaudoParcial(concretagemId: string, idadeDias: numbe
 /** Groups several NFs of the same obra into one consolidated report (US13-CA3). */
 export async function agruparLaudo(concretagemIds: string[]): Promise<void> {
   const { error } = await supabase.rpc('agrupar_laudo', { concretagem_ids: concretagemIds });
+  if (error) {
+    throw new Error(messageForLaudoRpcError(error));
+  }
+}
+
+/**
+ * Generates the locked report PDF (F-S008-1 / US14) via the `gerar-laudo-pdf`
+ * Edge Function. On failure the thrown `EdgeFunctionError.message` is already the
+ * exact SPEC copy (409 "O laudo precisa estar pronto…", 422 "Não há resultados…").
+ */
+export async function gerarLaudoPdf(laudoId: string): Promise<GerarLaudoPdfResponse> {
+  return invokeFunction<GerarLaudoPdfResponse>('gerar-laudo-pdf', { laudo_id: laudoId });
+}
+
+/**
+ * Mints a short-lived signed URL to download a stored report PDF (F-S008-2 CA1).
+ * `pdfPath` is the `<bucket>/<path>` stored on the laudo; the bucket prefix is
+ * stripped before signing.
+ */
+export async function baixarLaudoPdf(pdfPath: string): Promise<string> {
+  const path = pdfPath.replace(/^laudos\//, '');
+  const { data, error } = await supabase.storage.from('laudos').createSignedUrl(path, 60);
+  if (error || !data) {
+    throw new Error(messageForSupabaseError(error ?? { status: 404 }));
+  }
+  return data.signedUrl;
+}
+
+/**
+ * Uploads the gov.br-signed PDF (and an optional 2nd/elaborador signature) via
+ * the `upload-laudo-assinado` Edge Function, publishing the report to `assinado`
+ * (F-S008-2 / US15). Thrown messages are the exact SPEC copy (415 "Envie um
+ * arquivo PDF válido.", 409 "Faça o upload do PDF assinado…").
+ */
+export async function uploadLaudoAssinado(
+  laudoId: string,
+  pdf: File,
+  elaborador?: File | null,
+): Promise<UploadLaudoAssinadoResponse> {
+  const form = new FormData();
+  form.append('laudo_id', laudoId);
+  form.append('pdf', pdf);
+  if (elaborador) {
+    form.append('pdf_elaborador', elaborador);
+  }
+  return invokeFunction<UploadLaudoAssinadoResponse>('upload-laudo-assinado', form);
+}
+
+/**
+ * Corrects a signed report (F-S008-3 / US22): the previous version becomes
+ * `substituido` and a new `versao+1` draft is created via the `corrigir_laudo`
+ * RPC. Non-signed reports raise the exact "Só é possível corrigir laudos já
+ * assinados." message.
+ */
+export async function corrigirLaudo(laudoId: string): Promise<void> {
+  const { error } = await supabase.rpc('corrigir_laudo', { laudo_id: laudoId });
   if (error) {
     throw new Error(messageForLaudoRpcError(error));
   }

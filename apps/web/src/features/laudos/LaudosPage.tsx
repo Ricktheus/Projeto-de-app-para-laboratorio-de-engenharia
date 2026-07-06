@@ -1,4 +1,4 @@
-import { MESSAGES } from '@concreto/shared';
+import { MESSAGES, type LaudoStatus } from '@concreto/shared';
 import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
@@ -6,19 +6,32 @@ import { ManagementNav } from '../../components/ManagementNav';
 import { BigButton, EmptyState, LoadingButton, StatusPill, useToast } from '../../components/ui';
 
 import { LaudoDetalheView } from './LaudoDetalhe';
-import { type LaudoRascunhoRow } from './laudos-service';
+import { type LaudoListRow } from './laudos-service';
 import {
   useAgruparLaudo,
+  useBaixarPdf,
+  useCorrigirLaudo,
   useEmitirParcial,
+  useGerarPdf,
   useLaudoDetalhe,
-  useLaudoRascunhos,
+  useLaudos,
   useMarcarPronto,
+  useUploadAssinado,
 } from './useLaudos';
 
-/** Distinct obras present in the draft list, for the filter dropdown. */
-function obraOptions(rascunhos: LaudoRascunhoRow[]): { id: string; label: string }[] {
+const STATUS_PILL: Readonly<
+  Record<LaudoStatus, { label: string; tone: 'info' | 'warning' | 'success' | 'danger' }>
+> = {
+  rascunho: { label: 'Rascunho', tone: 'warning' },
+  pronto_assinatura: { label: 'Pronto p/ assinatura', tone: 'info' },
+  assinado: { label: 'Assinado', tone: 'success' },
+  substituido: { label: 'Substituído', tone: 'danger' },
+};
+
+/** Distinct obras present in the report list, for the filter dropdown. */
+function obraOptions(laudos: LaudoListRow[]): { id: string; label: string }[] {
   const byId = new Map<string, string>();
-  for (const laudo of rascunhos) {
+  for (const laudo of laudos) {
     if (!byId.has(laudo.obra_id)) {
       byId.set(laudo.obra_id, laudo.obra_sigla ?? laudo.obra_nome ?? 'Obra');
     }
@@ -27,15 +40,14 @@ function obraOptions(rascunhos: LaudoRascunhoRow[]): { id: string; label: string
 }
 
 /**
- * Pre-filled reports workspace (F-S007-3 / US13). Lists the draft reports that
- * appear after the first valid rupture, filterable by obra / NF, and opens a
- * consolidated detail (per-age KGF/MPa/FCM + resistance curve). Supports the
- * on-demand partial emission, the optional grouping of several NFs of one obra,
- * and "marcar pronto para assinatura" (CPS_PENDENTES enforced server-side).
+ * Reports workspace (F-S007-3 / US13 + S008). Lists the active reports (rascunho
+ * / pronto / assinado), filterable by obra / NF, and opens a consolidated detail
+ * with the STATUS-AWARE actions: draft (emitir parcial, marcar pronto), pronto
+ * (gerar PDF, baixar, enviar assinado) and assinado (baixar, corrigir).
  */
 export function LaudosPage() {
   const { show } = useToast();
-  const { data: rascunhos, isLoading, isError, refetch } = useLaudoRascunhos();
+  const { data: laudos, isLoading, isError, refetch } = useLaudos();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [obraFilter, setObraFilter] = useState('');
@@ -47,8 +59,12 @@ export function LaudosPage() {
   const marcarPronto = useMarcarPronto();
   const emitirParcial = useEmitirParcial();
   const agrupar = useAgruparLaudo();
+  const gerarPdf = useGerarPdf();
+  const baixarPdf = useBaixarPdf();
+  const uploadAssinado = useUploadAssinado();
+  const corrigir = useCorrigirLaudo();
 
-  const lista = useMemo(() => rascunhos ?? [], [rascunhos]);
+  const lista = useMemo(() => laudos ?? [], [laudos]);
   const options = useMemo(() => obraOptions(lista), [lista]);
   const filtered = useMemo(
     () =>
@@ -61,7 +77,7 @@ export function LaudosPage() {
     [lista, obraFilter, nfFilter],
   );
 
-  // Grouping is over single-NF drafts of the SAME obra (US13-CA3).
+  // Grouping is over single-NF DRAFTS of the SAME obra (US13-CA3).
   const selectedRows = lista.filter((l) => selectedForGroup.includes(l.id));
   const sameObra =
     selectedRows.length >= 2 && new Set(selectedRows.map((l) => l.obra_id)).size === 1;
@@ -79,7 +95,6 @@ export function LaudosPage() {
     try {
       await marcarPronto.mutateAsync(selectedId);
       show(MESSAGES.feature.laudoMarcadoPronto, 'success');
-      setSelectedId(null);
     } catch (error) {
       show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
     }
@@ -89,6 +104,56 @@ export function LaudosPage() {
     try {
       await emitirParcial.mutateAsync({ concretagemId, idadeDias });
       show(MESSAGES.feature.laudoParcialEmitido, 'success');
+    } catch (error) {
+      show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
+    }
+  }
+
+  async function handleGerarPdf() {
+    if (!selectedId) {
+      return;
+    }
+    try {
+      await gerarPdf.mutateAsync(selectedId);
+      show(MESSAGES.feature.laudoPdfGerado, 'success');
+    } catch (error) {
+      show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
+    }
+  }
+
+  async function handleBaixarPdf() {
+    const path = detalhe.data?.pdf_original_url;
+    if (!path) {
+      return;
+    }
+    try {
+      const url = await baixarPdf.mutateAsync(path);
+      window.open(url, '_blank', 'noopener');
+    } catch (error) {
+      show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
+    }
+  }
+
+  async function handleUploadAssinado(pdf: File, elaborador: File | null) {
+    if (!selectedId) {
+      return;
+    }
+    try {
+      await uploadAssinado.mutateAsync({ laudoId: selectedId, pdf, elaborador });
+      show(MESSAGES.feature.laudoAssinadoPublicado, 'success');
+    } catch (error) {
+      show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
+    }
+  }
+
+  async function handleCorrigir() {
+    if (!selectedId) {
+      return;
+    }
+    try {
+      await corrigir.mutateAsync(selectedId);
+      show(MESSAGES.feature.laudoCorrigido, 'success');
+      setSelectedId(null);
     } catch (error) {
       show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
     }
@@ -111,7 +176,7 @@ export function LaudosPage() {
       <ManagementNav />
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-gray-600">Laudos pré-prontos, gerados após os rompimentos.</p>
+        <p className="text-gray-600">Laudos pré-prontos, geração de PDF, assinatura e correção.</p>
         <BigButton
           variant="neutral"
           onClick={() => {
@@ -182,7 +247,7 @@ export function LaudosPage() {
           {grouping ? (
             <div className="flex flex-wrap items-center gap-3 rounded-xl bg-blue-50 px-4 py-3">
               <span className="text-field text-blue-900">
-                Selecione 2 ou mais laudos da mesma obra para consolidar.
+                Selecione 2 ou mais rascunhos da mesma obra para consolidar.
               </span>
               <LoadingButton
                 loading={agrupar.isPending}
@@ -195,7 +260,7 @@ export function LaudosPage() {
             </div>
           ) : null}
 
-          {/* Draft list. */}
+          {/* Report list. */}
           <ul className="flex flex-col gap-3">
             {filtered.map((laudo) => (
               <li
@@ -207,8 +272,9 @@ export function LaudosPage() {
                     type="checkbox"
                     aria-label={`Selecionar ${laudo.numero}`}
                     checked={selectedForGroup.includes(laudo.id)}
+                    disabled={laudo.status !== 'rascunho'}
                     onChange={() => toggleGroupSelection(laudo.id)}
-                    className="h-6 w-6 accent-brand"
+                    className="h-6 w-6 accent-brand disabled:opacity-40"
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
@@ -217,7 +283,10 @@ export function LaudosPage() {
                     {laudo.obra_sigla ?? 'Obra'} · NF {laudo.nfs.join(', ') || '—'}
                   </p>
                 </div>
-                <StatusPill label="Rascunho" tone="warning" />
+                <StatusPill
+                  label={STATUS_PILL[laudo.status].label}
+                  tone={STATUS_PILL[laudo.status].tone}
+                />
                 {!grouping ? (
                   <BigButton
                     variant="neutral"
@@ -245,6 +314,14 @@ export function LaudosPage() {
                 marcandoPronto={marcarPronto.isPending}
                 onEmitirParcial={handleEmitirParcial}
                 emitindoParcial={emitirParcial.isPending}
+                onGerarPdf={handleGerarPdf}
+                gerandoPdf={gerarPdf.isPending}
+                onBaixarPdf={handleBaixarPdf}
+                baixandoPdf={baixarPdf.isPending}
+                onUploadAssinado={handleUploadAssinado}
+                enviandoAssinado={uploadAssinado.isPending}
+                onCorrigir={handleCorrigir}
+                corrigindo={corrigir.isPending}
               />
             )
           ) : null}

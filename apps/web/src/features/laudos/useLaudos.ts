@@ -2,23 +2,27 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   agruparLaudo,
+  baixarLaudoPdf,
+  corrigirLaudo,
   emitirLaudoParcial,
+  gerarLaudoPdf,
   getLaudoDetalhe,
-  listLaudoRascunhos,
+  listLaudos,
   marcarProntoAssinatura,
+  uploadLaudoAssinado,
   type LaudoDetalhe,
-  type LaudoRascunhoRow,
+  type LaudoListRow,
 } from './laudos-service';
 
-export const LAUDOS_KEY = ['laudos', 'rascunhos'] as const;
+export const LAUDOS_KEY = ['laudos', 'lista'] as const;
 const laudoDetalheKey = (id: string) => ['laudos', 'detalhe', id] as const;
 
-/** Loads the pre-filled report drafts (F-S007-3 / US13-CA1). */
-export function useLaudoRascunhos() {
-  return useQuery<LaudoRascunhoRow[]>({ queryKey: LAUDOS_KEY, queryFn: listLaudoRascunhos });
+/** Loads the active reports (rascunho / pronto_assinatura / assinado). */
+export function useLaudos() {
+  return useQuery<LaudoListRow[]>({ queryKey: LAUDOS_KEY, queryFn: listLaudos });
 }
 
-/** Loads a single report draft with its consolidated per-age results. */
+/** Loads a single report with its consolidated per-age results. */
 export function useLaudoDetalhe(laudoId: string | null) {
   return useQuery<LaudoDetalhe>({
     queryKey: laudoDetalheKey(laudoId ?? ''),
@@ -27,7 +31,7 @@ export function useLaudoDetalhe(laudoId: string | null) {
   });
 }
 
-/** Invalidates both the draft list and every loaded detail after a report change. */
+/** Invalidates both the report list and every loaded detail after a change. */
 function useInvalidateLaudos() {
   const queryClient = useQueryClient();
   return () => {
@@ -62,4 +66,44 @@ export function useAgruparLaudo() {
     mutationFn: (concretagemIds: string[]) => agruparLaudo(concretagemIds),
     onSuccess: invalidate,
   });
+}
+
+/** Generates the locked report PDF (F-S008-1 / US14). */
+export function useGerarPdf() {
+  const invalidate = useInvalidateLaudos();
+  return useMutation({
+    mutationFn: (laudoId: string) => gerarLaudoPdf(laudoId),
+    onSuccess: invalidate,
+  });
+}
+
+/** Uploads the signed PDF and publishes the report to `assinado` (F-S008-2 / US15). */
+export function useUploadAssinado() {
+  const invalidate = useInvalidateLaudos();
+  return useMutation({
+    mutationFn: ({
+      laudoId,
+      pdf,
+      elaborador,
+    }: {
+      laudoId: string;
+      pdf: File;
+      elaborador?: File | null;
+    }) => uploadLaudoAssinado(laudoId, pdf, elaborador),
+    onSuccess: invalidate,
+  });
+}
+
+/** Corrects a signed report, creating a new version (F-S008-3 / US22). */
+export function useCorrigirLaudo() {
+  const invalidate = useInvalidateLaudos();
+  return useMutation({
+    mutationFn: (laudoId: string) => corrigirLaudo(laudoId),
+    onSuccess: invalidate,
+  });
+}
+
+/** Downloads a stored report PDF via a short-lived signed URL (F-S008-2 CA1). */
+export function useBaixarPdf() {
+  return useMutation({ mutationFn: (pdfPath: string) => baixarLaudoPdf(pdfPath) });
 }

@@ -22,7 +22,10 @@ export class EdgeFunctionError extends Error {
  * shows the specified copy (e.g. "Já existe um usuário com este e-mail."). The
  * session's JWT is attached automatically by supabase-js.
  */
-export async function invokeFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
+export async function invokeFunction<T>(
+  name: string,
+  body: Record<string, unknown> | FormData,
+): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>(name, { body });
 
   if (!error) {
