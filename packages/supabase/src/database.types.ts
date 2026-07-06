@@ -687,6 +687,18 @@ export type Database = {
         Args: { cp_id: string; motivo: string };
         Returns: Json;
       };
+      marcar_pronto_assinatura: {
+        Args: { laudo_id: string };
+        Returns: Json;
+      };
+      emitir_laudo_parcial: {
+        Args: { concretagem_id: string; idade_dias: number };
+        Returns: Json;
+      };
+      agrupar_laudo: {
+        Args: { concretagem_ids: string[] };
+        Returns: Json;
+      };
     };
     Enums: {
       user_role: 'socio_campo' | 'eng_lab' | 'eng_escritorio' | 'cliente';
