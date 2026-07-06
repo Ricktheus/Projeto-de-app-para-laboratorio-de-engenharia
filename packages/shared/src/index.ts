@@ -35,6 +35,10 @@ export * from './coleta';
 // Etiquetas (printable label model, S005).
 export * from './etiquetas';
 
+// Prensa (rupture agenda, error mapping, per-age result classification,
+// evidence watermark — S006).
+export * from './prensa';
+
 // Network error mapping (Supabase/PostgREST → PT messages).
 export * from './net';
 

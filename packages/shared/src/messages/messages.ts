@@ -90,6 +90,24 @@ const FEATURE_MESSAGES = {
   emptyAgendaColeta: 'Nenhuma coleta pendente para hoje.',
   coletaConfirmada: 'CP coletado com sucesso.',
   coletaAtrasadaAviso: 'Coleta após 24h: será registrada uma ressalva no laudo.',
+
+  // Prensa / ruptura (F-S006-1 / F-S006-2 / F-S006-3).
+  emptyPrensa: 'Nenhum CP para romper hoje.',
+  buscarCpQr: 'Buscar por QR',
+  rupturaRegistrada: 'Ruptura registrada com sucesso.',
+  selecioneFratura: 'Selecione o tipo de fratura.',
+  // Very low load: almost certainly typed in kN instead of kgf (~102 kgf/kN).
+  cargaMuitoBaixaKn: 'Valor muito baixo. Você digitou em kN em vez de kgf?',
+
+  // Descarte / expurgo (F-S006-4).
+  motivoDescarteObrigatorio: 'Informe o motivo do descarte/expurgo.',
+  cpDescartado: 'Corpo de prova descartado.',
+  resultadoExpurgado: 'Resultado expurgado (removido da média).',
+  cpEstadoInvalidoAcao: 'Este corpo de prova não está em um estado válido para esta ação.',
+
+  // Fotos de evidência (F-S006-5).
+  evidenciaEnviada: 'Foto de evidência enviada.',
+  evidenciaFalhaUpload: 'Falha ao enviar a foto. Tente novamente.',
 } as const;
 
 /**
@@ -169,13 +187,29 @@ export function messageForDomainCode(code: string): string {
     : HTTP_MESSAGES.serverError;
 }
 
+/** Options for {@link cpMandatorio28dMessage}. */
+export interface Mandatorio28dMessageOptions {
+  /**
+   * The specimen's target age in days — the "{idade}d" in the message. The
+   * mandatory specimens are the 2 highest target ages, usually 28d but possibly
+   * 63d/91d, so the age is interpolated rather than hard-coded. Defaults to 28.
+   */
+  idade?: number;
+  /** Earliest allowed rupture date (ISO 'YYYY-MM-DD'), appended in parentheses. */
+  data?: string;
+}
+
 /**
- * Builds the mandatory-28d block message, optionally appending the earliest
- * allowed rupture date, e.g. "…antes da idade prevista (2026-06-17)." (SPEC §5.2).
+ * Builds the mandatory-specimen block message (F-S006-2 / SPEC §5.2), e.g.
+ * "Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista
+ * (2026-06-17)." The target age and the earliest allowed date are both optional
+ * (age defaults to 28) so the same builder serves the RPC error mapping and any
+ * client-side preview.
  */
-export function cpMandatorio28dMessage(dataPrevista?: string): string {
-  const base = 'Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista';
-  return dataPrevista ? `${base} (${dataPrevista}).` : `${base}.`;
+export function cpMandatorio28dMessage(options: Mandatorio28dMessageOptions = {}): string {
+  const idade = options.idade ?? 28;
+  const base = `Este CP de ${idade}d é obrigatório e não pode ser rompido antes da idade prevista`;
+  return options.data ? `${base} (${options.data}).` : `${base}.`;
 }
 
 /**
