@@ -71,7 +71,7 @@ A sprint só está concluída quando **todos** os itens abaixo forem verdadeiros
 
 ### 7. Git e entrega
 
-* Desenvolva na branch **`claude/vibrant-clarke-ng4aq0`** (crie localmente a partir da base se necessário). **Não** faça push para outra branch sem permissão explícita.
+* Desenvolva na branch  (crie localmente a partir da base se necessário). **Não** faça push para outra branch sem permissão explícita.
 * Commits pequenos e descritivos, um por feature ou por unidade lógica coerente.
 * Faça push da branch designada ao final. **Não** abra Pull Request a menos que seja explicitamente solicitado.
 
