@@ -28,6 +28,25 @@ export function addDaysUtcDayNumber(value: DateInput, days: number): number {
 }
 
 /**
+ * Formats an ISO date ('YYYY-MM-DD', or a longer timestamp whose date portion
+ * is read) as the Brazilian 'DD/MM/YYYY'. Parses the calendar parts directly so
+ * the displayed day never shifts with the runtime timezone. Returns the empty
+ * string for a missing/unparseable value. UI-facing helper (dates are shown in
+ * pt-BR across the web panel and reports).
+ */
+export function formatIsoDateBr(value: string | null | undefined): string {
+  if (!value) {
+    return '';
+  }
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (!match) {
+    return '';
+  }
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+}
+
+/**
  * Adds `days` to a date and formats the result as an ISO calendar date
  * ('YYYY-MM-DD') in UTC. Used to preview each CP's `data_ruptura_planejada`
  * (= data_moldagem + idade_alvo_dias) client-side; the authoritative value is

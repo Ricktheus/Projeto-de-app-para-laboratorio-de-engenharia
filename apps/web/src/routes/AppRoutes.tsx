@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { LoginPage } from '../features/auth/LoginPage';
 import { CampoPage } from '../features/campo/CampoPage';
+import { LaudosPage } from '../features/laudos/LaudosPage';
 import { ObrasPage } from '../features/obras/ObrasPage';
 import { PainelPage } from '../features/painel/PainelPage';
 import { PortalPage } from '../features/portal/PortalPage';
@@ -50,6 +51,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute area="portal">
             <PortalPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/laudos"
+        element={
+          <ProtectedRoute area="laudos">
+            <LaudosPage />
           </ProtectedRoute>
         }
       />

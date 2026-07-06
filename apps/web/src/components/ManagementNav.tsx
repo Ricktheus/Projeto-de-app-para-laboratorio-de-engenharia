@@ -12,6 +12,7 @@ interface NavItem {
 
 const NAV_ITEMS: readonly NavItem[] = [
   { to: '/painel', label: 'Painel', area: 'painel' },
+  { to: '/laudos', label: 'Laudos', area: 'laudos' },
   { to: '/obras', label: 'Obras', area: 'painel' },
   { to: '/usuarios', label: 'Clientes e Usuários', area: 'usuarios' },
 ];

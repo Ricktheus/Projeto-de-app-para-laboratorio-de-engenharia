@@ -108,6 +108,25 @@ const FEATURE_MESSAGES = {
   // Fotos de evidência (F-S006-5).
   evidenciaEnviada: 'Foto de evidência enviada.',
   evidenciaFalhaUpload: 'Falha ao enviar a foto. Tente novamente.',
+
+  // Painel do escritório — concretagens em tempo real (F-S007-1).
+  painelErroCarregar: 'Não foi possível carregar as concretagens.',
+  painelTentarNovamente: 'Tentar novamente',
+  emptyConcretagensPainel: 'Nenhuma concretagem cadastrada.',
+
+  // Edição de concretagem (F-S007-2).
+  concretagemAtualizada: 'Concretagem atualizada com sucesso.',
+  concretagemRecarregar: 'Recarregar',
+
+  // Laudos pré-prontos (F-S007-3).
+  emptyLaudos: 'Nenhum laudo pré-pronto. Eles aparecem após o primeiro rompimento válido.',
+  laudoMarcadoPronto: 'Laudo marcado como pronto para assinatura.',
+  laudoParcialEmitido: 'Laudo parcial gerado.',
+  laudoAgrupado: 'Laudo consolidado gerado.',
+  laudoParcialIdadeInvalida: 'Laudo parcial disponível apenas para 7 ou 14 dias.',
+  laudoAgruparObrasDiferentes: 'Só é possível agrupar concretagens da mesma obra.',
+  laudoAgruparPoucas: 'Selecione ao menos duas concretagens para agrupar.',
+  laudoNaoRascunho: 'Este laudo não está mais em rascunho. Recarregue a página.',
 } as const;
 
 /**
@@ -133,8 +152,11 @@ const DOMAIN_MESSAGES = {
   CP_JA_COLETADO: 'CP já coletado.',
   CP_NAO_COLETAVEL: 'Este CP não pode ser coletado.',
   CP_MANDATORIO_28D: 'Este CP de 28d é obrigatório e não pode ser rompido antes da idade prevista.',
+  // Exact copy prescribed by SPEC F-S007-3 (marcar pronto_assinatura com CPs
+  // pendentes). This is the single source; the laudo state machine and the
+  // `marcar_pronto_assinatura` RPC both surface it through messageForLaudoRpcError.
   CPS_PENDENTES:
-    'Há corpos de prova pendentes. Conclua todos antes de marcar como pronto para assinatura.',
+    'Existem CPs pendentes nesta(s) idade(s). Conclua os rompimentos antes de avançar.',
   SEM_PDF_ASSINADO: 'Faça o upload do PDF assinado antes de publicar o laudo.',
 
   // OCR (SPEC §5.1).

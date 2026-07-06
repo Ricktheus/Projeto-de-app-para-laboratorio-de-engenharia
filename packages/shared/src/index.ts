@@ -39,6 +39,10 @@ export * from './etiquetas';
 // evidence watermark — S006).
 export * from './prensa';
 
+// Laudo (report consolidation: FCM per age, resistance curve, RPC error
+// mapping — S007).
+export * from './laudo';
+
 // Network error mapping (Supabase/PostgREST → PT messages).
 export * from './net';
 

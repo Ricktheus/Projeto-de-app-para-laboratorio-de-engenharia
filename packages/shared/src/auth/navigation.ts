@@ -18,9 +18,10 @@ export type Platform = 'mobile' | 'web';
 
 /**
  * A semantic area of the product. Apps translate each key into a concrete
- * route (e.g. `campo` → `/campo` on web, `/(campo)` on mobile).
+ * route (e.g. `campo` → `/campo` on web, `/(campo)` on mobile). `laudos` is the
+ * office report workspace (web-only, S007).
  */
-export type NavArea = 'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios';
+export type NavArea = 'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios' | 'laudos';
 
 /**
  * Areas each role is allowed to open. Anything not listed is denied by default
@@ -31,8 +32,8 @@ export type NavArea = 'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios';
  */
 export const ROLE_ALLOWED_AREAS: Readonly<Record<UserRole, readonly NavArea[]>> = {
   socio_campo: ['campo'],
-  eng_lab: ['prensa', 'painel', 'usuarios'],
-  eng_escritorio: ['painel', 'usuarios'],
+  eng_lab: ['prensa', 'painel', 'laudos', 'usuarios'],
+  eng_escritorio: ['painel', 'laudos', 'usuarios'],
   cliente: ['portal'],
 };
 
