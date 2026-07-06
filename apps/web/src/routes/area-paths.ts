@@ -12,4 +12,5 @@ export const AREA_PATH: Readonly<Record<NavArea, string>> = {
   portal: '/portal',
   usuarios: '/usuarios',
   laudos: '/laudos',
+  exportacao: '/exportacao',
 };

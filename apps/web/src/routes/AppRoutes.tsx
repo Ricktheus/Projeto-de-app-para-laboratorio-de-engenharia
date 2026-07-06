@@ -2,12 +2,14 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { LoginPage } from '../features/auth/LoginPage';
 import { CampoPage } from '../features/campo/CampoPage';
+import { ExportacaoPage } from '../features/exportacao/ExportacaoPage';
 import { LaudosPage } from '../features/laudos/LaudosPage';
 import { ObrasPage } from '../features/obras/ObrasPage';
 import { PainelPage } from '../features/painel/PainelPage';
 import { PortalPage } from '../features/portal/PortalPage';
 import { PrensaPage } from '../features/prensa/PrensaPage';
 import { UsuariosPage } from '../features/usuarios/UsuariosPage';
+import { ValidacaoPublicaPage } from '../features/validacao-publica/ValidacaoPublicaPage';
 
 import { ProtectedRoute } from './ProtectedRoute';
 import { RoleHomeRedirect } from './RoleHomeRedirect';
@@ -21,6 +23,8 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* PUBLIC anti-fraud validation surface — no auth (F-S009-2 / US19). */}
+      <Route path="/validar/:codigo" element={<ValidacaoPublicaPage />} />
       <Route path="/" element={<RoleHomeRedirect />} />
       <Route
         path="/painel"
@@ -75,6 +79,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute area="usuarios">
             <UsuariosPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/exportacao"
+        element={
+          <ProtectedRoute area="exportacao">
+            <ExportacaoPage />
           </ProtectedRoute>
         }
       />
