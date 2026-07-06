@@ -78,6 +78,24 @@ export type UploadLaudoAssinadoResponse = z.infer<typeof uploadLaudoAssinadoResp
 export const validarLaudoQuerySchema = z.object({ codigo: z.string().min(1) });
 export type ValidarLaudoQuery = z.infer<typeof validarLaudoQuerySchema>;
 
+/** Public validation 200 body (SPEC §5.5). Read-only; never carries evidence. */
+export const validarLaudoResponseSchema = z.object({
+  autentico: z.boolean(),
+  numero: z.string(),
+  versao: z.number().int().positive(),
+  cliente: z.string().nullable(),
+  obra: z.string().nullable(),
+  data_emissao: z.string().nullable(),
+  resultados: z.array(
+    z.object({
+      idade_dias: z.number().int().positive(),
+      fcm_mpa: z.number(),
+      fck_projeto: z.number().nullable(),
+    }),
+  ),
+});
+export type ValidarLaudoResponse = z.infer<typeof validarLaudoResponseSchema>;
+
 // ---- §5.6 exportar-excel ---------------------------------------------------
 
 export const exportarExcelRequestSchema = z.object({
@@ -90,8 +108,16 @@ export type ExportarExcelRequest = z.infer<typeof exportarExcelRequestSchema>;
 
 // ---- §5.7 enviar-email (internal) ------------------------------------------
 
+/**
+ * Internal e-mail worker request. `evento` selects the mode:
+ *   - `processar_fila`        — drain pending `email_events` (retry, US24-CA5);
+ *   - `cps_pendentes_coleta`  — compute pending collections + enqueue (cron, CA3);
+ *   - a laudo event (`laudo_assinado`/`pronto_assinatura`) with `laudo_id` —
+ *     enqueue that notification, then drain.
+ * `laudo_id` is only required by the laudo-scoped events, so it is optional here.
+ */
 export const enviarEmailRequestSchema = z.object({
   evento: z.string().min(1),
-  laudo_id: uuidSchema,
+  laudo_id: uuidSchema.nullish(),
 });
 export type EnviarEmailRequest = z.infer<typeof enviarEmailRequestSchema>;

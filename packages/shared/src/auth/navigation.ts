@@ -21,7 +21,8 @@ export type Platform = 'mobile' | 'web';
  * route (e.g. `campo` → `/campo` on web, `/(campo)` on mobile). `laudos` is the
  * office report workspace (web-only, S007).
  */
-export type NavArea = 'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios' | 'laudos';
+export type NavArea =
+  'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios' | 'laudos' | 'exportacao';
 
 /**
  * Areas each role is allowed to open. Anything not listed is denied by default
@@ -32,8 +33,8 @@ export type NavArea = 'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios' | 'l
  */
 export const ROLE_ALLOWED_AREAS: Readonly<Record<UserRole, readonly NavArea[]>> = {
   socio_campo: ['campo'],
-  eng_lab: ['prensa', 'painel', 'laudos', 'usuarios'],
-  eng_escritorio: ['painel', 'laudos', 'usuarios'],
+  eng_lab: ['prensa', 'painel', 'laudos', 'usuarios', 'exportacao'],
+  eng_escritorio: ['painel', 'laudos', 'usuarios', 'exportacao'],
   cliente: ['portal'],
 };
 

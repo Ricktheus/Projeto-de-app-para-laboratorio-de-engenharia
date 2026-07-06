@@ -2,10 +2,10 @@ import { type NavArea } from '@concreto/shared';
 
 /**
  * expo-router path for each semantic {@link NavArea}. Role → area lives in
- * `packages/shared`; this only binds areas to concrete mobile routes. `usuarios`
- * and `laudos` have no mobile screen (user management and reports are web-only),
- * so they map to the panel — never used as a mobile home (no role homes there on
- * mobile).
+ * `packages/shared`; this only binds areas to concrete mobile routes. `usuarios`,
+ * `laudos` and `exportacao` have no mobile screen (user management, reports and
+ * the Excel export are web-only), so they map to the panel — never used as a
+ * mobile home (no role homes there on mobile).
  */
 export const AREA_HREF: Readonly<Record<NavArea, string>> = {
   campo: '/campo',
@@ -14,4 +14,5 @@ export const AREA_HREF: Readonly<Record<NavArea, string>> = {
   portal: '/portal',
   usuarios: '/painel',
   laudos: '/painel',
+  exportacao: '/painel',
 };

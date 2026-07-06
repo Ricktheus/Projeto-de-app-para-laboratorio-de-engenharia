@@ -128,6 +128,21 @@ const FEATURE_MESSAGES = {
   laudoAgruparPoucas: 'Selecione ao menos duas concretagens para agrupar.',
   laudoNaoRascunho: 'Este laudo não está mais em rascunho. Recarregue a página.',
 
+  // Portal do cliente (F-S009-1 / US18).
+  emptyPortalLaudos: 'Você ainda não possui laudos disponíveis.',
+  portalBaixarLaudo: 'Baixar laudo (PDF)',
+  portalTodasObras: 'Todas as obras',
+
+  // Validação pública via QR (F-S009-2 / US19).
+  validacaoAutentico: 'Laudo autêntico.',
+  validacaoNaoAutentico: 'Laudo não encontrado / não autêntico.',
+  validacaoEmAtualizacao: 'Este laudo está em processo de atualização.',
+
+  // Exportação Excel (F-S009-3 / US23).
+  exportarExcel: 'Exportar Excel',
+  exportandoExcel: 'Gerando planilha…',
+  exportacaoConcluida: 'Planilha gerada com sucesso.',
+
   // Geração de PDF / assinatura / versionamento (F-S008-1 / F-S008-2 / F-S008-3).
   laudoGerarPdf: 'Gerar PDF',
   laudoGerandoPdf: 'Gerando laudo…',
@@ -190,6 +205,32 @@ const DOMAIN_MESSAGES = {
   SEM_DADOS: 'Nenhum dado encontrado para os filtros selecionados.',
 } as const;
 
+/**
+ * Transactional e-mail copy (F-S009-4 / US24). The mandated sentence of each
+ * event is the EXACT SPEC string; the `enviar-email` worker composes the body
+ * from these so the wording never drifts. `cpsPendentesColeta` interpolates the
+ * pending count via {@link cpsPendentesColetaBody}.
+ */
+const EMAIL_MESSAGES = {
+  // laudo assinado/publicado -> cliente (US24-CA1).
+  laudoAssinadoAssunto: 'Seu laudo está disponível',
+  laudoAssinadoCorpo: 'Seu laudo está disponível para download.',
+  // laudo pronto_assinatura -> RT (US24-CA2).
+  prontoAssinaturaAssunto: 'Laudo aguardando assinatura',
+  prontoAssinaturaCorpo: 'Há laudo(s) aguardando sua assinatura.',
+  // CPs moldado >24h sem coleta -> sócio (US24-CA3, cron diário).
+  cpsPendentesAssunto: 'CPs pendentes de coleta',
+  // novo cliente -> boas-vindas com link do portal e definição de senha (US24-CA4).
+  novoClienteAssunto: 'Bem-vindo ao portal do laboratório',
+  novoClienteCorpo:
+    'Sua conta foi criada. Acesse o portal para definir sua senha e baixar seus laudos.',
+} as const;
+
+/** Builds the pending-collection body with the interpolated count (US24-CA3). */
+export function cpsPendentesColetaBody(quantidade: number): string {
+  return `Existem ${quantidade} CPs pendentes de coleta.`;
+}
+
 /** The full catalog, grouped by concern. */
 export const MESSAGES = {
   http: HTTP_MESSAGES,
@@ -197,6 +238,7 @@ export const MESSAGES = {
   uiState: UI_STATE_MESSAGES,
   feature: FEATURE_MESSAGES,
   domain: DOMAIN_MESSAGES,
+  email: EMAIL_MESSAGES,
 } as const;
 
 /** A resolvable domain/Edge error code. */
