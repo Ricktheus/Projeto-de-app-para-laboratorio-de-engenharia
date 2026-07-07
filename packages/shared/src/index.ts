@@ -32,6 +32,10 @@ export * from './concretagem';
 // Coleta (24h collection agenda + collect-error mapping, S005).
 export * from './coleta';
 
+// Dashboard (operational-home metrics: period counters, overdue collection,
+// upcoming ruptures — S010).
+export * from './dashboard';
+
 // Etiquetas (printable label model, S005).
 export * from './etiquetas';
 

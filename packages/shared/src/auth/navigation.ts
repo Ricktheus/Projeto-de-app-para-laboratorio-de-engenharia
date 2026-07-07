@@ -19,10 +19,18 @@ export type Platform = 'mobile' | 'web';
 /**
  * A semantic area of the product. Apps translate each key into a concrete
  * route (e.g. `campo` → `/campo` on web, `/(campo)` on mobile). `laudos` is the
- * office report workspace (web-only, S007).
+ * office report workspace and `dashboard` the operational home (both web-only:
+ * `dashboard` is the S010 operational overview the office engineers land on).
  */
 export type NavArea =
-  'campo' | 'prensa' | 'painel' | 'portal' | 'usuarios' | 'laudos' | 'exportacao';
+  | 'campo'
+  | 'prensa'
+  | 'painel'
+  | 'portal'
+  | 'usuarios'
+  | 'laudos'
+  | 'exportacao'
+  | 'dashboard';
 
 /**
  * Areas each role is allowed to open. Anything not listed is denied by default
@@ -33,8 +41,8 @@ export type NavArea =
  */
 export const ROLE_ALLOWED_AREAS: Readonly<Record<UserRole, readonly NavArea[]>> = {
   socio_campo: ['campo'],
-  eng_lab: ['prensa', 'painel', 'laudos', 'usuarios', 'exportacao'],
-  eng_escritorio: ['painel', 'laudos', 'usuarios', 'exportacao'],
+  eng_lab: ['dashboard', 'prensa', 'painel', 'laudos', 'usuarios', 'exportacao'],
+  eng_escritorio: ['dashboard', 'painel', 'laudos', 'usuarios', 'exportacao'],
   cliente: ['portal'],
 };
 
@@ -42,17 +50,18 @@ export const ROLE_ALLOWED_AREAS: Readonly<Record<UserRole, readonly NavArea[]>> 
  * Home area a role lands on right after login.
  *
  * `eng_lab` is platform-sensitive per SPEC F-S003-1 ("eng_lab → prensa/painel"):
- * on mobile the RT lands on the press screen, on web on the office panel. Every
- * returned area is, by construction, contained in {@link ROLE_ALLOWED_AREAS}.
+ * on mobile the RT lands on the press screen; on web both office engineers land
+ * on the operational `dashboard` (F-S010-1). Every returned area is, by
+ * construction, contained in {@link ROLE_ALLOWED_AREAS}.
  */
 export function roleHome(role: UserRole, platform: Platform): NavArea {
   switch (role) {
     case 'socio_campo':
       return 'campo';
     case 'eng_lab':
-      return platform === 'mobile' ? 'prensa' : 'painel';
+      return platform === 'mobile' ? 'prensa' : 'dashboard';
     case 'eng_escritorio':
-      return 'painel';
+      return 'dashboard';
     case 'cliente':
       return 'portal';
   }

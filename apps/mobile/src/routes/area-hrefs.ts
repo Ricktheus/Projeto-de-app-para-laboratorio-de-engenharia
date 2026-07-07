@@ -15,4 +15,6 @@ export const AREA_HREF: Readonly<Record<NavArea, string>> = {
   usuarios: '/painel',
   laudos: '/painel',
   exportacao: '/painel',
+  // No mobile dashboard (office-only S010 screen) — falls back to the panel.
+  dashboard: '/painel',
 };

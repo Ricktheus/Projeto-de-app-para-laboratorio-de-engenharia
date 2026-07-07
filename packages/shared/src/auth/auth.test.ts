@@ -15,11 +15,20 @@ describe('role-based navigation (F-S003-2)', () => {
   it('routes each role to its home area per platform', () => {
     expect(roleHome('socio_campo', 'mobile')).toBe('campo');
     expect(roleHome('socio_campo', 'web')).toBe('campo');
-    // eng_lab is platform-sensitive: prensa on mobile, painel on web.
+    // eng_lab is platform-sensitive: prensa on mobile, operational dashboard on web.
     expect(roleHome('eng_lab', 'mobile')).toBe('prensa');
-    expect(roleHome('eng_lab', 'web')).toBe('painel');
-    expect(roleHome('eng_escritorio', 'web')).toBe('painel');
+    expect(roleHome('eng_lab', 'web')).toBe('dashboard');
+    // Both office engineers land on the S010 operational dashboard on web.
+    expect(roleHome('eng_escritorio', 'web')).toBe('dashboard');
     expect(roleHome('cliente', 'web')).toBe('portal');
+  });
+
+  it('lets the office engineers open the operational dashboard (F-S010-1)', () => {
+    expect(canAccessArea('eng_lab', 'dashboard')).toBe(true);
+    expect(canAccessArea('eng_escritorio', 'dashboard')).toBe(true);
+    // Field partner and client never reach the office dashboard (deny by default).
+    expect(canAccessArea('socio_campo', 'dashboard')).toBe(false);
+    expect(canAccessArea('cliente', 'dashboard')).toBe(false);
   });
 
   it('every home area is an area the role is allowed to open', () => {
