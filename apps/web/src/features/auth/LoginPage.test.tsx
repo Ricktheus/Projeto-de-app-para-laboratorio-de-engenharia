@@ -28,7 +28,8 @@ function renderLogin() {
       <MemoryRouter initialEntries={['/login']}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/painel" element={<div>HOME PAINEL</div>} />
+          {/* eng_escritorio's web home is the operational dashboard (F-S010-1). */}
+          <Route path="/dashboard" element={<div>HOME DASHBOARD</div>} />
         </Routes>
         <Toaster />
       </MemoryRouter>
@@ -100,7 +101,7 @@ describe('LoginPage (F-S003-1)', () => {
     });
     renderLogin();
     await fillAndSubmit();
-    expect(await screen.findByText('HOME PAINEL')).toBeInTheDocument();
+    expect(await screen.findByText('HOME DASHBOARD')).toBeInTheDocument();
     expect(useAuthStore.getState().profile?.role).toBe('eng_escritorio');
   });
 

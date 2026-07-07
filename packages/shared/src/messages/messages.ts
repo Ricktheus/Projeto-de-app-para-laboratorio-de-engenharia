@@ -133,6 +133,24 @@ const FEATURE_MESSAGES = {
   portalBaixarLaudo: 'Baixar laudo (PDF)',
   portalTodasObras: 'Todas as obras',
 
+  // Dashboard operacional (F-S010-1).
+  dashboardTitulo: 'Dashboard operacional',
+  dashboardCpsTitulo: 'Corpos de prova',
+  dashboardCpsMoldados: 'Moldados',
+  dashboardCpsColetados: 'Coletados',
+  dashboardCpsRompidos: 'Rompidos',
+  dashboardHoje: 'Hoje',
+  dashboardSemana: 'Semana',
+  dashboardLaudosPendentesTitulo: 'Laudos pendentes de assinatura',
+  dashboardConcretagensSemColetaTitulo: 'Concretagens sem coleta (>24h)',
+  dashboardProximosRompimentosTitulo: 'Próximos rompimentos',
+  dashboardErroCard: 'Não foi possível carregar este indicador.',
+  dashboardTentarNovamente: 'Tentar novamente',
+  dashboardEmptyCps: 'Nenhum corpo de prova registrado nesta semana.',
+  dashboardEmptyLaudosPendentes: 'Nenhum laudo aguardando assinatura.',
+  dashboardEmptyConcretagensSemColeta: 'Nenhuma concretagem com coleta atrasada.',
+  dashboardEmptyProximosRompimentos: 'Nenhum rompimento programado.',
+
   // Validação pública via QR (F-S009-2 / US19).
   validacaoAutentico: 'Laudo autêntico.',
   validacaoNaoAutentico: 'Laudo não encontrado / não autêntico.',

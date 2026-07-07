@@ -10,6 +10,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     css: false,
+    // Unit/component tests live under src; the Playwright specs in e2e/ are run
+    // by `pnpm test:e2e`, not Vitest (F-S010-2).
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     // Satisfy the fail-fast env read in src/lib/env.ts during unit tests.
     env: {
       VITE_SUPABASE_URL: 'http://localhost:54321',

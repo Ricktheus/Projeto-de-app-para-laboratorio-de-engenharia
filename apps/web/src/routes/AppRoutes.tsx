@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { LoginPage } from '../features/auth/LoginPage';
 import { CampoPage } from '../features/campo/CampoPage';
+import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { ExportacaoPage } from '../features/exportacao/ExportacaoPage';
 import { LaudosPage } from '../features/laudos/LaudosPage';
 import { ObrasPage } from '../features/obras/ObrasPage';
@@ -26,6 +27,14 @@ export function AppRoutes() {
       {/* PUBLIC anti-fraud validation surface — no auth (F-S009-2 / US19). */}
       <Route path="/validar/:codigo" element={<ValidacaoPublicaPage />} />
       <Route path="/" element={<RoleHomeRedirect />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute area="dashboard">
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/painel"
         element={
