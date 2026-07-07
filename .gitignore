@@ -9,6 +9,11 @@ build/
 # Monorepo tooling
 .turbo/
 
+# Playwright E2E artifacts
+playwright-report/
+test-results/
+.playwright/
+
 # Supabase local stack
 supabase/.branches/
 supabase/.temp/
