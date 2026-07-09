@@ -22,6 +22,7 @@ import {
   StatusPill,
   useToast,
 } from '../../components/ui';
+import { hapticError, hapticSuccess } from '../../services/haptics';
 import { EvidenciaCapture } from '../evidencia/EvidenciaCapture';
 import { FraturaPicker } from '../fratura/FraturaPicker';
 
@@ -249,10 +250,12 @@ function RupturaInputForm({ cp }: { cp: PrensaCpRow }) {
       },
       {
         onSuccess: (result) => {
+          hapticSuccess();
           show(MESSAGES.feature.rupturaRegistrada, 'success');
           setRegistered({ rupturaId: result.rupturaId, mpa: result.mpaCalculado });
         },
         onError: (error) => {
+          hapticError();
           setConfirming(false); // keep the typed inputs
           show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
         },

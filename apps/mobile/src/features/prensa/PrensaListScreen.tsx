@@ -3,7 +3,9 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
-import { EmptyState, StatusPill, TextField } from '../../components/ui';
+import { QrScanner } from '../../components/QrScanner';
+import { BigButton, EmptyState, StatusPill, TextField } from '../../components/ui';
+import { hapticLight } from '../../services/haptics';
 
 import { type PrensaCpRow } from './prensa-service';
 import { useRupturaAgenda } from './usePrensa';
@@ -42,9 +44,26 @@ export function PrensaListScreen() {
   const router = useRouter();
   const { data, isLoading, isError } = useRupturaAgenda();
   const [query, setQuery] = useState('');
+  const [scanning, setScanning] = useState(false);
 
   const filtered = useMemo(() => (data ?? []).filter((row) => matches(row, query)), [data, query]);
   const today = useMemo(todayIso, []);
+
+  // QW-03: a scanned QR fills the search, locating the specimen on the day's
+  // list immediately (US07-CA2) — no typing the code with gloves on.
+  if (scanning) {
+    return (
+      <QrScanner
+        hint="Aponte para o QR do corpo de prova a romper."
+        onScan={(codigo) => {
+          hapticLight();
+          setQuery(codigo.trim());
+          setScanning(false);
+        }}
+        onCancel={() => setScanning(false)}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -71,6 +90,7 @@ export function PrensaListScreen() {
       <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
         {data.length} {data.length === 1 ? 'CP para romper hoje' : 'CPs para romper hoje'}
       </Text>
+      <BigButton label="📷 Bipar QR do CP" variant="neutral" onPress={() => setScanning(true)} />
       <TextField
         label={MESSAGES.feature.buscarCpQr}
         placeholder="Código do CP, obra ou NF"

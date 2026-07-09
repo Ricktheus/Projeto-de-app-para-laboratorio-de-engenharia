@@ -27,13 +27,15 @@ Após a auditoria, o projeto concluiu **S010** (dashboard operacional, testes E2
 | QW-19 | Portal: link "Validar autenticidade" por laudo | ✅ Feito | `PortalPage` |
 | QW-20 | Página pública: banner de conclusão conforme/abaixo do fck | ✅ Feito | `ValidacaoPublicaPage` |
 | QW-24 | Empty state do portal orientando o cliente novo | ✅ Feito | `messages` + `PortalPage` |
+| QW-03 | Scanner de QR na busca da prensa (reuso do `CameraView`) | ✅ Feito (2º lote) | `components/QrScanner` + `PrensaListScreen` |
+| QW-05 | Háptica no salvar ruptura / erro / leitura de QR | ✅ Feito (2º lote) | `services/haptics` + prensa + coleta |
+| QW-06 | Data em BR (DD/MM/AAAA) com máscara + validação | ✅ Feito (2º lote) | `shared/lib/date` + `components/ui/DateField` + `ConcretagemForm` |
 | QW-14 | Pipeline por card no painel | ↔️ Coberto em parte pelo **dashboard S010** (contadores agregados) — mantido no backlog o detalhamento por card |
-| QW-03 | Scanner de QR na busca da prensa | ⏭️ Adiado | reuso do `CameraView` — envolve nova tela/rota, próximo lote |
-| QW-05 | Háptica no salvar/erro | ⏭️ Adiado | requer `expo-haptics` (dependência nativa não verificável neste ambiente) |
-| QW-06 | Date picker nativo BR | ⏭️ Adiado | `@react-native-community/datetimepicker` (nativo) — QW-07 já mitiga mostrando as datas em BR |
 | QW-09 / QW-10 / QW-17 / QW-21 / QW-22 / QW-23 | Aterrissar na NF criada · reimprimir falhas em lote · busca no painel · logo · biometria · migração de ícones | ⏭️ Backlog | ver notas na Parte 2 |
 
-> **Racional dos adiamentos:** priorizei o que é **frontend puro e verificável por teste** neste ambiente. Itens que exigem dependência nativa nova (`expo-haptics`, date picker, biometria) ou asset de marca (logo) ficam para um lote em que seja possível *buildar no device*; a migração de emojis→biblioteca de ícones (QW-23) é uma decisão de design system melhor feita deliberadamente, não junto de mudanças funcionais.
+> **Sobre o QW-06:** em vez do date picker **nativo** (`@react-native-community/datetimepicker`, que exigiria build no device para validar), optei por um **campo BR mascarado** (`DateField` + helpers `maskBrDate`/`brDateToIso` no `shared`) — mesma eliminação do footgun de ISO, porém 100% coberto por teste. Ele também corrigiu um **bug latente**: o campo de data anterior era editável mas **ignorado no salvamento** (o payload usava sempre "hoje"); agora a data digitada realmente alimenta a concretagem e a agenda de rompimentos.
+>
+> **Ainda no backlog:** logo/identidade (QW-21, precisa de asset de marca), biometria no login (QW-22, `expo-local-authentication` + fluxo de auth), migração emoji→biblioteca de ícones (QW-23, decisão de design system melhor feita isolada) e refinamentos menores (QW-09/10/17).
 
 ---
 
