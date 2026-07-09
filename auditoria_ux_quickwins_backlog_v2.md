@@ -30,12 +30,18 @@ Após a auditoria, o projeto concluiu **S010** (dashboard operacional, testes E2
 | QW-03 | Scanner de QR na busca da prensa (reuso do `CameraView`) | ✅ Feito (2º lote) | `components/QrScanner` + `PrensaListScreen` |
 | QW-05 | Háptica no salvar ruptura / erro / leitura de QR | ✅ Feito (2º lote) | `services/haptics` + prensa + coleta |
 | QW-06 | Data em BR (DD/MM/AAAA) com máscara + validação | ✅ Feito (2º lote) | `shared/lib/date` + `components/ui/DateField` + `ConcretagemForm` |
+| QW-21 | Identidade visual (logo + wordmark) nas superfícies externas | ✅ Feito (3º lote) | `shared/constants/brand` + `web/components/BrandMark` (login, portal, validação pública) |
+| QW-22 | Bloqueio do app por biometria (proteção do aparelho em campo) | ✅ Feito (3º lote) | `services/biometrics` + `LockOverlay` + `BiometricLockToggle` + `useAppLock` |
 | QW-14 | Pipeline por card no painel | ↔️ Coberto em parte pelo **dashboard S010** (contadores agregados) — mantido no backlog o detalhamento por card |
-| QW-09 / QW-10 / QW-17 / QW-21 / QW-22 / QW-23 | Aterrissar na NF criada · reimprimir falhas em lote · busca no painel · logo · biometria · migração de ícones | ⏭️ Backlog | ver notas na Parte 2 |
+| QW-09 / QW-10 / QW-17 / QW-23 | Aterrissar na NF criada · reimprimir falhas em lote · busca no painel · migração de ícones | ⏭️ Backlog | ver notas na Parte 2 |
 
 > **Sobre o QW-06:** em vez do date picker **nativo** (`@react-native-community/datetimepicker`, que exigiria build no device para validar), optei por um **campo BR mascarado** (`DateField` + helpers `maskBrDate`/`brDateToIso` no `shared`) — mesma eliminação do footgun de ISO, porém 100% coberto por teste. Ele também corrigiu um **bug latente**: o campo de data anterior era editável mas **ignorado no salvamento** (o payload usava sempre "hoje"); agora a data digitada realmente alimenta a concretagem e a agenda de rompimentos.
 >
-> **Ainda no backlog:** logo/identidade (QW-21, precisa de asset de marca), biometria no login (QW-22, `expo-local-authentication` + fluxo de auth), migração emoji→biblioteca de ícones (QW-23, decisão de design system melhor feita isolada) e refinamentos menores (QW-09/10/17).
+> **Sobre o QW-21 (identidade):** como a razão social ainda está a confirmar (PRD §10), a marca vive num único ponto (`BRAND` no `shared`) e o `BrandMark` usa um **glifo SVG inline** (um corpo de prova cilíndrico) — sem asset externo, seguro para CSP. Trocar `BRAND` (ou o SVG por um logo real) rebranda todas as superfícies de uma vez.
+>
+> **Sobre o QW-22 (biometria):** como a sessão do Supabase é persistida (o operador raramente revê a tela de login), a mecânica útil aqui não é "login por biometria" e sim um **bloqueio do app** — protege os dados de um aparelho esquecido no balcão do laboratório. É **opt-in por aparelho** (toggle no cabeçalho, só aparece onde há biometria cadastrada), trava no cold start e nunca derruba a sessão por baixo. Implementado de forma **defensiva** (nunca lança se o módulo nativo faltar) e coberto por teste; a validação tátil/hardware final precisa de um device real.
+>
+> **Ainda no backlog:** migração emoji→biblioteca de ícones (QW-23, decisão de design system melhor feita isolada) e refinamentos menores (QW-09 aterrissar na NF criada, QW-10 reimprimir falhas em lote, QW-17 busca no painel).
 
 ---
 

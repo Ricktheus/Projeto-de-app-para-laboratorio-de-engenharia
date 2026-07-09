@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Navigate } from 'react-router-dom';
 
+import { BrandMark } from '../../components/BrandMark';
 import { LoadingButton } from '../../components/ui';
 import { AREA_PATH } from '../../routes/area-paths';
 import { useAuthStore } from '../../stores/auth-store';
@@ -36,9 +37,9 @@ export function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
-        <header className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Laboratório de Concreto</h1>
-          <p className="mt-1 text-gray-500">Entre com suas credenciais.</p>
+        <header className="mb-6 flex flex-col items-center gap-3 text-center">
+          <BrandMark size="lg" />
+          <p className="text-gray-500">Entre com suas credenciais.</p>
         </header>
 
         {errorMessage ? (

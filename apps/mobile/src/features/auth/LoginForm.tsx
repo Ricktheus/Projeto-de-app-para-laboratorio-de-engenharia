@@ -1,4 +1,4 @@
-import { loginCredentialsSchema, type LoginCredentials } from '@concreto/shared';
+import { BRAND, loginCredentialsSchema, type LoginCredentials } from '@concreto/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { Text, TextInput, View } from 'react-native';
@@ -33,8 +33,9 @@ export function LoginForm({ onSubmit, isPending, errorMessage }: LoginFormProps)
     <View className="flex-1 justify-center gap-4 p-6">
       <View className="gap-1">
         <Text style={{ fontSize: 24 }} className="text-center font-bold text-gray-900">
-          Laboratório de Concreto
+          {BRAND.nome}
         </Text>
+        <Text className="text-center text-gray-500">{BRAND.tagline}</Text>
         <Text className="text-center text-gray-500">Entre com suas credenciais.</Text>
       </View>
 

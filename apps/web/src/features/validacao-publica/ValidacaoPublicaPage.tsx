@@ -8,6 +8,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
+import { BrandMark } from '../../components/BrandMark';
+
 import { validarLaudoPublico, type ValidacaoResultado } from './validacao-service';
 
 function formatDate(iso: string | null): string {
@@ -57,11 +59,12 @@ const CONCLUSAO_STYLE: Record<
 function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col items-center bg-gray-100 px-4 py-10">
-      <header className="mb-6 text-center">
-        <h1 className="text-xl font-bold text-gray-900">Validação de Laudo</h1>
-        <p className="text-sm text-gray-500">
-          Controle Tecnológico de Concreto · verificação pública de autenticidade
-        </p>
+      <header className="mb-6 flex flex-col items-center gap-3 text-center">
+        <BrandMark size="lg" />
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Validação de Laudo</h1>
+          <p className="text-sm text-gray-500">Verificação pública de autenticidade</p>
+        </div>
       </header>
       <main className="w-full max-w-xl">{children}</main>
     </div>

@@ -13,7 +13,8 @@
         "NSCameraUsageDescription": "O app usa a câmera para fotografar a nota fiscal e ler o QR Code dos corpos de prova.",
         "NSPhotoLibraryUsageDescription": "O app acessa suas fotos para você selecionar a imagem da nota fiscal.",
         "NSLocationWhenInUseUsageDescription": "O app usa sua localização para preencher automaticamente o GPS da obra.",
-        "NSBluetoothAlwaysUsageDescription": "O app usa o Bluetooth para imprimir as etiquetas dos corpos de prova na impressora térmica."
+        "NSBluetoothAlwaysUsageDescription": "O app usa o Bluetooth para imprimir as etiquetas dos corpos de prova na impressora térmica.",
+        "NSFaceIDUsageDescription": "O app usa o Face ID para desbloquear o acesso e proteger os dados do laboratório."
       }
     },
     "android": {
@@ -51,6 +52,12 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "O app usa sua localização para preencher automaticamente o GPS da obra."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "O app usa o Face ID para desbloquear o acesso e proteger os dados do laboratório."
         }
       ]
     ],

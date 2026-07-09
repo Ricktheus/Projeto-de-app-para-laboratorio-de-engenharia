@@ -11,3 +11,11 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'success', Error: 'error', Warning: 'warning' },
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
 }));
+
+// Biometrics have no native binding under jest; default to "available + success"
+// so tests can drive the lock flow, overriding per-test as needed.
+jest.mock('expo-local-authentication', () => ({
+  hasHardwareAsync: jest.fn().mockResolvedValue(true),
+  isEnrolledAsync: jest.fn().mockResolvedValue(true),
+  authenticateAsync: jest.fn().mockResolvedValue({ success: true }),
+}));
