@@ -34,6 +34,8 @@ const PARTIAL_AGES = [7, 14] as const;
 
 export interface LaudoDetalheViewProps {
   detalhe: LaudoDetalheData;
+  onDefinirNumero: (numero: string) => void;
+  definindoNumero: boolean;
   onMarcarPronto: () => void;
   marcandoPronto: boolean;
   onEmitirParcial: (concretagemId: string, idadeDias: number) => void;
@@ -55,9 +57,17 @@ export interface LaudoDetalheViewProps {
  * PDF, baixar, enviar assinado), assinado (baixar, corrigir). Guards and error
  * copy are enforced/rendered exactly as the SPEC prescribes.
  */
+/** True while the report still carries the auto-generated "RASCUNHO …" number. */
+function isNumeroPlaceholder(numero: string): boolean {
+  return /^RASCUNHO/i.test(numero.trim());
+}
+
 export function LaudoDetalheView(props: LaudoDetalheViewProps) {
   const { detalhe } = props;
   const singleConcretagem = detalhe.concretagens.length === 1 ? detalhe.concretagens[0]! : null;
+  // The definitive number is editable while the report is not yet published (C4).
+  const podeDefinirNumero = detalhe.status === 'rascunho' || detalhe.status === 'pronto_assinatura';
+  const numeroPendente = isNumeroPlaceholder(detalhe.numero);
   const idadesComResultado = new Set(
     detalhe.consolidado.idades.filter((i) => i.fcm !== null).map((i) => i.idadeAlvoDias),
   );
@@ -83,6 +93,16 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
           {detalhe.concretagens.map((c) => c.nf_numero).join(', ') || '—'}
         </p>
       </header>
+
+      {/* Definitive laudo number (C4 / PRD §2.3): required before the PDF. */}
+      {podeDefinirNumero ? (
+        <NumeroEditor
+          numeroAtual={numeroPendente ? '' : detalhe.numero}
+          pendente={numeroPendente}
+          onDefinirNumero={props.onDefinirNumero}
+          definindoNumero={props.definindoNumero}
+        />
+      ) : null}
 
       {/* Per-age results (KGF/MPa/FCM). */}
       <div className="flex flex-col gap-4">
@@ -154,6 +174,63 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
         {detalhe.status === 'assinado' ? <AssinadoActions {...props} /> : null}
       </div>
     </section>
+  );
+}
+
+/**
+ * Definitive-number editor (C4). While a report shows the "RASCUNHO …"
+ * placeholder the PDF cannot be generated, so this block is highlighted as
+ * pending; the engineer types the controlled number (N°003AGEHAB / CT001-T2-CP1)
+ * and saves it through `definir_numero_laudo`.
+ */
+function NumeroEditor({
+  numeroAtual,
+  pendente,
+  onDefinirNumero,
+  definindoNumero,
+}: {
+  numeroAtual: string;
+  pendente: boolean;
+  onDefinirNumero: (numero: string) => void;
+  definindoNumero: boolean;
+}) {
+  const [numero, setNumero] = useState(numeroAtual);
+  const trimmed = numero.trim();
+  const invalido = trimmed === '' || /^RASCUNHO/i.test(trimmed);
+
+  return (
+    <div
+      className={`flex flex-col gap-2 rounded-xl border p-4 ${
+        pendente ? 'border-amber-300 bg-amber-50' : 'border-gray-200 bg-gray-50'
+      }`}
+    >
+      <label className="flex flex-col gap-1">
+        <span className="text-field font-semibold text-gray-800">
+          {MESSAGES.feature.laudoNumeroLabel}
+        </span>
+        {pendente ? (
+          <span className="text-sm text-amber-700">{MESSAGES.domain.NUMERO_PENDENTE}</span>
+        ) : null}
+        <input
+          value={numero}
+          onChange={(e) => setNumero(e.target.value)}
+          placeholder="Ex.: N°003AGEHAB ou CT001-T2-CP1"
+          aria-label={MESSAGES.feature.laudoNumeroLabel}
+          disabled={definindoNumero}
+          className="min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field"
+        />
+      </label>
+      <div>
+        <LoadingButton
+          loading={definindoNumero}
+          loadingLabel={MESSAGES.feature.laudoDefinindoNumero}
+          disabled={invalido}
+          onClick={() => onDefinirNumero(trimmed)}
+        >
+          {MESSAGES.feature.laudoDefinirNumero}
+        </LoadingButton>
+      </div>
+    </div>
   );
 }
 

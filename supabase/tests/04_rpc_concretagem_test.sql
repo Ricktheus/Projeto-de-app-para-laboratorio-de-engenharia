@@ -13,7 +13,7 @@ select plan(9);
 insert into clientes (id, nome) values
   ('c1111111-1111-1111-1111-111111111111', 'Cliente A');
 
-insert into auth.users (id, email, raw_user_meta_data) values
+insert into auth.users (id, email, raw_app_meta_data) values
   ('11111111-1111-1111-1111-111111111111', 'socio@lab.test', '{"role":"socio_campo"}'),
   ('44444444-4444-4444-4444-444444444444', 'clia@cli.test',
      '{"role":"cliente","cliente_id":"c1111111-1111-1111-1111-111111111111"}');

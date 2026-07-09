@@ -266,6 +266,21 @@ export async function marcarProntoAssinatura(laudoId: string): Promise<void> {
   }
 }
 
+/**
+ * Assigns the definitive laudo number (C4 / PRD §2.3) via the `definir_numero_laudo`
+ * RPC. The server guards it (engineer-only, not yet signed, non-placeholder, unique
+ * per client); invalid/duplicate numbers surface the exact SPEC copy.
+ */
+export async function definirNumeroLaudo(laudoId: string, numero: string): Promise<void> {
+  const { error } = await supabase.rpc('definir_numero_laudo', {
+    laudo_id: laudoId,
+    numero,
+  });
+  if (error) {
+    throw new Error(messageForLaudoRpcError(error));
+  }
+}
+
 /** Emits an on-demand 7d|14d partial report for a concretagem (US13-CA2). */
 export async function emitirLaudoParcial(concretagemId: string, idadeDias: number): Promise<void> {
   const { error } = await supabase.rpc('emitir_laudo_parcial', {

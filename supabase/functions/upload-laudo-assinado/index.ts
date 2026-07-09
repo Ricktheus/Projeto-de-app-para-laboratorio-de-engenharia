@@ -2,13 +2,15 @@
  * POST /functions/v1/upload-laudo-assinado (SPEC §5.4 / F-S008-2 / US15).
  *
  * Multipart upload of the gov.br-signed PDF. Stores it at
- * `laudos/<id>/assinado.pdf`, fills `pdf_assinado_url` + `assinatura_rt_url` and
- * moves the report `pronto_assinatura → assinado` — but ONLY when a valid PDF is
- * present (one RT signature is enough). An optional 2nd file (`pdf_elaborador`)
- * fills `assinatura_elaborador_url`. On publication it enqueues the
- * `laudo_assinado` e-mail to the client (US24-CA1); the actual delivery is the
- * S009 `enviar-email` worker, so a failed enqueue never blocks publication
- * (US24-CA5 spirit).
+ * `laudos/<id>/assinado.pdf`, then moves the report `pronto_assinatura → assinado`
+ * through the `publicar_laudo_assinado` RPC — called with the CALLER's JWT so the
+ * audit trail records the real engineer (C3) and the transition is an atomic,
+ * row-locked guard (C2). The stored PDF is never overwritten for a laudo that is
+ * not publishable: the state is checked BEFORE the upload. A content sha256 is
+ * persisted as a lifetime integrity anchor. One RT signature is enough; an
+ * optional `pdf_elaborador` fills the 2nd-signature slot. On publication it
+ * enqueues the `laudo_assinado` e-mail (US24-CA1); a failed enqueue never blocks
+ * publication (US24-CA5).
  *
  * Exact envelopes (SPEC §5.4):
  *   415 ARQUIVO_INVALIDO   — "Envie um arquivo PDF válido."
@@ -19,7 +21,7 @@
 import { MESSAGES, uploadLaudoAssinadoFieldsSchema } from '@concreto/shared';
 
 import { errorResponse, handlePreflight, jsonResponse } from '../_shared/http.ts';
-import { resolveCaller, serviceClient } from '../_shared/supabase.ts';
+import { resolveCaller, serviceClient, userClient } from '../_shared/supabase.ts';
 
 const LAUDOS_BUCKET = 'laudos';
 const MAX_PDF_BYTES = 20 * 1024 * 1024; // SPEC §7.1: PDF ≤ 20 MB.
@@ -43,15 +45,24 @@ async function isValidPdf(file: File): Promise<boolean> {
   return new TextDecoder().decode(head) === PDF_MAGIC;
 }
 
+/** Hex sha256 of the file bytes — the lifetime integrity anchor of the signed PDF. */
+async function sha256Hex(bytes: ArrayBuffer): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   const preflight = handlePreflight(req);
   if (preflight) {
     return preflight;
   }
 
-  // ----- Auth (JWT required).
-  const caller = await resolveCaller(req.headers.get('Authorization'));
-  if (!caller) {
+  // ----- Auth (JWT required). Keep the header to run the publish RPC AS the user.
+  const authHeader = req.headers.get('Authorization');
+  const caller = await resolveCaller(authHeader);
+  if (!caller || !authHeader) {
     return errorResponse(401, 'NAO_AUTENTICADO', MESSAGES.http.unauthorized);
   }
 
@@ -93,7 +104,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return errorResponse(415, 'ARQUIVO_INVALIDO', MESSAGES.domain.ARQUIVO_INVALIDO);
   }
 
-  // ----- The laudo must exist; capture the client e-mail for the notification.
+  // ----- Pre-check the state BEFORE touching Storage (C2): a laudo that is not
+  // `pronto_assinatura` must never have its stored PDF overwritten. The final
+  // transition is still guarded atomically by the RPC below (defence in depth).
   const { data: laudo } = await service
     .from('laudos')
     .select('id, status, clientes(email)')
@@ -106,12 +119,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!laudo) {
     return errorResponse(404, 'LAUDO_NAO_ENCONTRADO', MESSAGES.http.notFound);
   }
+  if (laudo.status !== 'pronto_assinatura') {
+    return errorResponse(409, 'LAUDO_NAO_PUBLICAVEL', MESSAGES.http.conflict);
+  }
 
-  // ----- Store the signed PDF(s) in the private bucket.
+  // ----- Store the signed PDF(s) in the private bucket + compute the hash.
+  const pdfBytes = await pdf.arrayBuffer();
+  const pdfSha256 = await sha256Hex(pdfBytes);
   const signedPath = `${laudoId}/assinado.pdf`;
   const { error: uploadError } = await service.storage
     .from(LAUDOS_BUCKET)
-    .upload(signedPath, pdf, { contentType: 'application/pdf', upsert: true });
+    .upload(signedPath, pdfBytes, { contentType: 'application/pdf', upsert: true });
   if (uploadError) {
     console.error('[upload-laudo-assinado] falha ao salvar PDF assinado:', uploadError);
     return errorResponse(500, 'ERRO_INTERNO', MESSAGES.http.serverError);
@@ -131,30 +149,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
     elaboradorUrl = `${LAUDOS_BUCKET}/${elabPath}`;
   }
 
-  // ----- Publish: pronto_assinatura → assinado, guarded atomically by the state
-  // (only a pronto_assinatura report can be published). The signed PDF also
-  // stands as the RT signature (gov.br PAdES embeds it in the document).
-  const { data: updated, error: updateError } = await service
-    .from('laudos')
-    .update({
-      status: 'assinado',
-      pdf_assinado_url: pdfAssinadoUrl,
-      assinatura_rt_url: pdfAssinadoUrl,
-      assinatura_elaborador_url: elaboradorUrl,
-      data_emissao: new Date().toISOString().slice(0, 10),
-    })
-    .eq('id', laudoId)
-    .eq('status', 'pronto_assinatura')
-    .select('id')
-    .maybeSingle();
-
-  if (updateError) {
-    console.error('[upload-laudo-assinado] falha ao publicar laudo:', updateError);
+  // ----- Publish through the RPC, AS the caller (auth.uid() ⇒ real actor in the
+  // audit trail, C3). The RPC re-checks `pronto_assinatura` under a row lock, so a
+  // concurrent publish cannot double-apply.
+  const { error: rpcError } = await userClient(authHeader).rpc('publicar_laudo_assinado', {
+    laudo_id: laudoId,
+    pdf_assinado_url: pdfAssinadoUrl,
+    assinatura_elaborador_url: elaboradorUrl,
+    pdf_sha256: pdfSha256,
+  });
+  if (rpcError) {
+    const token = (rpcError.message ?? '').trim();
+    if (token === 'LAUDO_NAO_PUBLICAVEL') {
+      return errorResponse(409, 'LAUDO_NAO_PUBLICAVEL', MESSAGES.http.conflict);
+    }
+    if (token === 'LAUDO_NAO_ENCONTRADO') {
+      return errorResponse(404, 'LAUDO_NAO_ENCONTRADO', MESSAGES.http.notFound);
+    }
+    console.error('[upload-laudo-assinado] falha ao publicar laudo:', rpcError);
     return errorResponse(500, 'ERRO_INTERNO', MESSAGES.http.serverError);
-  }
-  if (!updated) {
-    // Not in `pronto_assinatura` (already signed / still draft / changed) ⇒ conflict.
-    return errorResponse(409, 'LAUDO_NAO_PUBLICAVEL', MESSAGES.http.conflict);
   }
 
   // ----- Enqueue the client notification (US24-CA1). Best-effort: a failed

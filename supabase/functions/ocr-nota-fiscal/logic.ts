@@ -15,6 +15,13 @@ export const DEFAULT_OCR_MAX_ATTEMPTS = 3;
 export const DEFAULT_OCR_CONFIDENCE_MIN = 0.75;
 
 /**
+ * Default cap of OCR attempts PER USER in a rolling 24h window (H2). The per-
+ * concretagem limit alone is bypassable because `concretagemRef` is a client-
+ * chosen string; this per-user ceiling bounds the OpenAI cost of a leaked JWT.
+ */
+export const DEFAULT_OCR_USER_DAILY_MAX = 50;
+
+/**
  * Rate-limit decision (SPEC §5.1): the Nth attempt is rejected once `attempts`
  * previously-recorded tries have reached `maxAttempts`. With max = 3, the 4th
  * attempt is rejected (US01-CA5).

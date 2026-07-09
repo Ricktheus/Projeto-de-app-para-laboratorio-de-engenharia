@@ -28,12 +28,16 @@ sql_paths = []
 
 [auth]
 enabled = true
-# Local test users are created via the standard Supabase auth flows; the
-# on_auth_user_created trigger (migration 0003) provisions the profile row.
-enable_signup = true
+# SECURITY (C1): public self-signup is DISABLED. Registration is internal only
+# (PRD §2.5): accounts are created via the `admin-provisionar-usuario` Edge
+# Function (Admin API + service_role), which sets the role in app_metadata. This
+# is the load-bearing control that prevents anon self-provisioning as an admin;
+# the handle_new_user trigger (migration 0018) additionally ignores user_metadata
+# for role/is_admin. Do NOT re-enable signup without keeping both in place.
+enable_signup = false
 
 [auth.email]
-enable_signup = true
+enable_signup = false
 enable_confirmations = false
 
 [studio]

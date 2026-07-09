@@ -15,6 +15,7 @@ import * as laudosService from './laudos-service';
 vi.mock('./laudos-service', () => ({
   listLaudos: vi.fn(),
   getLaudoDetalhe: vi.fn(),
+  definirNumeroLaudo: vi.fn(),
   marcarProntoAssinatura: vi.fn(),
   emitirLaudoParcial: vi.fn(),
   agruparLaudo: vi.fn(),

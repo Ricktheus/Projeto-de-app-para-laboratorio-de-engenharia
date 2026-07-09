@@ -79,9 +79,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const input = parsed.data;
 
   if (input.tipo === 'usuario') {
-    // ----- Internal user: invite with the chosen role/admin flag.
+    // ----- Internal user. The role/is_admin live in app_metadata (the trusted,
+    // server-only channel the handle_new_user trigger reads — user_metadata is
+    // ignored for privileges, see migration 0018 / C1). `nome` is display-only.
     const { data, error } = await service.auth.admin.inviteUserByEmail(input.email, {
-      data: { role: input.role, is_admin: input.isAdmin, nome: input.nome },
+      data: { nome: input.nome },
     });
     if (error) {
       if (isEmailAlreadyRegistered(error)) {
@@ -90,7 +92,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
       console.error('[admin-provisionar-usuario] invite (usuario) falhou:', error);
       return errorResponse(500, 'ERRO_INTERNO', MESSAGES.http.serverError);
     }
-    return jsonResponse({ user_id: data.user.id }, 201);
+    const userId = data.user.id;
+    // Set the trusted app_metadata (keeps future JWT claims consistent)…
+    await service.auth.admin.updateUserById(userId, {
+      app_metadata: { role: input.role, is_admin: input.isAdmin },
+    });
+    // …and authoritatively set the profile role (current_role_name reads usuarios;
+    // the trigger provisioned it as the default `cliente`). service_role bypasses
+    // RLS, so this is the single source of truth for authorization.
+    const { error: profileError } = await service
+      .from('usuarios')
+      .update({ role: input.role, is_admin: input.isAdmin })
+      .eq('id', userId);
+    if (profileError) {
+      // Roll back the half-provisioned account so it cannot linger as a cliente.
+      await service.auth.admin.deleteUser(userId);
+      console.error('[admin-provisionar-usuario] update de perfil (usuario) falhou:', profileError);
+      return errorResponse(500, 'ERRO_INTERNO', MESSAGES.http.serverError);
+    }
+    return jsonResponse({ user_id: userId }, 201);
   }
 
   // ----- Client: invite first (so a duplicate e-mail creates nothing), then
@@ -121,10 +141,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return errorResponse(409, 'CLIENTE_CONFLITO', MESSAGES.http.conflict);
   }
 
-  // Link the portal user to its client (RLS `clientes_self_select`).
+  // Link the portal user to its client (RLS `clientes_self_select`). The role is
+  // already the default `cliente`; cliente_id lives in app_metadata (trusted).
   await service.from('usuarios').update({ cliente_id: cliente.id }).eq('id', userId);
   await service.auth.admin.updateUserById(userId, {
-    user_metadata: { role: 'cliente', nome: input.nome, cliente_id: cliente.id },
+    app_metadata: { role: 'cliente', cliente_id: cliente.id },
+    user_metadata: { nome: input.nome },
   });
 
   return jsonResponse({ user_id: userId, cliente_id: cliente.id }, 201);

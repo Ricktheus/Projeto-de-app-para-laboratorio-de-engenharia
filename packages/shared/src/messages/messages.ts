@@ -174,6 +174,15 @@ const FEATURE_MESSAGES = {
   laudoCorrigir: 'Corrigir laudo',
   laudoCorrigindo: 'Criando correção…',
   laudoCorrigido: 'Correção criada. Nova versão gerada em rascunho.',
+
+  // Numeração do laudo (C4 / PRD §2.3): número definitivo antes de gerar o PDF.
+  laudoNumeroLabel: 'Número do laudo',
+  laudoDefinirNumero: 'Definir número',
+  laudoDefinindoNumero: 'Salvando…',
+  laudoNumeroDefinido: 'Número do laudo definido.',
+  laudoNumeroInvalido: 'Informe um número de laudo válido (sem o prefixo “RASCUNHO”).',
+  laudoNumeroDuplicado: 'Já existe um laudo com este número para este cliente.',
+  laudoNaoEditavel: 'Este laudo não pode mais ter o número alterado.',
 } as const;
 
 /**
@@ -218,6 +227,8 @@ const DOMAIN_MESSAGES = {
   LAUDO_NAO_ENCONTRADO: 'Laudo não encontrado / não autêntico.',
   // Versionamento / correção (F-S008-3 / US22).
   LAUDO_NAO_ASSINADO: 'Só é possível corrigir laudos já assinados.',
+  // Numeração pendente ao gerar o PDF (C4 / PRD §2.3).
+  NUMERO_PENDENTE: 'Defina o número do laudo antes de gerar o PDF.',
 
   // Export (SPEC §5.6).
   SEM_DADOS: 'Nenhum dado encontrado para os filtros selecionados.',

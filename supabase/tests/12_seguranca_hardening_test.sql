@@ -17,7 +17,7 @@ select plan(10);
 insert into clientes (id, nome)
 values ('c1111111-1111-1111-1111-111111111111', 'Cliente A');
 
-insert into auth.users (id, email, raw_user_meta_data)
+insert into auth.users (id, email, raw_app_meta_data)
 values ('22222222-2222-2222-2222-222222222222', 'englab@lab.test',
         '{"nome":"Eng Lab","role":"eng_lab","is_admin":true}');
 -- handle_new_user() provisioned the matching usuarios row.

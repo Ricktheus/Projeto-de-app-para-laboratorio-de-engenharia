@@ -15,7 +15,7 @@ insert into clientes (id, nome) values
   ('c2222222-2222-2222-2222-222222222222', 'Cliente B');
 
 -- Users via auth.users -> handle_new_user() provisions usuarios.
-insert into auth.users (id, email, raw_user_meta_data) values
+insert into auth.users (id, email, raw_app_meta_data) values
   ('11111111-1111-1111-1111-111111111111', 'socio@lab.test',  '{"role":"socio_campo"}'),
   ('22222222-2222-2222-2222-222222222222', 'englab@lab.test', '{"role":"eng_lab","is_admin":true}'),
   ('33333333-3333-3333-3333-333333333333', 'engesc@lab.test', '{"role":"eng_escritorio","is_admin":true}'),
@@ -40,10 +40,11 @@ insert into rupturas (id, corpo_prova_id, diametro_nominal_mm, carga_ruptura_kgf
 insert into evidencia_fotos (id, ruptura_id, tipo, storage_path) values
   ('f9111111-1111-1111-1111-111111111111', 'f1111111-1111-1111-1111-111111111111', 'antes', 'evidencias/x.png');
 
-insert into laudos (id, cliente_id, obra_id, tipo_laudo, numero, codigo_verificacao, status, criado_por) values
-  ('a1111111-1111-1111-1111-111111111111', 'c1111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', 'parcial_7d', 'N-A1', 'hash-a1', 'assinado',  '22222222-2222-2222-2222-222222222222'),
-  ('a2222222-2222-2222-2222-222222222222', 'c1111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', 'parcial_7d', 'N-A2', 'hash-a2', 'rascunho',  '22222222-2222-2222-2222-222222222222'),
-  ('a3333333-3333-3333-3333-333333333333', 'c2222222-2222-2222-2222-222222222222', 'b2222222-2222-2222-2222-222222222222', 'parcial_7d', 'N-B1', 'hash-b1', 'assinado',  '22222222-2222-2222-2222-222222222222');
+-- `assinado` reports carry a pdf_assinado_url (chk_laudo_assinado_requires_pdf, 0018).
+insert into laudos (id, cliente_id, obra_id, tipo_laudo, numero, codigo_verificacao, status, pdf_assinado_url, criado_por) values
+  ('a1111111-1111-1111-1111-111111111111', 'c1111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', 'parcial_7d', 'N-A1', 'hash-a1', 'assinado',  'laudos/a1111111-1111-1111-1111-111111111111/assinado.pdf', '22222222-2222-2222-2222-222222222222'),
+  ('a2222222-2222-2222-2222-222222222222', 'c1111111-1111-1111-1111-111111111111', 'b1111111-1111-1111-1111-111111111111', 'parcial_7d', 'N-A2', 'hash-a2', 'rascunho',  null, '22222222-2222-2222-2222-222222222222'),
+  ('a3333333-3333-3333-3333-333333333333', 'c2222222-2222-2222-2222-222222222222', 'b2222222-2222-2222-2222-222222222222', 'parcial_7d', 'N-B1', 'hash-b1', 'assinado',  'laudos/a3333333-3333-3333-3333-333333333333/assinado.pdf', '22222222-2222-2222-2222-222222222222');
 
 -- ===================== concretagens =====================
 reset role; set role authenticated;
