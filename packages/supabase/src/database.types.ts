@@ -417,6 +417,7 @@ export type Database = {
           data_emissao: string | null;
           pdf_original_url: string | null;
           pdf_assinado_url: string | null;
+          pdf_assinado_sha256: string | null;
           assinatura_rt_url: string | null;
           assinatura_elaborador_url: string | null;
           criado_por: string;
@@ -436,6 +437,7 @@ export type Database = {
           data_emissao?: string | null;
           pdf_original_url?: string | null;
           pdf_assinado_url?: string | null;
+          pdf_assinado_sha256?: string | null;
           assinatura_rt_url?: string | null;
           assinatura_elaborador_url?: string | null;
           criado_por: string;
@@ -455,6 +457,7 @@ export type Database = {
           data_emissao?: string | null;
           pdf_original_url?: string | null;
           pdf_assinado_url?: string | null;
+          pdf_assinado_sha256?: string | null;
           assinatura_rt_url?: string | null;
           assinatura_elaborador_url?: string | null;
           criado_por?: string;
@@ -701,6 +704,23 @@ export type Database = {
       };
       corrigir_laudo: {
         Args: { laudo_id: string };
+        Returns: Json;
+      };
+      definir_numero_laudo: {
+        Args: { laudo_id: string; numero: string };
+        Returns: Json;
+      };
+      publicar_laudo_assinado: {
+        Args: {
+          laudo_id: string;
+          pdf_assinado_url: string;
+          assinatura_elaborador_url?: string | null;
+          pdf_sha256?: string | null;
+        };
+        Returns: Json;
+      };
+      registrar_pdf_laudo: {
+        Args: { laudo_id: string; pdf_original_url: string; codigo_verificacao: string };
         Returns: Json;
       };
     };

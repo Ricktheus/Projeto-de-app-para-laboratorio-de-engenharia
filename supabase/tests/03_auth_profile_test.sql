@@ -7,7 +7,7 @@
 -- Run with: pg_prove -d <db> supabase/tests/03_auth_profile_test.sql
 -- =====================================================================
 begin;
-select plan(6);
+select plan(7);
 
 insert into clientes (id, nome)
 values ('c1111111-1111-1111-1111-111111111111', 'Cliente A');
@@ -31,8 +31,8 @@ select is(
   1,
   'usuarios 1:1 com auth.users via trigger on_auth_user_created');
 
--- ---------- metadata provisions the engineer partner (is_admin=true) ----------
-insert into auth.users (id, email, raw_user_meta_data) values
+-- ---------- app_metadata (server-only) provisions the engineer partner ----------
+insert into auth.users (id, email, raw_app_meta_data) values
   ('f2222222-2222-2222-2222-222222222222', 'rt@lab.test',
    '{"role":"eng_lab","is_admin":true,"nome":"RT"}');
 
@@ -40,7 +40,20 @@ select is(
   (select role::text || ':' || is_admin::text from usuarios
      where id = 'f2222222-2222-2222-2222-222222222222'),
   'eng_lab:true',
-  'metadata provisiona role=eng_lab e is_admin=true (socio engenheiro)');
+  'app_metadata provisiona role=eng_lab e is_admin=true (socio engenheiro)');
+
+-- ---------- SECURITY (C1): role in USER metadata is IGNORED (no escalation) ----------
+-- raw_user_meta_data is user-controllable at signUp(); a self-signed user asking
+-- for eng_lab/is_admin must still land as a plain cliente.
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('f3333333-3333-3333-3333-333333333333', 'attacker@evil.test',
+   '{"role":"eng_lab","is_admin":true}');
+
+select is(
+  (select role::text || ':' || is_admin::text from usuarios
+     where id = 'f3333333-3333-3333-3333-333333333333'),
+  'cliente:false',
+  'role/is_admin em raw_user_meta_data NAO escala privilegios (C1)');
 
 -- ---------- ON DELETE CASCADE ----------
 delete from auth.users where id = 'f1111111-1111-1111-1111-111111111111';

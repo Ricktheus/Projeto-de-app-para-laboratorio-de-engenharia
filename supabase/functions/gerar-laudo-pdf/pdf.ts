@@ -325,7 +325,10 @@ export async function composeLaudoPdf(input: PdfComposeInput): Promise<Uint8Arra
       copying: false,
       modifying: false,
       annotating: false,
-      contentAccessibility: false,
+      // Accessibility extraction stays allowed (M6): screen readers must reach the
+      // content — restricting it is deprecated in PDF 2.0 and hurts a11y without
+      // adding anti-fraud value (the QR + integrity hash are the real controls).
+      contentAccessibility: true,
       documentAssembly: false,
       fillingForms: false,
     },

@@ -154,3 +154,29 @@ O risco do projeto **não** está na arquitetura — está em um pequeno conjunt
 * `prevent_physical_delete`, auditoria genérica via `to_jsonb`, `search_path` fixado em todo `SECURITY DEFINER`, `revoke ... from anon` em todas as RPCs.
 * Optimistic locking do painel (F-S007-2) com desambiguação 404/409 — implementação correta e testada.
 * Estrutura de erros (`{ error, message }` + catálogo PT) consistente entre Edge, RPC e UI.
+
+---
+
+## 8. Correções aplicadas (pós-S010)
+
+> Todas as correções abaixo foram implementadas de forma **forward-only** na migration `0018_security_hardening.sql` (nenhuma migration existente foi editada) + Edge Functions + `packages/shared` + UI web. Suítes executadas nesta rodada: **shared 225/225**, **web 55/55**, **mobile 68/68**, lint e typecheck limpos. Os invariantes de banco novos têm cobertura pgTAP em `supabase/tests/13_hardening_0018_test.sql` (roda no CI com Postgres/pgTAP).
+
+| # | Achado | Correção implementada |
+|---|---|---|
+| **C1** | Escalada de privilégio (signup + `user_metadata`) | `enable_signup=false` (config); `handle_new_user` lê role/is_admin/cliente_id **apenas** de `raw_app_meta_data` (canal server-only); `admin-provisionar-usuario` grava o role via Admin API (`app_metadata`) + `update usuarios` autoritativo. Fixtures pgTAP migradas para `raw_app_meta_data`; teste anti-escalada adicionado (`03`). |
+| **C2** | PDF assinado sobrescrito antes da checagem | `upload-laudo-assinado` valida o estado **antes** do upload; a transição roda via RPC `publicar_laudo_assinado` (row-lock + `LAUDO_NAO_PUBLICAVEL`); `pdf_assinado_sha256` persistido como âncora de integridade. |
+| **C3** | Auditoria sem ator em escritas `service_role` | Publicação e registro do PDF agora via RPC chamada com o **JWT do usuário** (`publicar_laudo_assinado`, `registrar_pdf_laudo`) — `auth.uid()` volta a registrar o engenheiro no `audit_log`. |
+| **C4** | Sem fluxo de numeração do laudo | RPC `definir_numero_laudo` (eng-only, único por cliente, rejeita placeholder); `gerar-laudo-pdf` bloqueia com `NUMERO_PENDENTE` enquanto o número for `RASCUNHO…`; editor de número na UI (`LaudoDetalhe`). |
+| **H1** | Máquina de estados contornável por PATCH | `CHECK (assinado ⇒ pdf_assinado_url)` + trigger de **imutabilidade** de `rupturas` (mpa/carga/diâmetro nominal). |
+| **H2** | Rate limit de OCR burlável / sem teto | `imageBase64` com `.max()`; teto **por usuário/dia** (`ocr_user_daily_max`); tentativa registrada **antes** da chamada à OpenAI (fecha a corrida de burst). |
+| **H3** | Concorrência em `corrigir_laudo` | `SELECT … FOR UPDATE` + índice único parcial `uq_laudos_substitui` (uma versão é substituída **uma** vez). |
+| **M1** | Divergência de arredondamento de carga | `registrar_ruptura` faz `round(carga)` antes do cálculo (espelha o `calcMpa`). |
+| **M2** | `data_emissao` sobrescrita na publicação | `publicar_laudo_assinado` usa `coalesce(data_emissao, current_date)`. |
+| **M5** | Fotos de evidência mutáveis | Policy de `UPDATE` do bucket `evidencias` removida (write-once). |
+| **M6** | PDF bloqueava acessibilidade | `contentAccessibility: true` no `encrypt` (a11y; depreciado restringir em PDF 2.0). |
+
+### Residuais conscientes (não alterados, por decisão de engenharia)
+
+* **H4 (snapshot do laudo × dados vivos):** não implementado nesta rodada — exige coluna `laudos.dados_snapshot` + `validar-laudo` servindo o snapshot + bloqueio de edição de concretagem pós-emissão. É uma feature de médio porte; recomendo priorizá-la como primeira tarefa de um hardening S011 antes do primeiro laudo em produção. Enquanto isso, a numeração definitiva (C4) e a imutabilidade de rupturas (H1) já reduzem a superfície de divergência.
+* **M4 (CORS `*`):** mantido. A própria SPEC §7.1 nota que a autenticação é por **Bearer token (sem cookies)**, o que elimina CSRF clássico; apertar o CORS sem as origens de produção configuradas arriscaria quebrar os apps sem ganho real. Recomendo definir uma allowlist via env quando as origens de produção forem fixadas.
+* **C1 — dependência operacional:** a correção do trigger fecha o vetor de `user_metadata`, mas `enable_signup=false` é o controle **load-bearing**. Não reative o signup público sem manter ambos.

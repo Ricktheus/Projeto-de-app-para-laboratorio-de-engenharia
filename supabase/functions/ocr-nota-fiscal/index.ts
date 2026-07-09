@@ -20,6 +20,7 @@ import {
   assembleOcrResponse,
   DEFAULT_OCR_CONFIDENCE_MIN,
   DEFAULT_OCR_MAX_ATTEMPTS,
+  DEFAULT_OCR_USER_DAILY_MAX,
   shouldRejectForRateLimit,
 } from './logic.ts';
 
@@ -77,14 +78,39 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return errorResponse(429, 'OCR_LIMITE', MESSAGES.domain.OCR_LIMITE);
   }
 
+  // ----- Per-user daily ceiling (H2): `concretagemRef` is client-chosen, so the
+  // per-concretagem limit alone is bypassable; this bounds a leaked JWT's cost.
+  const userDailyMax = await readNumberSetting(
+    service,
+    'ocr_user_daily_max',
+    DEFAULT_OCR_USER_DAILY_MAX,
+  );
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count: userCount } = await service
+    .from('ocr_attempts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', caller.id)
+    .gte('created_at', since);
+  if (shouldRejectForRateLimit(userCount ?? 0, userDailyMax)) {
+    return errorResponse(429, 'OCR_LIMITE', MESSAGES.domain.OCR_LIMITE);
+  }
+
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   if (!apiKey) {
     console.error('[ocr-nota-fiscal] OPENAI_API_KEY ausente');
     return errorResponse(502, 'OCR_FALHA', MESSAGES.domain.OCR_FALHA);
   }
 
-  // ----- Call the vision model, recording the attempt either way.
-  let success = false;
+  // ----- Record the attempt BEFORE calling the model so the per-concretagem /
+  // per-user counts include in-flight tries (closes the burst race). The row is
+  // updated to success=true only when extraction succeeds.
+  const { data: attempt } = await service
+    .from('ocr_attempts')
+    .insert({ concretagem_ref: concretagemRef, user_id: caller.id, success: false })
+    .select('id')
+    .maybeSingle<{ id: string }>();
+
+  // ----- Call the vision model.
   try {
     const raw = await extractFromImage(imageBase64, apiKey);
     const minConfidence = await readNumberSetting(
@@ -93,10 +119,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
       DEFAULT_OCR_CONFIDENCE_MIN,
     );
     const response = ocrNotaFiscalResponseSchema.parse(assembleOcrResponse(raw, minConfidence));
-    success = true;
+    if (attempt) {
+      await service.from('ocr_attempts').update({ success: true }).eq('id', attempt.id);
+    }
     return jsonResponse(response, 200);
   } catch (error) {
-    // US01-CA4: log the error; the client falls back to manual entry.
+    // US01-CA4: log the error; the client falls back to manual entry. The attempt
+    // row stays success=false (still counts toward the limit).
     console.error('[ocr-nota-fiscal] falha no OCR:', error);
     if (error instanceof OcrTimeoutError) {
       return errorResponse(504, 'OCR_TIMEOUT', MESSAGES.domain.OCR_TIMEOUT);
@@ -105,9 +134,5 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return errorResponse(502, 'OCR_FALHA', MESSAGES.domain.OCR_FALHA);
     }
     return errorResponse(502, 'OCR_FALHA', MESSAGES.domain.OCR_FALHA);
-  } finally {
-    await service
-      .from('ocr_attempts')
-      .insert({ concretagem_ref: concretagemRef, user_id: caller.id, success });
   }
 });

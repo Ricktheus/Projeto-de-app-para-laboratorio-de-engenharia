@@ -11,6 +11,7 @@ import {
   useAgruparLaudo,
   useBaixarPdf,
   useCorrigirLaudo,
+  useDefinirNumero,
   useEmitirParcial,
   useGerarPdf,
   useLaudoDetalhe,
@@ -56,6 +57,7 @@ export function LaudosPage() {
   const [selectedForGroup, setSelectedForGroup] = useState<string[]>([]);
 
   const detalhe = useLaudoDetalhe(selectedId);
+  const definirNumero = useDefinirNumero();
   const marcarPronto = useMarcarPronto();
   const emitirParcial = useEmitirParcial();
   const agrupar = useAgruparLaudo();
@@ -86,6 +88,18 @@ export function LaudosPage() {
     setSelectedForGroup((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
+  }
+
+  async function handleDefinirNumero(numero: string) {
+    if (!selectedId) {
+      return;
+    }
+    try {
+      await definirNumero.mutateAsync({ laudoId: selectedId, numero });
+      show(MESSAGES.feature.laudoNumeroDefinido, 'success');
+    } catch (error) {
+      show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');
+    }
   }
 
   async function handleMarcarPronto() {
@@ -310,6 +324,8 @@ export function LaudosPage() {
             ) : (
               <LaudoDetalheView
                 detalhe={detalhe.data}
+                onDefinirNumero={handleDefinirNumero}
+                definindoNumero={definirNumero.isPending}
                 onMarcarPronto={handleMarcarPronto}
                 marcandoPronto={marcarPronto.isPending}
                 onEmitirParcial={handleEmitirParcial}

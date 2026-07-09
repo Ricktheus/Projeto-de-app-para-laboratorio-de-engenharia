@@ -23,7 +23,7 @@ import {
 } from '@concreto/shared';
 
 import { errorResponse, handlePreflight, jsonResponse } from '../_shared/http.ts';
-import { resolveCaller, serviceClient } from '../_shared/supabase.ts';
+import { resolveCaller, serviceClient, userClient } from '../_shared/supabase.ts';
 import { ChartRasterError, generateQrPng, rasterizeChartPng } from './assets.ts';
 import { loadReportInput } from './data.ts';
 import { composeLaudoPdf } from './pdf.ts';
@@ -46,9 +46,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return preflight;
   }
 
-  // ----- Auth (JWT required).
-  const caller = await resolveCaller(req.headers.get('Authorization'));
-  if (!caller) {
+  // ----- Auth (JWT required). Keep the header to record the PDF AS the caller.
+  const authHeader = req.headers.get('Authorization');
+  const caller = await resolveCaller(authHeader);
+  if (!caller || !authHeader) {
     return errorResponse(401, 'NAO_AUTENTICADO', MESSAGES.http.unauthorized);
   }
 
@@ -86,6 +87,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return errorResponse(422, 'SEM_RESULTADOS', MESSAGES.domain.SEM_RESULTADOS);
   }
 
+  // ----- C4: the definitive laudo number must be assigned first — a legal report
+  // must not print the "RASCUNHO …" placeholder. The office sets it via
+  // `definir_numero_laudo` (SPEC §2.3) before generating the PDF.
+  if (/^RASCUNHO/i.test(report.header.numero.trim())) {
+    return errorResponse(409, 'NUMERO_PENDENTE', MESSAGES.domain.NUMERO_PENDENTE);
+  }
+
   // ----- Anti-fraud verification code (SPEC §7.1): sha256(laudo_id + secret).
   const secret = Deno.env.get('LAUDO_VERIFICATION_SECRET');
   if (!secret) {
@@ -121,10 +129,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     const pdfOriginalUrl = `${LAUDOS_BUCKET}/${path}`;
-    const { error: updateError } = await service
-      .from('laudos')
-      .update({ pdf_original_url: pdfOriginalUrl, codigo_verificacao: codigo })
-      .eq('id', laudoId);
+    // Record the PDF url + verification code AS the caller (auth.uid() ⇒ real
+    // actor in the audit trail, C3). The RPC re-checks `pronto_assinatura`.
+    const { error: updateError } = await userClient(authHeader).rpc('registrar_pdf_laudo', {
+      laudo_id: laudoId,
+      pdf_original_url: pdfOriginalUrl,
+      codigo_verificacao: codigo,
+    });
     if (updateError) {
       console.error('[gerar-laudo-pdf] falha ao atualizar laudo:', updateError);
       return errorResponse(500, 'ERRO_INTERNO', MESSAGES.http.serverError);

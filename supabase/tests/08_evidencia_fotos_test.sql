@@ -14,7 +14,7 @@ select plan(7);
 insert into clientes (id, nome) values
   ('c8888888-8888-8888-8888-888888888888', 'Cliente Evidencia');
 
-insert into auth.users (id, email, raw_user_meta_data) values
+insert into auth.users (id, email, raw_app_meta_data) values
   ('e8888888-8888-8888-8888-888888888888', 'englab8@lab.test',  '{"role":"eng_lab","is_admin":true}'),
   ('a8888888-8888-8888-8888-888888888888', 'engesc8@lab.test',  '{"role":"eng_escritorio","is_admin":true}'),
   ('58888888-8888-8888-8888-888888888888', 'socio8@lab.test',   '{"role":"socio_campo"}'),

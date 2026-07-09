@@ -4,6 +4,7 @@ import {
   agruparLaudo,
   baixarLaudoPdf,
   corrigirLaudo,
+  definirNumeroLaudo,
   emitirLaudoParcial,
   gerarLaudoPdf,
   getLaudoDetalhe,
@@ -45,6 +46,16 @@ export function useMarcarPronto() {
   const invalidate = useInvalidateLaudos();
   return useMutation({
     mutationFn: (laudoId: string) => marcarProntoAssinatura(laudoId),
+    onSuccess: invalidate,
+  });
+}
+
+/** Assigns the definitive laudo number before PDF generation (C4 / PRD §2.3). */
+export function useDefinirNumero() {
+  const invalidate = useInvalidateLaudos();
+  return useMutation({
+    mutationFn: ({ laudoId, numero }: { laudoId: string; numero: string }) =>
+      definirNumeroLaudo(laudoId, numero),
     onSuccess: invalidate,
   });
 }

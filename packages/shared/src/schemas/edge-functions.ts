@@ -10,9 +10,13 @@ import { isoDateSchema, tipoFraturaSchema, uuidSchema } from './common';
 
 // ---- §5.1 ocr-nota-fiscal --------------------------------------------------
 
+/** ~10 MB binary ≈ 14 MB of base64 (SPEC §7.1: imagem ≤ 10 MB). Caps payload to
+ * protect the OCR quota/cost from an oversized upload. */
+export const OCR_IMAGE_BASE64_MAX = 14_000_000;
+
 export const ocrNotaFiscalRequestSchema = z.object({
-  imageBase64: z.string().min(1),
-  concretagemRef: z.string().min(1),
+  imageBase64: z.string().min(1).max(OCR_IMAGE_BASE64_MAX),
+  concretagemRef: z.string().min(1).max(200),
 });
 export type OcrNotaFiscalRequest = z.infer<typeof ocrNotaFiscalRequestSchema>;
 

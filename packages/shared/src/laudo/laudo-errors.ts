@@ -17,6 +17,9 @@ export const LAUDO_RPC_TOKENS = [
   'LAUDO_NAO_ENCONTRADO',
   'LAUDO_NAO_RASCUNHO',
   'LAUDO_NAO_ASSINADO',
+  'NUMERO_INVALIDO',
+  'NUMERO_DUPLICADO',
+  'LAUDO_NAO_EDITAVEL',
 ] as const;
 export type LaudoRpcToken = (typeof LAUDO_RPC_TOKENS)[number];
 
@@ -52,6 +55,12 @@ export function messageForLaudoRpcError(error: SupabaseErrorLike): string {
       return MESSAGES.feature.laudoNaoRascunho;
     case 'LAUDO_NAO_ASSINADO':
       return MESSAGES.domain.LAUDO_NAO_ASSINADO;
+    case 'NUMERO_INVALIDO':
+      return MESSAGES.feature.laudoNumeroInvalido;
+    case 'NUMERO_DUPLICADO':
+      return MESSAGES.feature.laudoNumeroDuplicado;
+    case 'LAUDO_NAO_EDITAVEL':
+      return MESSAGES.feature.laudoNaoEditavel;
     default:
       return messageForSupabaseError(error);
   }
