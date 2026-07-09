@@ -46,10 +46,14 @@ export function ConcretagemScreen() {
 
   const save = useMutation({
     mutationFn: criarConcretagemComCps,
-    onSuccess: () => {
+    onSuccess: (result) => {
       show(MESSAGES.feature.concretagemSalva, 'success');
-      // Go straight to label printing so the partner prints on-site (F-S005-1).
-      router.replace({ pathname: '/etiquetas', params: { obraId } });
+      // Go straight to label printing so the partner prints on-site (F-S005-1),
+      // landing on the concretagem just created (QW-09).
+      router.replace({
+        pathname: '/etiquetas',
+        params: { obraId, highlight: result.concretagem_id },
+      });
     },
     onError: (error) => {
       show(error instanceof Error ? error.message : MESSAGES.http.serverError, 'error');

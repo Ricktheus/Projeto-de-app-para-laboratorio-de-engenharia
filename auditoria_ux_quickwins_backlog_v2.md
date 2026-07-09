@@ -9,7 +9,7 @@
 
 ## ✅ Status de Implementação (pós-S010 + hardening)
 
-Após a auditoria, o projeto concluiu **S010** (dashboard operacional, testes E2E, rate limiting) e um **hardening de segurança**. Reavaliei cada achado contra o código atual e implementei os quick wins de maior valor. **Nenhuma mudança de banco/backend** — só frontend + `packages/shared` + queries de leitura já cobertas pela RLS. Tudo com testes (360 no total: 232 shared + 72 mobile + 56 web), typecheck e lint verdes.
+Após a auditoria, o projeto concluiu **S010** (dashboard operacional, testes E2E, rate limiting) e um **hardening de segurança**. Reavaliei cada achado contra o código atual e implementei os quick wins em **4 lotes** — **23 dos 24** itens entregues (só o QW-23, migração de ícones, ficou de fora por ser decisão de design system). **Nenhuma mudança de banco/backend** — só frontend + `packages/shared` + queries de leitura já cobertas pela RLS. Tudo com testes (**374** no total: 238 shared + 80 mobile + 56 web), typecheck e lint verdes.
 
 | ID | Quick win | Status | Onde |
 |---|---|---|---|
@@ -32,8 +32,11 @@ Após a auditoria, o projeto concluiu **S010** (dashboard operacional, testes E2
 | QW-06 | Data em BR (DD/MM/AAAA) com máscara + validação | ✅ Feito (2º lote) | `shared/lib/date` + `components/ui/DateField` + `ConcretagemForm` |
 | QW-21 | Identidade visual (logo + wordmark) nas superfícies externas | ✅ Feito (3º lote) | `shared/constants/brand` + `web/components/BrandMark` (login, portal, validação pública) |
 | QW-22 | Bloqueio do app por biometria (proteção do aparelho em campo) | ✅ Feito (3º lote) | `services/biometrics` + `LockOverlay` + `BiometricLockToggle` + `useAppLock` |
+| QW-09 | Aterrissar na concretagem recém-criada (topo + badge) | ✅ Feito (4º lote) | `ConcretagemScreen` → `EtiquetasScreen` (param `highlight`) |
+| QW-10 | "Reimprimir falhas (N)" após impressão parcial | ✅ Feito (4º lote) | `EtiquetasScreen` |
+| QW-17 | Busca por obra/cliente/NF no painel do escritório | ✅ Feito (4º lote) | `PainelPage` |
 | QW-14 | Pipeline por card no painel | ↔️ Coberto em parte pelo **dashboard S010** (contadores agregados) — mantido no backlog o detalhamento por card |
-| QW-09 / QW-10 / QW-17 / QW-23 | Aterrissar na NF criada · reimprimir falhas em lote · busca no painel · migração de ícones | ⏭️ Backlog | ver notas na Parte 2 |
+| QW-23 | Migração emoji → biblioteca de ícones | ⏭️ Backlog | decisão de design system, melhor feita isolada de mudanças funcionais |
 
 > **Sobre o QW-06:** em vez do date picker **nativo** (`@react-native-community/datetimepicker`, que exigiria build no device para validar), optei por um **campo BR mascarado** (`DateField` + helpers `maskBrDate`/`brDateToIso` no `shared`) — mesma eliminação do footgun de ISO, porém 100% coberto por teste. Ele também corrigiu um **bug latente**: o campo de data anterior era editável mas **ignorado no salvamento** (o payload usava sempre "hoje"); agora a data digitada realmente alimenta a concretagem e a agenda de rompimentos.
 >

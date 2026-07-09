@@ -1,5 +1,5 @@
 import { formatIsoDateBr, MESSAGES } from '@concreto/shared';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
 import { ManagementNav } from '../../components/ManagementNav';
@@ -11,7 +11,11 @@ import {
   type ConcretagemPatch,
   type ConcretagemRow,
 } from '../concretagens/concretagens-service';
-import { useAtualizarConcretagem, useConcretagens, useConcretagensRealtime } from '../concretagens/useConcretagens';
+import {
+  useAtualizarConcretagem,
+  useConcretagens,
+  useConcretagensRealtime,
+} from '../concretagens/useConcretagens';
 
 /** One labelled fact of a concretagem card. */
 function Fact({ label, value }: { label: string; value: string }) {
@@ -41,6 +45,20 @@ export function PainelPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
+  const [search, setSearch] = useState('');
+
+  // QW-17: free-text filter over obra / cliente / NF, for months of history.
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    if (!concretagens || needle === '') {
+      return concretagens ?? [];
+    }
+    return concretagens.filter((row) =>
+      [row.obra_sigla, row.obra_nome, row.cliente_nome, row.nf_numero].some((field) =>
+        (field ?? '').toLowerCase().includes(needle),
+      ),
+    );
+  }, [concretagens, search]);
 
   async function handleEdit(row: ConcretagemRow, patch: ConcretagemPatch) {
     setEditError(null);
@@ -108,59 +126,75 @@ export function PainelPage() {
           }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {concretagens.map((row) =>
-            editingId === row.id ? (
-              <li key={row.id}>
-                <ConcretagemEditForm
-                  concretagem={row}
-                  submitting={atualizar.isPending}
-                  errorMessage={editError}
-                  errorAction={
-                    conflict ? (
-                      <BigButton variant="neutral" onClick={handleReload}>
-                        {MESSAGES.feature.concretagemRecarregar}
-                      </BigButton>
-                    ) : undefined
-                  }
-                  onSubmit={(patch) => handleEdit(row, patch)}
-                  onCancel={() => setEditingId(null)}
-                />
-              </li>
-            ) : (
-              <li
-                key={row.id}
-                className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-field font-medium text-gray-900">
-                      {row.obra_sigla ?? 'Obra'} <span className="text-gray-400">·</span>{' '}
-                      {row.obra_nome ?? '—'}
-                    </p>
-                    <p className="truncate text-sm text-gray-500">{row.cliente_nome ?? 'Cliente'}</p>
-                  </div>
-                  <StatusPill label={`NF ${row.nf_numero}`} tone="info" />
-                </div>
+        <>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por obra, cliente ou NF"
+            aria-label="Buscar concretagens"
+            className="mb-4 w-full max-w-md min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field"
+          />
+          {filtered.length === 0 ? (
+            <EmptyState icon="🔍" title="Nenhuma concretagem encontrada para a busca." />
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {filtered.map((row) =>
+                editingId === row.id ? (
+                  <li key={row.id}>
+                    <ConcretagemEditForm
+                      concretagem={row}
+                      submitting={atualizar.isPending}
+                      errorMessage={editError}
+                      errorAction={
+                        conflict ? (
+                          <BigButton variant="neutral" onClick={handleReload}>
+                            {MESSAGES.feature.concretagemRecarregar}
+                          </BigButton>
+                        ) : undefined
+                      }
+                      onSubmit={(patch) => handleEdit(row, patch)}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  </li>
+                ) : (
+                  <li
+                    key={row.id}
+                    className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-field font-medium text-gray-900">
+                          {row.obra_sigla ?? 'Obra'} <span className="text-gray-400">·</span>{' '}
+                          {row.obra_nome ?? '—'}
+                        </p>
+                        <p className="truncate text-sm text-gray-500">
+                          {row.cliente_nome ?? 'Cliente'}
+                        </p>
+                      </div>
+                      <StatusPill label={`NF ${row.nf_numero}`} tone="info" />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <Fact label="Data" value={formatIsoDateBr(row.data_concretagem)} />
-                  <Fact label="FCK" value={`${row.fck_projeto} MPa`} />
-                  <Fact label="Volume" value={`${row.volume_m3} m³`} />
-                  <Fact label="Concreteira" value={row.concreteira ?? '—'} />
-                </div>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      <Fact label="Data" value={formatIsoDateBr(row.data_concretagem)} />
+                      <Fact label="FCK" value={`${row.fck_projeto} MPa`} />
+                      <Fact label="Volume" value={`${row.volume_m3} m³`} />
+                      <Fact label="Concreteira" value={row.concreteira ?? '—'} />
+                    </div>
 
-                {canEdit ? (
-                  <div className="flex flex-wrap gap-2">
-                    <BigButton variant="neutral" onClick={() => startEditing(row.id)}>
-                      Editar
-                    </BigButton>
-                  </div>
-                ) : null}
-              </li>
-            ),
+                    {canEdit ? (
+                      <div className="flex flex-wrap gap-2">
+                        <BigButton variant="neutral" onClick={() => startEditing(row.id)}>
+                          Editar
+                        </BigButton>
+                      </div>
+                    ) : null}
+                  </li>
+                ),
+              )}
+            </ul>
           )}
-        </ul>
+        </>
       )}
     </AppShell>
   );
