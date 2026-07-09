@@ -6,22 +6,28 @@ import {
   useCpForRuptura,
   useDescartarCp,
   useExpurgarResultado,
+  useProximoCpPendente,
   useRegistrarRuptura,
 } from './usePrensa';
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn(), push: jest.fn() }) }));
+const mockRouterReplace = jest.fn();
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ back: jest.fn(), push: jest.fn(), replace: mockRouterReplace }),
+}));
 jest.mock('../evidencia/EvidenciaCapture', () => ({ EvidenciaCapture: () => null }));
 jest.mock('./usePrensa', () => ({
   useCpForRuptura: jest.fn(),
   useRegistrarRuptura: jest.fn(),
   useDescartarCp: jest.fn(),
   useExpurgarResultado: jest.fn(),
+  useProximoCpPendente: jest.fn(),
 }));
 
 const mockedCp = useCpForRuptura as jest.MockedFunction<typeof useCpForRuptura>;
 const mockedRegistrar = useRegistrarRuptura as jest.MockedFunction<typeof useRegistrarRuptura>;
 const mockedDescartar = useDescartarCp as jest.MockedFunction<typeof useDescartarCp>;
 const mockedExpurgar = useExpurgarResultado as jest.MockedFunction<typeof useExpurgarResultado>;
+const mockedProximo = useProximoCpPendente as jest.MockedFunction<typeof useProximoCpPendente>;
 
 const cp = (over: Partial<PrensaCpRow> = {}): PrensaCpRow => ({
   cpId: 'cp-1',
@@ -32,6 +38,7 @@ const cp = (over: Partial<PrensaCpRow> = {}): PrensaCpRow => ({
   idadeAlvoDias: 28,
   dataRupturaPlanejada: '2020-01-01',
   diametroNominalMm: 100,
+  fckProjeto: null,
   mandatorio28d: false,
   status: 'coletado',
   rupturaId: null,
@@ -52,21 +59,34 @@ const registrarMutate = jest.fn();
 
 beforeEach(() => {
   registrarMutate.mockReset();
-  mockedRegistrar.mockReturnValue({ mutate: registrarMutate, isPending: false } as unknown as ReturnType<typeof useRegistrarRuptura>);
-  mockedDescartar.mockReturnValue({ mutate: jest.fn(), isPending: false } as unknown as ReturnType<typeof useDescartarCp>);
-  mockedExpurgar.mockReturnValue({ mutate: jest.fn(), isPending: false } as unknown as ReturnType<typeof useExpurgarResultado>);
+  mockRouterReplace.mockReset();
+  mockedRegistrar.mockReturnValue({
+    mutate: registrarMutate,
+    isPending: false,
+  } as unknown as ReturnType<typeof useRegistrarRuptura>);
+  mockedDescartar.mockReturnValue({ mutate: jest.fn(), isPending: false } as unknown as ReturnType<
+    typeof useDescartarCp
+  >);
+  mockedExpurgar.mockReturnValue({ mutate: jest.fn(), isPending: false } as unknown as ReturnType<
+    typeof useExpurgarResultado
+  >);
+  mockedProximo.mockReturnValue(null);
 });
 afterEach(() => jest.clearAllMocks());
 
 describe('RupturaFormScreen (F-S006-2/3)', () => {
   it('Loading: shows a spinner', () => {
-    mockedCp.mockReturnValue({ isLoading: true, isError: false, data: undefined } as ReturnType<typeof useCpForRuptura>);
+    mockedCp.mockReturnValue({ isLoading: true, isError: false, data: undefined } as ReturnType<
+      typeof useCpForRuptura
+    >);
     render(<RupturaFormScreen cpId="cp-1" />);
     expect(screen.getByLabelText('Carregando')).toBeTruthy();
   });
 
   it('Not found: shows "CP não encontrado."', () => {
-    mockedCp.mockReturnValue({ isLoading: false, isError: false, data: null } as ReturnType<typeof useCpForRuptura>);
+    mockedCp.mockReturnValue({ isLoading: false, isError: false, data: null } as ReturnType<
+      typeof useCpForRuptura
+    >);
     render(<RupturaFormScreen cpId="cp-1" />);
     expect(screen.getByText('CP não encontrado.')).toBeTruthy();
   });
@@ -82,9 +102,13 @@ describe('RupturaFormScreen (F-S006-2/3)', () => {
   it('keeps "Salvar Ruptura" disabled until the load is valid', () => {
     setCp({});
     render(<RupturaFormScreen cpId="cp-1" />);
-    expect(screen.getByRole('button', { name: 'Salvar Ruptura' }).props.accessibilityState.disabled).toBe(true);
+    expect(
+      screen.getByRole('button', { name: 'Salvar Ruptura' }).props.accessibilityState.disabled,
+    ).toBe(true);
     fireEvent.changeText(screen.getByLabelText('Carga de ruptura'), '23562');
-    expect(screen.getByRole('button', { name: 'Salvar Ruptura' }).props.accessibilityState.disabled).toBe(false);
+    expect(
+      screen.getByRole('button', { name: 'Salvar Ruptura' }).props.accessibilityState.disabled,
+    ).toBe(false);
   });
 
   it('blocks saving without a fracture type (US09 sad path)', () => {
@@ -112,12 +136,20 @@ describe('RupturaFormScreen (F-S006-2/3)', () => {
       ),
     ).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText('Carga de ruptura'), '23562');
-    expect(screen.getByRole('button', { name: 'Salvar Ruptura' }).props.accessibilityState.disabled).toBe(true);
+    expect(
+      screen.getByRole('button', { name: 'Salvar Ruptura' }).props.accessibilityState.disabled,
+    ).toBe(true);
   });
 
   it('confirms then registers the rupture and shows the result (US08-CA1/CA3)', () => {
     registrarMutate.mockImplementation((_input, opts) =>
-      opts.onSuccess({ rupturaId: 'r-1', mpaCalculado: 29.42, areaMm2: 7853.98, cpStatus: 'rompido', laudoRascunhoId: 'l-1' }),
+      opts.onSuccess({
+        rupturaId: 'r-1',
+        mpaCalculado: 29.42,
+        areaMm2: 7853.98,
+        cpStatus: 'rompido',
+        laudoRascunhoId: 'l-1',
+      }),
     );
     setCp({});
     render(<RupturaFormScreen cpId="cp-1" />);
@@ -132,5 +164,33 @@ describe('RupturaFormScreen (F-S006-2/3)', () => {
       expect.anything(),
     );
     expect(screen.getByText('CP rompido')).toBeTruthy();
+  });
+
+  it('shows the fck verdict band when the fck is known (QW-01)', () => {
+    // 28d, fck 25 → 29.42 MPa measured ≥ fck ⇒ conforme.
+    setCp({ data: cp({ fckProjeto: 25 }) });
+    render(<RupturaFormScreen cpId="cp-1" />);
+    fireEvent.changeText(screen.getByLabelText('Carga de ruptura'), '23562');
+    expect(screen.getByLabelText('Veredito: Conforme o fck')).toBeTruthy();
+  });
+
+  it('flags a result below the fck as "abaixo" (QW-01)', () => {
+    setCp({ data: cp({ fckProjeto: 40 }) });
+    render(<RupturaFormScreen cpId="cp-1" />);
+    fireEvent.changeText(screen.getByLabelText('Carga de ruptura'), '23562'); // 29.42 < 40
+    expect(screen.getByLabelText('Veredito: Abaixo do fck — avaliar reforço')).toBeTruthy();
+  });
+
+  it('offers "Próximo CP →" and chains to the next pending specimen (QW-02)', () => {
+    mockedProximo.mockReturnValue(cp({ cpId: 'cp-2', obraSigla: 'OBRA-2', idadeAlvoDias: 7 }));
+    mockedCp.mockReturnValue({
+      data: cp({ status: 'rompido', rupturaId: 'r-1', mpaCalculado: 29.42 }),
+      isLoading: false,
+      isError: false,
+    } as ReturnType<typeof useCpForRuptura>);
+    render(<RupturaFormScreen cpId="cp-1" />);
+    const proximo = screen.getByRole('button', { name: /Próximo CP/ });
+    fireEvent.press(proximo);
+    expect(mockRouterReplace).toHaveBeenCalledWith('/ruptura/cp-2');
   });
 });

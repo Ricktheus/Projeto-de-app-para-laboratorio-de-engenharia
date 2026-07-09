@@ -2,8 +2,38 @@
 
 > **Perspectiva:** Product Manager Sênior + Especialista em UI/UX.
 > **Base da análise:** PRD v2.0, SPEC Técnica, e o **código real das telas** entregues em S001–S009 (mobile Expo: campo/prensa; web: painel/laudos/portal/validação pública).
-> **Data:** 06/07/2026.
+> **Data:** 06/07/2026 (auditoria) · 09/07/2026 (implementação dos quick wins).
 > **Restrição respeitada na Parte 2:** nenhum quick win altera schema do banco, RLS, RPCs ou Edge Functions — apenas frontend, `packages/shared` e, no máximo, *queries de leitura* já permitidas pela RLS atual.
+
+---
+
+## ✅ Status de Implementação (pós-S010 + hardening)
+
+Após a auditoria, o projeto concluiu **S010** (dashboard operacional, testes E2E, rate limiting) e um **hardening de segurança**. Reavaliei cada achado contra o código atual e implementei os quick wins de maior valor. **Nenhuma mudança de banco/backend** — só frontend + `packages/shared` + queries de leitura já cobertas pela RLS. Tudo com testes (360 no total: 232 shared + 72 mobile + 56 web), typecheck e lint verdes.
+
+| ID | Quick win | Status | Onde |
+|---|---|---|---|
+| QW-01 | Veredito fck no display de MPa (verde/âmbar/vermelho + projeção 28d) | ✅ Feito | `shared/engineering/veredito.ts` + `RupturaFormScreen` |
+| QW-02 | "Próximo CP →" encadeando a agenda do dia | ✅ Feito | `RupturaFormScreen` + `usePrensa` |
+| QW-04 | Contagem + pill "Atrasado Xd" na lista da prensa | ✅ Feito | `PrensaListScreen` |
+| QW-07 | Preview de rompimentos + copy dinâmica dos obrigatórios | ✅ Feito | `MoldagemConfig` (via `buildCpPlan`) |
+| QW-08 | Badge de pendências na Agenda de Coletas | ✅ Feito | `ObrasScreen` |
+| QW-11 | Busca de obras | ✅ Feito | `ObrasScreen` |
+| QW-12 | Pill "Slump dentro/fora da tolerância" ao digitar | ✅ Feito | `ConcretagemForm` (via `checkSlumpTolerance`) |
+| QW-13 | Chips de status + seção "Aguardando assinatura (N)" | ✅ Feito | `LaudosPage` |
+| QW-15 | "Copiar link de validação pública" | ✅ Feito | `LaudoDetalhe` |
+| QW-16 | `scrollIntoView` ao abrir "Ver laudo" | ✅ Feito | `LaudosPage` |
+| QW-18 | Datas BR (`formatIsoDateBr`) nas etiquetas | ✅ Feito (parte datas) | `EtiquetasScreen` |
+| QW-19 | Portal: link "Validar autenticidade" por laudo | ✅ Feito | `PortalPage` |
+| QW-20 | Página pública: banner de conclusão conforme/abaixo do fck | ✅ Feito | `ValidacaoPublicaPage` |
+| QW-24 | Empty state do portal orientando o cliente novo | ✅ Feito | `messages` + `PortalPage` |
+| QW-14 | Pipeline por card no painel | ↔️ Coberto em parte pelo **dashboard S010** (contadores agregados) — mantido no backlog o detalhamento por card |
+| QW-03 | Scanner de QR na busca da prensa | ⏭️ Adiado | reuso do `CameraView` — envolve nova tela/rota, próximo lote |
+| QW-05 | Háptica no salvar/erro | ⏭️ Adiado | requer `expo-haptics` (dependência nativa não verificável neste ambiente) |
+| QW-06 | Date picker nativo BR | ⏭️ Adiado | `@react-native-community/datetimepicker` (nativo) — QW-07 já mitiga mostrando as datas em BR |
+| QW-09 / QW-10 / QW-17 / QW-21 / QW-22 / QW-23 | Aterrissar na NF criada · reimprimir falhas em lote · busca no painel · logo · biometria · migração de ícones | ⏭️ Backlog | ver notas na Parte 2 |
+
+> **Racional dos adiamentos:** priorizei o que é **frontend puro e verificável por teste** neste ambiente. Itens que exigem dependência nativa nova (`expo-haptics`, date picker, biometria) ou asset de marca (logo) ficam para um lote em que seja possível *buildar no device*; a migração de emojis→biblioteca de ícones (QW-23) é uma decisão de design system melhor feita deliberadamente, não junto de mudanças funcionais.
 
 ---
 

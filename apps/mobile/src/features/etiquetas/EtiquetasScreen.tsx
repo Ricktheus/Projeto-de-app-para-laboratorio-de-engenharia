@@ -1,4 +1,4 @@
-import { MESSAGES } from '@concreto/shared';
+import { formatIsoDateBr, MESSAGES } from '@concreto/shared';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
 import { BigButton, EmptyState, StatusPill, type StatusTone } from '../../components/ui';
@@ -66,7 +66,7 @@ export function EtiquetasScreen({ obraId }: EtiquetasScreenProps) {
           {concretagem.obraSigla} · NF {concretagem.nfNumero}
         </Text>
         <Text className="text-gray-500">
-          {concretagem.dataConcretagem} · {concretagem.labels.length} etiqueta(s)
+          {formatIsoDateBr(concretagem.dataConcretagem)} · {concretagem.labels.length} etiqueta(s)
         </Text>
         <BigButton
           label={`Gerar Etiquetas (${concretagem.labels.length})`}

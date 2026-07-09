@@ -21,6 +21,8 @@ export interface PrensaCpRow {
   dataRupturaPlanejada: string;
   /** Nominal mold diameter (mm) — basis of the live MPa preview (never measured). */
   diametroNominalMm: number;
+  /** Specified design strength (fck) from the NF/project (MPa) — for the fck verdict. */
+  fckProjeto: number | null;
   mandatorio28d: boolean;
   status: CpStatus;
   /** Present when the CP is already `rompido` — its 1:1 rupture result. */
@@ -44,6 +46,7 @@ interface ObraEmbed {
 interface ConcretagemEmbed {
   nf_numero: string;
   diametro_nominal_mm: number;
+  fck_projeto: number | null;
   obras: ObraEmbed | ObraEmbed[] | null;
 }
 interface RupturaEmbed {
@@ -63,7 +66,7 @@ interface CpPrensaRow {
 
 const CP_PRENSA_SELECT =
   'id, codigo_rastreio, idade_alvo_dias, data_ruptura_planejada, status, mandatorio_28d, ' +
-  'concretagens(nf_numero, diametro_nominal_mm, obras(sigla, nome)), rupturas(id, mpa_calculado)';
+  'concretagens(nf_numero, diametro_nominal_mm, fck_projeto, obras(sigla, nome)), rupturas(id, mpa_calculado)';
 
 function concretagemOf(embed: CpPrensaRow['concretagens']): ConcretagemEmbed | null {
   const concretagem = Array.isArray(embed) ? embed[0] : embed;
@@ -92,6 +95,7 @@ function toPrensaRow(cp: CpPrensaRow): PrensaCpRow {
     idadeAlvoDias: cp.idade_alvo_dias,
     dataRupturaPlanejada: cp.data_ruptura_planejada,
     diametroNominalMm: concretagem?.diametro_nominal_mm ?? 100,
+    fckProjeto: concretagem?.fck_projeto ?? null,
     mandatorio28d: cp.mandatorio_28d,
     status: cp.status,
     rupturaId: ruptura?.id ?? null,

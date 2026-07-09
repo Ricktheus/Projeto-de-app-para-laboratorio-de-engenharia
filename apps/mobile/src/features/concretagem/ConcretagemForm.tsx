@@ -1,5 +1,6 @@
 import {
   applyManualEdit,
+  checkSlumpTolerance,
   expandMoldingConfig,
   MESSAGES,
   missingRequiredFields,
@@ -12,7 +13,7 @@ import {
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
-import { LoadingButton, NumericInput, TextField } from '../../components/ui';
+import { LoadingButton, NumericInput, StatusPill, TextField } from '../../components/ui';
 
 import { MoldagemConfig } from './MoldagemConfig';
 
@@ -120,6 +121,22 @@ export function ConcretagemForm({
 
   const bannerError = errorMessage ?? localError;
 
+  // QW-12: live slump-tolerance check (non-blocking) — a caveat is also added to
+  // the laudo server-side, but showing it here catches an out-of-spec pour early.
+  const slumpNums = {
+    medido: slumpCm.trim() === '' ? null : slumpCmToMm(Number(slumpCm)),
+    projeto: slumpProjetoCm.trim() === '' ? null : slumpCmToMm(Number(slumpProjetoCm)),
+    tolerancia: slumpToleranciaCm.trim() === '' ? null : slumpCmToMm(Number(slumpToleranciaCm)),
+  };
+  const slumpCheck =
+    slumpNums.medido !== null && slumpNums.projeto !== null && slumpNums.tolerancia !== null
+      ? checkSlumpTolerance({
+          slumpMedidoMm: slumpNums.medido,
+          slumpProjetoMm: slumpNums.projeto,
+          slumpToleranciaMm: slumpNums.tolerancia,
+        })
+      : null;
+
   return (
     <ScrollView className="w-full" contentContainerClassName="gap-4 pb-10">
       {bannerError ? (
@@ -195,8 +212,14 @@ export function ConcretagemForm({
           />
         </View>
       </View>
+      {slumpCheck ? (
+        <StatusPill
+          tone={slumpCheck.ok ? 'success' : 'warning'}
+          label={slumpCheck.ok ? 'Slump dentro da tolerância' : 'Slump fora da tolerância'}
+        />
+      ) : null}
 
-      <MoldagemConfig items={molding} onChange={setMolding} />
+      <MoldagemConfig items={molding} onChange={setMolding} dataMoldagem={dataConcretagem} />
 
       <LoadingButton
         label="Salvar concretagem"

@@ -27,6 +27,16 @@ export function useCpForRuptura(cpId: string) {
   });
 }
 
+/**
+ * The next specimen still due for rupture today, excluding `currentCpId` — powers
+ * the "Próximo CP →" shortcut so the engineer chains ruptures on the day of the
+ * press without returning to the list each time. Reads the already-cached agenda.
+ */
+export function useProximoCpPendente(currentCpId: string): PrensaCpRow | null {
+  const { data } = useRupturaAgenda();
+  return data?.find((row) => row.cpId !== currentCpId) ?? null;
+}
+
 /** Invalidates the agenda + the specific CP after any terminal transition. */
 function useInvalidatePrensa() {
   const queryClient = useQueryClient();

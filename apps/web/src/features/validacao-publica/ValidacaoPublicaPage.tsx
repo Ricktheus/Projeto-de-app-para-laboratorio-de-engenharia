@@ -1,4 +1,10 @@
-import { MESSAGES, type ValidarLaudoResponse } from '@concreto/shared';
+import {
+  fckVerdict,
+  FCK_VEREDITO_LABELS,
+  MESSAGES,
+  type FckVeredito,
+  type ValidarLaudoResponse,
+} from '@concreto/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
@@ -11,6 +17,41 @@ function formatDate(iso: string | null): string {
   const [year, month, day] = iso.split('-');
   return day && month && year ? `${day}/${month}/${year}` : iso;
 }
+
+type Resultado = ValidarLaudoResponse['resultados'][number];
+
+/**
+ * Overall conclusion of the report versus its fck (QW-20): uses the result of the
+ * HIGHEST age that has an fck to compare against — the measured strength at a
+ * final age, or the 28d projection at an early age. `null` when no result has a
+ * comparable fck. This is an INDICATIVE reading (not a formal NBR 12655
+ * acceptance) shown so a fiscal/auditor gets the answer, not just the raw table.
+ */
+function conclusaoVeredito(
+  resultados: readonly Resultado[],
+): Exclude<FckVeredito, 'indeterminado'> | null {
+  const comparaveis = resultados.filter((r) => r.fck_projeto != null);
+  if (comparaveis.length === 0) {
+    return null;
+  }
+  const alvo = comparaveis.reduce((a, b) => (b.idade_dias > a.idade_dias ? b : a));
+  const { veredito } = fckVerdict({
+    mpa: alvo.fcm_mpa,
+    idadeDias: alvo.idade_dias,
+    fckProjeto: alvo.fck_projeto,
+  });
+  return veredito === 'indeterminado' ? null : veredito;
+}
+
+/** Conclusion banner styling per verdict. */
+const CONCLUSAO_STYLE: Record<
+  Exclude<FckVeredito, 'indeterminado'>,
+  { bg: string; text: string; icon: string }
+> = {
+  conforme: { bg: 'bg-green-50', text: 'text-success', icon: '✓' },
+  atencao: { bg: 'bg-amber-50', text: 'text-amber-700', icon: '!' },
+  abaixo: { bg: 'bg-red-50', text: 'text-danger', icon: '✕' },
+};
 
 /** Standalone public shell (no app chrome / no sign-out — anonymous surface). */
 function PublicShell({ children }: { children: React.ReactNode }) {
@@ -29,6 +70,7 @@ function PublicShell({ children }: { children: React.ReactNode }) {
 
 /** Green authenticity banner + the report's public data. */
 function LaudoAutentico({ laudo }: { laudo: ValidarLaudoResponse }) {
+  const conclusao = conclusaoVeredito(laudo.resultados);
   return (
     <section className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6">
       <div
@@ -40,6 +82,18 @@ function LaudoAutentico({ laudo }: { laudo: ValidarLaudoResponse }) {
         </span>
         <span className="text-field font-semibold">{MESSAGES.feature.validacaoAutentico}</span>
       </div>
+
+      {conclusao ? (
+        <div
+          className={`flex items-center gap-2 rounded-xl px-4 py-3 ${CONCLUSAO_STYLE[conclusao].bg} ${CONCLUSAO_STYLE[conclusao].text}`}
+          role="status"
+        >
+          <span aria-hidden className="text-xl font-bold">
+            {CONCLUSAO_STYLE[conclusao].icon}
+          </span>
+          <span className="text-field font-semibold">{FCK_VEREDITO_LABELS[conclusao]}</span>
+        </div>
+      ) : null}
 
       <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Laudo nº" value={laudo.numero} />

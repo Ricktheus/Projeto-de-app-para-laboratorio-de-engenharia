@@ -51,6 +51,25 @@ describe('ValidacaoPublicaPage (F-S009-2 / US19)', () => {
     expect(screen.getByText('Residencial X')).toBeInTheDocument();
     expect(screen.getByText('27.44')).toBeInTheDocument();
     expect(screen.getByText('32.1')).toBeInTheDocument();
+    // QW-20: conclusion verdict from the 28d result (32.1 ≥ fck 30).
+    expect(screen.getByText('Conforme o fck')).toBeInTheDocument();
+  });
+
+  it('concludes "abaixo do fck" when the highest age is under the specified fck (QW-20)', async () => {
+    mockedValidar.mockResolvedValue({
+      status: 'encontrado',
+      laudo: {
+        autentico: true,
+        numero: 'N°004AGEHAB',
+        versao: 1,
+        cliente: 'AGEHAB',
+        obra: 'Residencial Y',
+        data_emissao: '2026-06-20',
+        resultados: [{ idade_dias: 28, fcm_mpa: 24, fck_projeto: 30 }],
+      },
+    });
+    renderAt('def456');
+    expect(await screen.findByText('Abaixo do fck — avaliar reforço')).toBeInTheDocument();
   });
 
   it('shows the not-found / not-authentic copy for an unknown code (US19-CA3)', async () => {

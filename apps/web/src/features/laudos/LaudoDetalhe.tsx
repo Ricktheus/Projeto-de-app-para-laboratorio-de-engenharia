@@ -1,7 +1,7 @@
 import { MESSAGES, type CpStatus, type LaudoStatus, type LaudoTipo } from '@concreto/shared';
 import { useState } from 'react';
 
-import { BigButton, LoadingButton, StatusPill } from '../../components/ui';
+import { BigButton, LoadingButton, StatusPill, useToast } from '../../components/ui';
 
 import { ResistenciaChart } from './ResistenciaChart';
 import { type LaudoDetalhe as LaudoDetalheData } from './laudos-service';
@@ -315,7 +315,7 @@ function ProntoActions({
   );
 }
 
-/** Assinado actions: download the report + correct (new version). */
+/** Assinado actions: copy public link + download the report + correct (new version). */
 function AssinadoActions({
   detalhe,
   onBaixarPdf,
@@ -325,6 +325,9 @@ function AssinadoActions({
 }: LaudoDetalheViewProps) {
   return (
     <div className="flex flex-wrap gap-2">
+      {detalhe.codigo_verificacao ? (
+        <CopiarLinkValidacao codigo={detalhe.codigo_verificacao} />
+      ) : null}
       {detalhe.pdf_original_url ? (
         <LoadingButton
           variant="neutral"
@@ -343,6 +346,33 @@ function AssinadoActions({
         {MESSAGES.feature.laudoCorrigir}
       </LoadingButton>
     </div>
+  );
+}
+
+/**
+ * Copies the PUBLIC validation URL for the report (QW-15), so the engineer can
+ * paste it to the client/fiscal (e.g. via WhatsApp) without generating the PDF
+ * and scanning its own QR. The link points at the anonymous `/validar/:codigo`
+ * page, which always resolves to the current ("vigente") version.
+ */
+function CopiarLinkValidacao({ codigo }: { codigo: string }) {
+  const { show } = useToast();
+  const url = `${window.location.origin}/validar/${codigo}`;
+
+  async function handleCopiar() {
+    try {
+      await navigator.clipboard.writeText(url);
+      show(MESSAGES.feature.laudoLinkCopiado, 'success');
+    } catch {
+      // Clipboard blocked (permissions/insecure context) — show the URL to copy by hand.
+      show(url, 'info');
+    }
+  }
+
+  return (
+    <BigButton variant="neutral" onClick={handleCopiar}>
+      {MESSAGES.feature.laudoCopiarLink}
+    </BigButton>
   );
 }
 

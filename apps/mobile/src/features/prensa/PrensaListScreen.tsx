@@ -20,6 +20,18 @@ function matches(row: PrensaCpRow, query: string): boolean {
   );
 }
 
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
+
+/** Whole days a specimen is past its planned rupture date (0 when due today). */
+function overdueDays(dataRupturaPlanejada: string, today: string): number {
+  const planned = Date.parse(`${dataRupturaPlanejada}T00:00:00Z`);
+  const now = Date.parse(`${today}T00:00:00Z`);
+  if (Number.isNaN(planned) || Number.isNaN(now)) {
+    return 0;
+  }
+  return Math.max(0, Math.round((now - planned) / 86_400_000));
+}
+
 /**
  * Press list of the day (F-S006-1): `coletado` specimens due for rupture across
  * ALL clients, oldest planned date first. A QR/code search box locates a
@@ -32,6 +44,7 @@ export function PrensaListScreen() {
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => (data ?? []).filter((row) => matches(row, query)), [data, query]);
+  const today = useMemo(todayIso, []);
 
   if (isLoading) {
     return (
@@ -55,6 +68,9 @@ export function PrensaListScreen() {
 
   return (
     <View className="flex-1 gap-4">
+      <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
+        {data.length} {data.length === 1 ? 'CP para romper hoje' : 'CPs para romper hoje'}
+      </Text>
       <TextField
         label={MESSAGES.feature.buscarCpQr}
         placeholder="Código do CP, obra ou NF"
@@ -82,9 +98,15 @@ export function PrensaListScreen() {
               <Text className="text-gray-500">
                 {row.obraNome} · NF {row.nfNumero}
               </Text>
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row flex-wrap items-center gap-2">
                 <StatusPill tone="info" label={row.codigoRastreio} />
                 {row.mandatorio28d ? <StatusPill tone="warning" label="Obrigatório" /> : null}
+                {overdueDays(row.dataRupturaPlanejada, today) > 0 ? (
+                  <StatusPill
+                    tone="danger"
+                    label={`Atrasado ${overdueDays(row.dataRupturaPlanejada, today)}d`}
+                  />
+                ) : null}
               </View>
             </Pressable>
           ))}

@@ -1,5 +1,5 @@
 import { MESSAGES, type LaudoStatus } from '@concreto/shared';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
 import { ManagementNav } from '../../components/ManagementNav';
@@ -29,6 +29,15 @@ const STATUS_PILL: Readonly<
   substituido: { label: 'Substituído', tone: 'danger' },
 };
 
+/** A status filter chip: a status subset + its human label. */
+type StatusFilter = 'todos' | LaudoStatus;
+const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'pronto_assinatura', label: 'Aguardando assinatura' },
+  { value: 'rascunho', label: 'Rascunho' },
+  { value: 'assinado', label: 'Assinado' },
+];
+
 /** Distinct obras present in the report list, for the filter dropdown. */
 function obraOptions(laudos: LaudoListRow[]): { id: string; label: string }[] {
   const byId = new Map<string, string>();
@@ -53,8 +62,10 @@ export function LaudosPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [obraFilter, setObraFilter] = useState('');
   const [nfFilter, setNfFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos');
   const [grouping, setGrouping] = useState(false);
   const [selectedForGroup, setSelectedForGroup] = useState<string[]>([]);
+  const detalheRef = useRef<HTMLDivElement>(null);
 
   const detalhe = useLaudoDetalhe(selectedId);
   const definirNumero = useDefinirNumero();
@@ -68,16 +79,29 @@ export function LaudosPage() {
 
   const lista = useMemo(() => laudos ?? [], [laudos]);
   const options = useMemo(() => obraOptions(lista), [lista]);
+  const aguardandoAssinatura = useMemo(
+    () => lista.filter((l) => l.status === 'pronto_assinatura').length,
+    [lista],
+  );
   const filtered = useMemo(
     () =>
       lista.filter(
         (laudo) =>
+          (statusFilter === 'todos' || laudo.status === statusFilter) &&
           (obraFilter === '' || laudo.obra_id === obraFilter) &&
           (nfFilter.trim() === '' ||
             laudo.nfs.some((nf) => nf.toLowerCase().includes(nfFilter.trim().toLowerCase()))),
       ),
-    [lista, obraFilter, nfFilter],
+    [lista, statusFilter, obraFilter, nfFilter],
   );
+
+  // QW-16: bring the detail into view when a report is opened (it renders below
+  // a potentially long list, where the click can otherwise look like a no-op).
+  useEffect(() => {
+    if (selectedId && !grouping && typeof detalheRef.current?.scrollIntoView === 'function') {
+      detalheRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedId, grouping]);
 
   // Grouping is over single-NF DRAFTS of the SAME obra (US13-CA3).
   const selectedRows = lista.filter((l) => selectedForGroup.includes(l.id));
@@ -230,6 +254,42 @@ export function LaudosPage() {
         />
       ) : (
         <div className="flex flex-col gap-6">
+          {/* QW-13: the signature queue — the costliest pending state — surfaced. */}
+          {aguardandoAssinatura > 0 ? (
+            <button
+              type="button"
+              onClick={() => setStatusFilter('pronto_assinatura')}
+              className="flex items-center gap-3 self-start rounded-xl bg-blue-50 px-4 py-3 text-left hover:bg-blue-100"
+            >
+              <span className="text-2xl font-bold tabular-nums text-brand">
+                {aguardandoAssinatura}
+              </span>
+              <span className="text-field font-medium text-blue-900">
+                laudo(s) aguardando assinatura — clique para filtrar
+              </span>
+            </button>
+          ) : null}
+
+          {/* QW-13: status chips. */}
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por status">
+            {STATUS_FILTERS.map((chip) => (
+              <button
+                key={chip.value}
+                type="button"
+                aria-pressed={statusFilter === chip.value}
+                onClick={() => setStatusFilter(chip.value)}
+                className={[
+                  'min-h-touch rounded-xl px-4 text-field font-medium',
+                  statusFilter === chip.value
+                    ? 'bg-brand text-brand-fg'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+                ].join(' ')}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+
           {/* Filters. */}
           <div className="flex flex-wrap gap-3">
             <label className="flex flex-col gap-1">
@@ -315,31 +375,33 @@ export function LaudosPage() {
 
           {/* Selected report detail. */}
           {selectedId && !grouping ? (
-            detalhe.isLoading ? (
-              <div className="h-64 animate-pulse rounded-2xl bg-gray-200" aria-hidden />
-            ) : detalhe.isError || !detalhe.data ? (
-              <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-field text-danger">
-                {MESSAGES.http.serverError}
-              </div>
-            ) : (
-              <LaudoDetalheView
-                detalhe={detalhe.data}
-                onDefinirNumero={handleDefinirNumero}
-                definindoNumero={definirNumero.isPending}
-                onMarcarPronto={handleMarcarPronto}
-                marcandoPronto={marcarPronto.isPending}
-                onEmitirParcial={handleEmitirParcial}
-                emitindoParcial={emitirParcial.isPending}
-                onGerarPdf={handleGerarPdf}
-                gerandoPdf={gerarPdf.isPending}
-                onBaixarPdf={handleBaixarPdf}
-                baixandoPdf={baixarPdf.isPending}
-                onUploadAssinado={handleUploadAssinado}
-                enviandoAssinado={uploadAssinado.isPending}
-                onCorrigir={handleCorrigir}
-                corrigindo={corrigir.isPending}
-              />
-            )
+            <div ref={detalheRef}>
+              {detalhe.isLoading ? (
+                <div className="h-64 animate-pulse rounded-2xl bg-gray-200" aria-hidden />
+              ) : detalhe.isError || !detalhe.data ? (
+                <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-field text-danger">
+                  {MESSAGES.http.serverError}
+                </div>
+              ) : (
+                <LaudoDetalheView
+                  detalhe={detalhe.data}
+                  onDefinirNumero={handleDefinirNumero}
+                  definindoNumero={definirNumero.isPending}
+                  onMarcarPronto={handleMarcarPronto}
+                  marcandoPronto={marcarPronto.isPending}
+                  onEmitirParcial={handleEmitirParcial}
+                  emitindoParcial={emitirParcial.isPending}
+                  onGerarPdf={handleGerarPdf}
+                  gerandoPdf={gerarPdf.isPending}
+                  onBaixarPdf={handleBaixarPdf}
+                  baixandoPdf={baixarPdf.isPending}
+                  onUploadAssinado={handleUploadAssinado}
+                  enviandoAssinado={uploadAssinado.isPending}
+                  onCorrigir={handleCorrigir}
+                  corrigindo={corrigir.isPending}
+                />
+              )}
+            </div>
           ) : null}
         </div>
       )}

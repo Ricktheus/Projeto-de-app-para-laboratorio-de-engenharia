@@ -29,6 +29,7 @@ const LAUDO_A: portalService.PortalLaudoRow = {
   obra_id: 'oA',
   obra_nome: 'Obra A',
   obra_sigla: 'OBRA-A',
+  codigo_verificacao: 'cod-a',
 };
 const LAUDO_B: portalService.PortalLaudoRow = {
   id: 'lb',
@@ -39,6 +40,7 @@ const LAUDO_B: portalService.PortalLaudoRow = {
   obra_id: 'oB',
   obra_nome: 'Obra B',
   obra_sigla: 'OBRA-B',
+  codigo_verificacao: 'cod-b',
 };
 
 function renderPage() {
@@ -71,7 +73,9 @@ describe('PortalPage (F-S009-1 / US18)', () => {
     mockedList.mockResolvedValue([]);
     renderPage();
     expect(
-      await screen.findByText('Você ainda não possui laudos disponíveis.'),
+      await screen.findByText(
+        'Seus laudos aparecerão aqui assim que forem assinados pelo responsável técnico.',
+      ),
     ).toBeInTheDocument();
   });
 

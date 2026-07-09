@@ -126,6 +126,16 @@ export function PortalPage() {
                 {laudo.versao > 1 ? (
                   <StatusPill label={`Versão ${laudo.versao}`} tone="info" />
                 ) : null}
+                {laudo.codigo_verificacao ? (
+                  <a
+                    href={`/validar/${laudo.codigo_verificacao}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-h-touch inline-flex items-center rounded-xl border border-gray-300 px-4 text-field font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    {MESSAGES.feature.portalValidarAutenticidade}
+                  </a>
+                ) : null}
                 <LoadingButton
                   loading={baixandoId === laudo.id}
                   loadingLabel={MESSAGES.feature.laudoBaixandoPdf}

@@ -12,7 +12,12 @@ const mockedAgenda = useRupturaAgenda as jest.MockedFunction<typeof useRupturaAg
 type AgendaResult = ReturnType<typeof useRupturaAgenda>;
 
 function agenda(partial: Partial<AgendaResult>): void {
-  mockedAgenda.mockReturnValue({ isLoading: false, isError: false, data: [], ...partial } as AgendaResult);
+  mockedAgenda.mockReturnValue({
+    isLoading: false,
+    isError: false,
+    data: [],
+    ...partial,
+  } as AgendaResult);
 }
 
 const row = (over: Partial<PrensaCpRow> = {}): PrensaCpRow => ({
@@ -24,6 +29,7 @@ const row = (over: Partial<PrensaCpRow> = {}): PrensaCpRow => ({
   idadeAlvoDias: 28,
   dataRupturaPlanejada: '2026-07-01',
   diametroNominalMm: 100,
+  fckProjeto: 30,
   mandatorio28d: false,
   status: 'coletado',
   rupturaId: null,
@@ -60,7 +66,12 @@ describe('PrensaListScreen (F-S006-1) — states & QR search', () => {
   });
 
   it('QR search filters the list; a non-match shows "CP não encontrado." (US07-CA2)', () => {
-    agenda({ data: [row({ cpId: 'cp-1', codigoRastreio: 'CP-AAA' }), row({ cpId: 'cp-2', codigoRastreio: 'CP-BBB', obraSigla: 'OBRA-2' })] });
+    agenda({
+      data: [
+        row({ cpId: 'cp-1', codigoRastreio: 'CP-AAA' }),
+        row({ cpId: 'cp-2', codigoRastreio: 'CP-BBB', obraSigla: 'OBRA-2' }),
+      ],
+    });
     render(<PrensaListScreen />);
     fireEvent.changeText(screen.getByLabelText('Buscar por QR'), 'CP-BBB');
     expect(screen.getByLabelText('Romper CP-BBB')).toBeTruthy();
