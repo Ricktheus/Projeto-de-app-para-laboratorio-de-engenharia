@@ -28,6 +28,24 @@ Este repositório contém os documentos de concepção e especificação para o 
 | **S008** | Geração de PDF travado, assinatura, versionamento | ✅ Concluída |
 | **S009** | Portal do cliente, validação pública, Excel, e-mails | ✅ Concluída |
 | **S010** | Hardening: dashboard, testes, segurança | ✅ Concluída |
+| **H1** | Auditoria técnica pós-S010 + correções de segurança/integridade | ✅ Concluída |
+
+### 🛡️ Hardening pós-S010 (auditoria técnica)
+
+Após concluir as 10 sprints, foi feita uma **auditoria técnica** ([AUDITORIA_POS_S008.md](./AUDITORIA_POS_S008.md)) cruzando o código com o PRD/SPEC. Os achados foram corrigidos em uma migration forward-only (`supabase/migrations/0018_security_hardening.sql`) + Edge Functions + `packages/shared` + UI web:
+
+| # | Achado | Correção |
+|---|---|---|
+| **C1** | Escalada de privilégio via signup público + `user_metadata` | Signup público desabilitado; `handle_new_user` lê papel **apenas** de `app_metadata` (server-only); provisionamento autoritativo em `admin-provisionar-usuario`. |
+| **C2** | PDF assinado sobrescrito antes da checagem de estado | Estado validado **antes** do upload; publicação via RPC `publicar_laudo_assinado` (row-lock) + hash `sha256` de integridade. |
+| **C3** | Auditoria sem ator em escritas `service_role` | Transições de laudo agora via RPC com **JWT do usuário** — `auth.uid()` registra o engenheiro no `audit_log`. |
+| **C4** | Sem fluxo para o número definitivo do laudo | RPC `definir_numero_laudo` + guarda `NUMERO_PENDENTE` na geração do PDF + editor de número na UI. |
+| **H1** | Máquina de estados contornável por PATCH direto | `CHECK (assinado ⇒ pdf_assinado_url)` + imutabilidade de resultados de ruptura. |
+| **H2** | Rate limit de OCR burlável / sem teto | Teto de payload + limite por usuário/dia + registro da tentativa antes da chamada. |
+| **H3** | Concorrência em `corrigir_laudo` | `SELECT … FOR UPDATE` + índice único parcial (uma versão substituída uma vez). |
+| **M1/M2/M5/M6** | Débitos menores | Arredondamento de carga, `data_emissao` preservada, evidências write-once, acessibilidade do PDF. |
+
+Cobertura pgTAP nova: `supabase/tests/13_hardening_0018_test.sql`. Detalhamento completo (incl. residuais conscientes **H4** e **M4**) na Seção 8 do relatório de auditoria. Suítes verdes na entrega: shared 225, web 55, mobile 68; lint e typecheck limpos. **Antes do deploy:** rodar `pnpm db:reset && pnpm db:test` para validar os invariantes de banco (pgTAP).
 
 ### 🎯 Próximos Passos
 
