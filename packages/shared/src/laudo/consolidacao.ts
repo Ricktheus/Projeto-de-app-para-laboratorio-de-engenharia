@@ -1,6 +1,6 @@
-import { roundMpa } from '../engineering/rounding';
-import type { CpStatus, LaudoTipo } from '../enums';
-import { isCpTerminal } from '../state-machines/cp';
+import { roundMpa } from '../engineering/rounding.ts';
+import type { CpStatus, LaudoTipo } from '../enums.ts';
+import { isCpTerminal } from '../state-machines/cp.ts';
 
 /**
  * Laudo consolidation (F-S007-3 / US13). Turns the raw specimens + rupture

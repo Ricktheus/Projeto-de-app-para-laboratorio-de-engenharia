@@ -7,13 +7,13 @@ export {
   canTransitionCp,
   type CpGuardContext,
   type CpLike,
-} from './cp';
+} from './cp.ts';
 export {
   laudoAllowedTransitions,
   canMarcarProntoAssinatura,
   canMarcarAssinado,
   canTransitionLaudo,
   type LaudoGuardContext,
-} from './laudo';
-export { canTransition } from './transition';
-export { allow, deny, type GuardResult, type TransitionReason, type StateEntity } from './types';
+} from './laudo.ts';
+export { canTransition } from './transition.ts';
+export { allow, deny, type GuardResult, type TransitionReason, type StateEntity } from './types.ts';

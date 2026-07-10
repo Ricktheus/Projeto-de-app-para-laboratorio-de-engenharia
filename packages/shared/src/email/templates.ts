@@ -5,7 +5,7 @@
  * and hands the result to Resend; the retry/queue mechanics stay in the function
  * (US24-CA5). Adding a portal link when present keeps the body actionable.
  */
-import { cpsPendentesColetaBody, MESSAGES } from '../messages/messages';
+import { cpsPendentesColetaBody, MESSAGES } from '../messages/messages.ts';
 
 /** The e-mail events the worker can deliver (mirror of `email_events.evento`). */
 export const EMAIL_EVENTOS = [

@@ -8,12 +8,12 @@ export {
   laudoStatusSchema,
   laudoTipoSchema,
   tipoFraturaSchema,
-} from './common';
-export { clienteSchema, type ClienteInput } from './cliente';
-export { obraSchema, type ObraInput } from './obra';
-export { concretagemSchema, type ConcretagemInput } from './concretagem';
-export { rupturaSchema, type RupturaInput } from './ruptura';
-export { laudoSchema, type LaudoInput } from './laudo';
+} from './common.ts';
+export { clienteSchema, type ClienteInput } from './cliente.ts';
+export { obraSchema, type ObraInput } from './obra.ts';
+export { concretagemSchema, type ConcretagemInput } from './concretagem.ts';
+export { rupturaSchema, type RupturaInput } from './ruptura.ts';
+export { laudoSchema, type LaudoInput } from './laudo.ts';
 export {
   criarConcretagemPayloadSchema,
   cpConfigSchema,
@@ -21,7 +21,7 @@ export {
   type CriarConcretagemPayload,
   type CpConfig,
   type CriarConcretagemComCps,
-} from './criar-concretagem';
+} from './criar-concretagem.ts';
 export {
   internalRoleSchema,
   convidarClienteSchema,
@@ -33,7 +33,7 @@ export {
   type ConvidarUsuarioInternoInput,
   type ProvisionarUsuarioRequest,
   type ProvisionarUsuarioResponse,
-} from './usuario';
+} from './usuario.ts';
 export {
   ocrNotaFiscalRequestSchema,
   ocrNotaFiscalResponseSchema,
@@ -58,4 +58,4 @@ export {
   type ValidarLaudoResponse,
   type ExportarExcelRequest,
   type EnviarEmailRequest,
-} from './edge-functions';
+} from './edge-functions.ts';

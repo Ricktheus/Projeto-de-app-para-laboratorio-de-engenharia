@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isoDateSchema, uuidSchema } from './common';
+import { isoDateSchema, uuidSchema } from './common.ts';
 
 /**
  * Concretagem (pour) create form payload. `fck_projeto` is CAPTURED from the NF

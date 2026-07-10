@@ -5,4 +5,4 @@ export {
   type EmailContent,
   type EmailEvento,
   type EmailPayload,
-} from './templates';
+} from './templates.ts';

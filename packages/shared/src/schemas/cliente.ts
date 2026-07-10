@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { cnpjSchema, emailSchema } from './common';
+import { cnpjSchema, emailSchema } from './common.ts';
 
 /**
  * Client create/update form payload. `id`, `created_at`, `updated_at` are

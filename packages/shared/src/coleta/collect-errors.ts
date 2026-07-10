@@ -1,5 +1,5 @@
-import { cpNaoColetavelMessage, MESSAGES } from '../messages/messages';
-import { messageForSupabaseError, type SupabaseErrorLike } from '../net/supabase-error';
+import { cpNaoColetavelMessage, MESSAGES } from '../messages/messages.ts';
+import { messageForSupabaseError, type SupabaseErrorLike } from '../net/supabase-error.ts';
 
 /**
  * Machine tokens the `coletar_cp` RPC raises as the exception MESSAGE (SPEC

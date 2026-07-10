@@ -1,5 +1,5 @@
-import type { LaudoTipo } from '../enums';
-import { formatIsoDateBr } from '../lib/date';
+import type { LaudoTipo } from '../enums.ts';
+import { formatIsoDateBr } from '../lib/date.ts';
 
 import {
   consolidarLaudo,
@@ -7,12 +7,12 @@ import {
   type LaudoCpResultado,
   type LaudoCurvaPonto,
   type LaudoIdadeConsolidada,
-} from './consolidacao';
+} from './consolidacao.ts';
 import {
   algumSlumpForaTolerancia,
   buildConsideracoesFinais,
   type RessalvaSlumpInput,
-} from './ressalvas';
+} from './ressalvas.ts';
 
 /**
  * Render-ready model of a laudo (F-S008-1, PRD §11). Turns the report's domain

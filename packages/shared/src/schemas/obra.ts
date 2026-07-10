@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { uuidSchema } from './common';
+import { uuidSchema } from './common.ts';
 
 /**
  * Construction-site (obra) create/update form payload. `criado_por` and GPS are

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isoDateSchema, uuidSchema } from './common';
+import { isoDateSchema, uuidSchema } from './common.ts';
 
 /**
  * Wire contract for the `criar_concretagem_com_cps` RPC (SPEC §4.6). Keys are

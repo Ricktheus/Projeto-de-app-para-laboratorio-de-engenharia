@@ -11,7 +11,7 @@
  * authoritative data-access enforcement still happens server-side via RLS
  * (see supabase/migrations/0005_rls.sql).
  */
-import { type UserRole } from '../enums';
+import { type UserRole } from '../enums.ts';
 
 /** Platform the navigation is resolved for. */
 export type Platform = 'mobile' | 'web';

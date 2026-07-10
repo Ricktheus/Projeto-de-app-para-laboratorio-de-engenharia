@@ -1,8 +1,8 @@
-import { isCpStatus, isLaudoStatus, type CpStatus, type LaudoStatus } from '../enums';
+import { isCpStatus, isLaudoStatus, type CpStatus, type LaudoStatus } from '../enums.ts';
 
-import { canTransitionCp, type CpGuardContext } from './cp';
-import { canTransitionLaudo, type LaudoGuardContext } from './laudo';
-import { deny, type GuardResult, type StateEntity } from './types';
+import { canTransitionCp, type CpGuardContext } from './cp.ts';
+import { canTransitionLaudo, type LaudoGuardContext } from './laudo.ts';
+import { deny, type GuardResult, type StateEntity } from './types.ts';
 
 /**
  * Unified entry point for state-machine transitions. Typed overloads keep each

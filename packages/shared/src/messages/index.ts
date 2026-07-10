@@ -5,4 +5,4 @@ export {
   messageForDomainCode,
   cpMandatorio28dMessage,
   type DomainMessageCode,
-} from './messages';
+} from './messages.ts';

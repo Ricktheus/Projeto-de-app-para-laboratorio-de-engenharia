@@ -1,5 +1,5 @@
-import type { CpStatus } from '../enums';
-import { toDate, type DateInput } from '../lib/date';
+import type { CpStatus } from '../enums.ts';
+import { toDate, type DateInput } from '../lib/date.ts';
 
 /**
  * Maximum time a specimen may stay in the field before it must be collected and

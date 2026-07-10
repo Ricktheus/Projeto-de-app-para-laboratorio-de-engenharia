@@ -6,15 +6,15 @@ export {
   type LaudoCpResultado,
   type LaudoCurvaPonto,
   type LaudoIdadeConsolidada,
-} from './consolidacao';
-export { LAUDO_RPC_TOKENS, messageForLaudoRpcError, type LaudoRpcToken } from './laudo-errors';
+} from './consolidacao.ts';
+export { LAUDO_RPC_TOKENS, messageForLaudoRpcError, type LaudoRpcToken } from './laudo-errors.ts';
 export {
   buildValidacaoPublica,
   resolveVigenteLaudoId,
   type ValidacaoPublicaInput,
   type ValidacaoPublicaResponse,
   type ValidacaoPublicaResultado,
-} from './validacao-publica';
+} from './validacao-publica.ts';
 export {
   CONSIDERACOES_FINAIS_PADRAO,
   RESSALVA_COLETA_ATRASADA,
@@ -24,7 +24,7 @@ export {
   isSlumpForaTolerancia,
   type ConsideracoesFinaisInput,
   type RessalvaSlumpInput,
-} from './ressalvas';
+} from './ressalvas.ts';
 export {
   buildResistenciaChart,
   computeChartGeometry,
@@ -33,7 +33,7 @@ export {
   type ChartTick,
   type ResistenciaChart,
   type ResistenciaChartOptions,
-} from './chart-svg';
+} from './chart-svg.ts';
 export {
   buildLaudoReport,
   formatMedidaCp,
@@ -43,4 +43,4 @@ export {
   type LaudoReportConcretagemInput,
   type LaudoReportHeader,
   type LaudoReportInput,
-} from './pdf-report';
+} from './pdf-report.ts';

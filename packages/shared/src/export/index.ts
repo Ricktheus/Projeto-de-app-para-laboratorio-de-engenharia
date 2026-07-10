@@ -3,4 +3,4 @@ export {
   type Comparativo,
   type ComparativoInputRow,
   type ComparativoLinha,
-} from './comparativo';
+} from './comparativo.ts';

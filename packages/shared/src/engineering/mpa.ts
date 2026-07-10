@@ -1,6 +1,6 @@
-import { DomainError } from '../errors';
+import { DomainError } from '../errors.ts';
 
-import { roundKgf, roundMpa } from './rounding';
+import { roundKgf, roundMpa } from './rounding.ts';
 
 /** kgf → newton conversion constant (standard gravity, exact). */
 export const KGF_TO_NEWTON = 9.80665;

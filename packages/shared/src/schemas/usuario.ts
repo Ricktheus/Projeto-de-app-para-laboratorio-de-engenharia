@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { cnpjSchema, emailSchema } from './common';
+import { cnpjSchema, emailSchema } from './common.ts';
 
 /**
  * Payloads for the `admin-provisionar-usuario` Edge Function (F-S004-1). The
