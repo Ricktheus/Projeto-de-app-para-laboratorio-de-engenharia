@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from '../features/auth/auth-service';
 import { useAuthStore } from '../stores/auth-store';
 
+import { BrandMark } from './BrandMark';
 import { StatusPill } from './ui';
 
 /** Human-readable PT labels for each role, shown in the app header. */
@@ -34,8 +35,9 @@ export function AppShell({ title, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-6 py-4">
-        <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+      <header className="flex items-center gap-4 border-b border-gray-200 bg-white px-6 py-4">
+        <BrandMark size="sm" tagline={false} />
+        <h1 className="hidden text-xl font-bold text-gray-900 sm:block">{title}</h1>
         <div className="ml-auto flex items-center gap-3">
           {profile ? (
             <span className="flex items-center gap-2 text-gray-700">

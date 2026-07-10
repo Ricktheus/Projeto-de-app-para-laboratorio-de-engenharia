@@ -16,10 +16,14 @@ interface AuthState {
   session: Session | null;
   profile: AuthProfile | null;
   failedAttempts: number[];
+  /** Biometric app lock (QW-22): when true, the app is gated behind a re-auth. */
+  locked: boolean;
   setAuthenticated: (session: Session, profile: AuthProfile) => void;
   setUnauthenticated: () => void;
   recordFailedAttempt: (at: number) => void;
   clearFailedAttempts: () => void;
+  lock: () => void;
+  unlock: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -27,10 +31,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   profile: null,
   failedAttempts: [],
+  locked: false,
   setAuthenticated: (session, profile) =>
     set({ status: 'authenticated', session, profile, failedAttempts: [] }),
-  setUnauthenticated: () => set({ status: 'unauthenticated', session: null, profile: null }),
+  // Signing out also clears any lock (there is nothing to protect once out).
+  setUnauthenticated: () =>
+    set({ status: 'unauthenticated', session: null, profile: null, locked: false }),
   recordFailedAttempt: (at) =>
     set({ failedAttempts: [...pruneLoginAttempts(get().failedAttempts, at), at] }),
   clearFailedAttempts: () => set({ failedAttempts: [] }),
+  lock: () => set({ locked: true }),
+  unlock: () => set({ locked: false }),
 }));

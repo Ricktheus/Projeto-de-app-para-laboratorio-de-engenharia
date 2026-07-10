@@ -1,5 +1,7 @@
 import {
   applyManualEdit,
+  brDateToIso,
+  checkSlumpTolerance,
   expandMoldingConfig,
   MESSAGES,
   missingRequiredFields,
@@ -12,9 +14,17 @@ import {
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
-import { LoadingButton, NumericInput, TextField } from '../../components/ui';
+import { DateField, LoadingButton, NumericInput, StatusPill, TextField } from '../../components/ui';
 
 import { MoldagemConfig } from './MoldagemConfig';
+
+/** A valid ISO date string ('YYYY-MM-DD'), else null. */
+function normalizeIso(value: string | number | null): string | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : brDateToIso(value);
+}
 
 /** A blank form state for the manual-entry path (nothing highlighted). */
 export function emptyConcretagemFields(): OcrFormState {
@@ -56,6 +66,11 @@ export function ConcretagemForm({
   onSave,
 }: ConcretagemFormProps) {
   const [fields, setFields] = useState<OcrFormState>(initialFields);
+  // Molding date drives BOTH the payload and the rupture-date preview. Seeded
+  // from the OCR-extracted date when valid, else the default (usually today).
+  const [dataIso, setDataIso] = useState<string | null>(
+    normalizeIso(initialFields.data_concretagem.value) ?? dataConcretagem,
+  );
   const [molding, setMolding] = useState<MoldingConfigItem[]>([
     { idadeAlvoDias: 7, quantidade: 2 },
     { idadeAlvoDias: 28, quantidade: 2 },
@@ -97,6 +112,11 @@ export function ConcretagemForm({
       return;
     }
 
+    if (!dataIso) {
+      setLocalError('Informe a data da concretagem (DD/MM/AAAA).');
+      return;
+    }
+
     const slump = slumpCm.trim() === '' ? null : slumpCmToMm(Number(slumpCm));
     const slumpProjeto = slumpProjetoCm.trim() === '' ? null : slumpCmToMm(Number(slumpProjetoCm));
     const slumpTolerancia =
@@ -105,7 +125,7 @@ export function ConcretagemForm({
     onSave({
       concretagem: {
         obra_id: obraId,
-        data_concretagem: dataConcretagem,
+        data_concretagem: dataIso,
         nf_numero: asString(fields.nf_numero.value),
         fck_projeto: Number(fields.fck_projeto.value),
         volume_m3: Number(fields.volume_m3.value),
@@ -119,6 +139,22 @@ export function ConcretagemForm({
   }
 
   const bannerError = errorMessage ?? localError;
+
+  // QW-12: live slump-tolerance check (non-blocking) — a caveat is also added to
+  // the laudo server-side, but showing it here catches an out-of-spec pour early.
+  const slumpNums = {
+    medido: slumpCm.trim() === '' ? null : slumpCmToMm(Number(slumpCm)),
+    projeto: slumpProjetoCm.trim() === '' ? null : slumpCmToMm(Number(slumpProjetoCm)),
+    tolerancia: slumpToleranciaCm.trim() === '' ? null : slumpCmToMm(Number(slumpToleranciaCm)),
+  };
+  const slumpCheck =
+    slumpNums.medido !== null && slumpNums.projeto !== null && slumpNums.tolerancia !== null
+      ? checkSlumpTolerance({
+          slumpMedidoMm: slumpNums.medido,
+          slumpProjetoMm: slumpNums.projeto,
+          slumpToleranciaMm: slumpNums.tolerancia,
+        })
+      : null;
 
   return (
     <ScrollView className="w-full" contentContainerClassName="gap-4 pb-10">
@@ -160,11 +196,10 @@ export function ConcretagemForm({
         onChangeText={(t) => editField('concreteira', t)}
         editable={!saving}
       />
-      <TextField
-        label="Data da concretagem (AAAA-MM-DD)"
-        value={asString(fields.data_concretagem.value) || dataConcretagem}
-        highlight={fields.data_concretagem.highlight}
-        onChangeText={(t) => editField('data_concretagem', t)}
+      <DateField
+        label="Data da concretagem"
+        valueIso={dataIso}
+        onChangeIso={setDataIso}
         editable={!saving}
       />
 
@@ -195,8 +230,18 @@ export function ConcretagemForm({
           />
         </View>
       </View>
+      {slumpCheck ? (
+        <StatusPill
+          tone={slumpCheck.ok ? 'success' : 'warning'}
+          label={slumpCheck.ok ? 'Slump dentro da tolerância' : 'Slump fora da tolerância'}
+        />
+      ) : null}
 
-      <MoldagemConfig items={molding} onChange={setMolding} />
+      <MoldagemConfig
+        items={molding}
+        onChange={setMolding}
+        dataMoldagem={dataIso ?? dataConcretagem}
+      />
 
       <LoadingButton
         label="Salvar concretagem"

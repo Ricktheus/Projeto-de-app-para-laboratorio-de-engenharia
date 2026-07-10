@@ -17,6 +17,8 @@ export interface PortalLaudoRow {
   obra_id: string;
   obra_nome: string | null;
   obra_sigla: string | null;
+  /** Public verification code — links to the anonymous validation page. */
+  codigo_verificacao: string | null;
 }
 
 interface ObraJoin {
@@ -30,6 +32,7 @@ interface PortalLaudoJoinRow {
   versao: number;
   data_emissao: string | null;
   obra_id: string;
+  codigo_verificacao: string | null;
   obras: ObraJoin | ObraJoin[] | null;
 }
 
@@ -41,7 +44,8 @@ function firstOrSelf<T>(value: T | T[] | null | undefined): T | null {
 }
 
 const LAUDOS_BUCKET = 'laudos';
-const SELECT = 'id, numero, tipo_laudo, versao, data_emissao, obra_id, obras(nome, sigla)';
+const SELECT =
+  'id, numero, tipo_laudo, versao, data_emissao, obra_id, codigo_verificacao, obras(nome, sigla)';
 
 /**
  * Lists the client's downloadable (signed) reports, newest first. The explicit
@@ -68,6 +72,7 @@ export async function listPortalLaudos(): Promise<PortalLaudoRow[]> {
       obra_id: row.obra_id,
       obra_nome: obra?.nome ?? null,
       obra_sigla: obra?.sigla ?? null,
+      codigo_verificacao: row.codigo_verificacao,
     };
   });
 }

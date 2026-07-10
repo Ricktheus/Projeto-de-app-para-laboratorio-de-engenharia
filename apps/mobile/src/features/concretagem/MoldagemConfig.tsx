@@ -1,4 +1,10 @@
-import { MOLDING_SHORTCUTS, type MoldingConfigItem } from '@concreto/shared';
+import {
+  buildCpPlan,
+  formatIsoDateBr,
+  MOLDING_SHORTCUTS,
+  type CpPlanEntry,
+  type MoldingConfigItem,
+} from '@concreto/shared';
 import { Pressable, Text, View } from 'react-native';
 
 import { NumericInput } from '../../components/ui';
@@ -6,6 +12,8 @@ import { NumericInput } from '../../components/ui';
 export interface MoldagemConfigProps {
   items: MoldingConfigItem[];
   onChange: (items: MoldingConfigItem[]) => void;
+  /** Molding date (ISO); used to preview each specimen's planned rupture date. */
+  dataMoldagem: string;
 }
 
 function totalCps(items: MoldingConfigItem[]): number {
@@ -15,13 +23,44 @@ function totalCps(items: MoldingConfigItem[]): number {
   );
 }
 
+/** Safely builds the CP plan preview; an invalid config (age/qty ≤ 0) yields []. */
+function safePlan(dataMoldagem: string, items: MoldingConfigItem[]): CpPlanEntry[] {
+  try {
+    return buildCpPlan(dataMoldagem, items);
+  } catch {
+    return [];
+  }
+}
+
+/** Groups a plan by planned rupture date, in chronological order, for the preview. */
+function planByDate(plan: CpPlanEntry[]): { data: string; idade: number; quantidade: number }[] {
+  const byDate = new Map<string, { data: string; idade: number; quantidade: number }>();
+  for (const entry of plan) {
+    const existing = byDate.get(entry.dataRupturaPlanejada);
+    if (existing) {
+      existing.quantidade += 1;
+    } else {
+      byDate.set(entry.dataRupturaPlanejada, {
+        data: entry.dataRupturaPlanejada,
+        idade: entry.idadeAlvoDias,
+        quantidade: 1,
+      });
+    }
+  }
+  return [...byDate.values()].sort((a, b) => a.data.localeCompare(b.data));
+}
+
 /**
  * Free molding configuration (US02-CA2): the partner sets the quantity and
  * target age of each specimen — no fixed count. Optional shortcuts pre-fill
  * common setups. The 2 highest ages become the mandatory 28-day specimens
  * (applied by the RPC on save).
  */
-export function MoldagemConfig({ items, onChange }: MoldagemConfigProps) {
+export function MoldagemConfig({ items, onChange, dataMoldagem }: MoldagemConfigProps) {
+  const plan = safePlan(dataMoldagem, items);
+  const grupos = planByDate(plan);
+  const maiorIdade = plan.reduce((max, entry) => Math.max(max, entry.idadeAlvoDias), 0);
+
   function updateItem(index: number, patch: Partial<MoldingConfigItem>) {
     onChange(items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
   }
@@ -93,9 +132,26 @@ export function MoldagemConfig({ items, onChange }: MoldagemConfigProps) {
       </Pressable>
 
       <Text className="text-gray-600" accessibilityLabel="Total de corpos de prova">
-        Total: {totalCps(items)} corpo(s) de prova. Os 2 de maior idade serão marcados como 28d
-        obrigatório.
+        Total: {totalCps(items)} corpo(s) de prova. Os 2 de maior idade ({maiorIdade || '—'}d) serão
+        preservados como obrigatórios de ruptura.
       </Text>
+
+      {grupos.length > 0 ? (
+        <View
+          className="gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-3"
+          accessibilityLabel="Agenda de rompimentos planejada"
+        >
+          <Text className="font-semibold text-gray-800">Rompimentos planejados</Text>
+          {grupos.map((grupo) => (
+            <View key={grupo.data} className="flex-row justify-between">
+              <Text className="text-gray-700">
+                {grupo.quantidade}× {grupo.idade}d
+              </Text>
+              <Text className="text-gray-500">{formatIsoDateBr(grupo.data)}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }

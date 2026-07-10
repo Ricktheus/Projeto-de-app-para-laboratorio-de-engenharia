@@ -2,6 +2,7 @@ export { BigButton, type BigButtonProps, type BigButtonVariant } from './BigButt
 export { LoadingButton, type LoadingButtonProps } from './LoadingButton';
 export { NumericInput, type NumericInputProps } from './NumericInput';
 export { TextField, type TextFieldProps } from './TextField';
+export { DateField, type DateFieldProps } from './DateField';
 export { StatusPill, type StatusPillProps, type StatusTone } from './StatusPill';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Toaster, useToast } from './Toast';

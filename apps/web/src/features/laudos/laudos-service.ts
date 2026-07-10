@@ -57,6 +57,8 @@ export interface LaudoDetalhe {
   obra_nome: string | null;
   obra_sigla: string | null;
   cliente_nome: string | null;
+  /** Public verification code (drives the "Copiar link de validação" action). */
+  codigo_verificacao: string | null;
   /** Reference fck for the resistance chart (the linked NFs' project strength). */
   fckProjeto: number | null;
   /** Set once the locked PDF has been generated (F-S008-1). */
@@ -105,6 +107,7 @@ interface LaudoDetalheJoinRow {
   numero: string;
   status: LaudoStatus;
   versao: number;
+  codigo_verificacao: string | null;
   pdf_original_url: string | null;
   pdf_assinado_url: string | null;
   updated_at: string;
@@ -141,7 +144,7 @@ const LIST_SELECT =
   'laudo_concretagens(concretagens(id, nf_numero))';
 
 const DETALHE_SELECT =
-  'id, tipo_laudo, numero, status, versao, pdf_original_url, pdf_assinado_url, updated_at, ' +
+  'id, tipo_laudo, numero, status, versao, codigo_verificacao, pdf_original_url, pdf_assinado_url, updated_at, ' +
   'obras(nome, sigla, clientes(nome)), ' +
   'laudo_concretagens(concretagens(id, nf_numero, quadra, lote, fck_projeto))';
 
@@ -218,6 +221,7 @@ export async function getLaudoDetalhe(laudoId: string): Promise<LaudoDetalhe> {
     obra_nome: obra?.nome ?? null,
     obra_sigla: obra?.sigla ?? null,
     cliente_nome: cliente?.nome ?? null,
+    codigo_verificacao: row.codigo_verificacao,
     fckProjeto: concretagens[0]?.fck_projeto ?? null,
     pdf_original_url: row.pdf_original_url,
     pdf_assinado_url: row.pdf_assinado_url,

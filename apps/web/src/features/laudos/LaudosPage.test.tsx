@@ -90,6 +90,7 @@ function detalheFrom(row: laudosService.LaudoListRow): laudosService.LaudoDetalh
     obra_nome: row.obra_nome,
     obra_sigla: row.obra_sigla,
     cliente_nome: row.cliente_nome,
+    codigo_verificacao: 'codigo-abc',
     fckProjeto: 30,
     pdf_original_url: row.pdf_original_url,
     pdf_assinado_url: row.pdf_assinado_url,

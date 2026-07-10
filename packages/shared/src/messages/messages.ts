@@ -129,8 +129,10 @@ const FEATURE_MESSAGES = {
   laudoNaoRascunho: 'Este laudo não está mais em rascunho. Recarregue a página.',
 
   // Portal do cliente (F-S009-1 / US18).
-  emptyPortalLaudos: 'Você ainda não possui laudos disponíveis.',
+  emptyPortalLaudos:
+    'Seus laudos aparecerão aqui assim que forem assinados pelo responsável técnico.',
   portalBaixarLaudo: 'Baixar laudo (PDF)',
+  portalValidarAutenticidade: 'Validar autenticidade',
   portalTodasObras: 'Todas as obras',
 
   // Dashboard operacional (F-S010-1).
@@ -174,6 +176,8 @@ const FEATURE_MESSAGES = {
   laudoCorrigir: 'Corrigir laudo',
   laudoCorrigindo: 'Criando correção…',
   laudoCorrigido: 'Correção criada. Nova versão gerada em rascunho.',
+  laudoCopiarLink: 'Copiar link de validação',
+  laudoLinkCopiado: 'Link de validação copiado.',
 
   // Numeração do laudo (C4 / PRD §2.3): número definitivo antes de gerar o PDF.
   laudoNumeroLabel: 'Número do laudo',

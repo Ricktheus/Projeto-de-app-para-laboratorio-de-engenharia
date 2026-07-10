@@ -16,4 +16,12 @@ export {
   type RangeCheckResult,
   type SlumpToleranceInput,
 } from './ranges';
+export {
+  fckVerdict,
+  FCK_VEREDITO_LABELS,
+  FCK_VEREDITO_TONES,
+  type FckVeredito,
+  type FckVerdictInput,
+  type FckVerdictResult,
+} from './veredito';
 export { roundMpa, roundKgf } from './rounding';

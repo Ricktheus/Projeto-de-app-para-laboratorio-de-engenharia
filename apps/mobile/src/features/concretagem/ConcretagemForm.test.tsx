@@ -68,6 +68,50 @@ describe('ConcretagemForm (F-S004-4/5)', () => {
     expect(payload.cps).toHaveLength(4);
   });
 
+  it('edits the concretagem date in BR and stores it as ISO (QW-06)', async () => {
+    const onSave = jest.fn();
+    render(
+      <ConcretagemForm
+        obraId={OBRA_ID}
+        initialFields={buildOcrFormState(OCR)}
+        dataConcretagem="2026-05-20"
+        saving={false}
+        onSave={onSave}
+      />,
+    );
+
+    // OCR date (2026-05-20) is shown in BR.
+    expect(screen.getByLabelText('Data da concretagem').props.value).toBe('20/05/2026');
+
+    fireEvent.changeText(screen.getByLabelText('Data da concretagem'), '08/07/2026');
+    fireEvent.press(screen.getByRole('button', { name: 'Salvar concretagem' }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled(), { timeout: 8000 });
+    expect(onSave.mock.calls[0]?.[0].concretagem.data_concretagem).toBe('2026-07-08');
+  });
+
+  it('blocks the save on an impossible date (QW-06)', async () => {
+    const onSave = jest.fn();
+    render(
+      <ConcretagemForm
+        obraId={OBRA_ID}
+        initialFields={buildOcrFormState(OCR)}
+        dataConcretagem="2026-05-20"
+        saving={false}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.changeText(screen.getByLabelText('Data da concretagem'), '31/02/2026');
+    fireEvent.press(screen.getByRole('button', { name: 'Salvar concretagem' }));
+
+    await waitFor(
+      () => expect(screen.getByText('Informe a data da concretagem (DD/MM/AAAA).')).toBeTruthy(),
+      { timeout: 8000 },
+    );
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it('lets a manual value satisfy a required field and unblock the save (US02-CA1)', async () => {
     const onSave = jest.fn();
     render(

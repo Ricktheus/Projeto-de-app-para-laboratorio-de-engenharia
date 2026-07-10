@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { BigButton, EmptyState, useToast } from '../../components/ui';
+import { hapticError, hapticSuccess } from '../../services/haptics';
 
 import { useColetarCp } from './useColeta';
 
@@ -36,9 +37,11 @@ export function ColetaScannerScreen() {
     setFeedback(null);
     try {
       await coletar.mutateAsync(result.data);
+      hapticSuccess();
       setFeedback({ kind: 'success', message: MESSAGES.feature.coletaConfirmada });
       show(MESSAGES.feature.coletaConfirmada, 'success');
     } catch (error) {
+      hapticError();
       const message = error instanceof Error ? error.message : MESSAGES.http.serverError;
       setFeedback({ kind: 'error', message });
       show(message, 'error');

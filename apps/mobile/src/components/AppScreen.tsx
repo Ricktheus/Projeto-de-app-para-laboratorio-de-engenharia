@@ -4,6 +4,7 @@ import { type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BiometricLockToggle } from '../features/auth/BiometricLockToggle';
 import { signOut } from '../features/auth/auth-service';
 import { useAuthStore } from '../stores/auth-store';
 
@@ -39,16 +40,19 @@ export function AppScreen({ title, children }: AppScreenProps) {
         <Text style={{ fontSize: 20 }} className="font-bold text-gray-900">
           {title}
         </Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={handleSignOut}
-          style={{ minHeight: 44 }}
-          className="justify-center rounded-xl border border-gray-300 px-4"
-        >
-          <Text style={{ fontSize: 16 }} className="font-medium text-gray-700">
-            Sair
-          </Text>
-        </Pressable>
+        <View className="flex-row items-center gap-3">
+          <BiometricLockToggle />
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleSignOut}
+            style={{ minHeight: 44 }}
+            className="justify-center rounded-xl border border-gray-300 px-4"
+          >
+            <Text style={{ fontSize: 16 }} className="font-medium text-gray-700">
+              Sair
+            </Text>
+          </Pressable>
+        </View>
       </View>
       {profile ? (
         <View className="px-4 pt-3">

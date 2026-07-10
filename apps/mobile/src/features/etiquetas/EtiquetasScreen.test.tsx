@@ -1,5 +1,5 @@
 import { buildCpLabel } from '@concreto/shared';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { EtiquetasScreen } from './EtiquetasScreen';
 import type { ConcretagemEtiquetas } from './etiquetas-service';
@@ -112,5 +112,23 @@ describe('EtiquetasScreen (F-S005-1/F-S005-2) — UI states', () => {
     expect(screen.getByText('Selecione a impressora Bluetooth.')).toBeTruthy();
     expect(screen.getByText('Impressora 1')).toBeTruthy();
     expect(screen.getByText('Impressora 2')).toBeTruthy();
+  });
+
+  it('badges the just-created concretagem (QW-09)', () => {
+    etiquetasState({ isLoading: false, isError: false, data: [concretagem] });
+    render(<EtiquetasScreen obraId="obra-1" highlightId="ct-1" />);
+    expect(screen.getByText('✨ Recém-criada')).toBeTruthy();
+  });
+
+  it('offers a bulk reprint of only the failed labels (QW-10)', () => {
+    etiquetasState({ isLoading: false, isError: false, data: [concretagem] });
+    const print = jest.fn();
+    // cp-2 failed on the last attempt; cp-1 printed fine.
+    printerSession({ statuses: { 'cp-1': 'impressa', 'cp-2': 'falhou' }, print });
+    render(<EtiquetasScreen obraId="obra-1" />);
+
+    const reprintFailed = screen.getByRole('button', { name: 'Reimprimir falhas (1)' });
+    fireEvent.press(reprintFailed);
+    expect(print).toHaveBeenCalledWith([expect.objectContaining({ cpId: 'cp-2' })]);
   });
 });
