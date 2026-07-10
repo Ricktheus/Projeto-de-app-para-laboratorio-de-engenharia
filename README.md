@@ -29,6 +29,7 @@ Este repositório contém os documentos de concepção e especificação para o 
 | **S009** | Portal do cliente, validação pública, Excel, e-mails | ✅ Concluída |
 | **S010** | Hardening: dashboard, testes, segurança | ✅ Concluída |
 | **H1** | Auditoria técnica pós-S010 + correções de segurança/integridade | ✅ Concluída |
+| **UX** | Auditoria de UI/UX + 23 quick wins (frontend-only) + backlog V2 | ✅ Concluída |
 
 ### 🛡️ Hardening pós-S010 (auditoria técnica)
 
@@ -46,6 +47,19 @@ Após concluir as 10 sprints, foi feita uma **auditoria técnica** ([AUDITORIA_P
 | **M1/M2/M5/M6** | Débitos menores | Arredondamento de carga, `data_emissao` preservada, evidências write-once, acessibilidade do PDF. |
 
 Cobertura pgTAP nova: `supabase/tests/13_hardening_0018_test.sql`. Detalhamento completo (incl. residuais conscientes **H4** e **M4**) na Seção 8 do relatório de auditoria. Suítes verdes na entrega: shared 225, web 55, mobile 68; lint e typecheck limpos. **Antes do deploy:** rodar `pnpm db:reset && pnpm db:test` para validar os invariantes de banco (pgTAP).
+
+### 🎨 Refinamento de UI/UX pós-S010
+
+Uma auditoria de produto (PM Sênior + UI/UX) avaliou o **código real** das telas e priorizou os ganhos de "último quilômetro". O relatório completo — atritos por jornada, quick wins com esforço×impacto e o **Backlog V2** — está em [auditoria_ux_quickwins_backlog_v2.md](./auditoria_ux_quickwins_backlog_v2.md). **23 dos 24 quick wins** foram implementados em 4 lotes, **sem tocar em banco/RLS/RPCs/Edge Functions** — apenas frontend, `packages/shared` e queries de leitura já cobertas pela RLS:
+
+| Lote | Entregas principais |
+|---|---|
+| **1º** | Veredito **fck** no display da prensa (verde/âmbar/vermelho + projeção 28d) · "Próximo CP →" · contagem/atraso na fila · preview de rompimentos na moldagem · pill de slump · filtro de status + "Aguardando assinatura" nos laudos · "Copiar link de validação" · **veredito conforme/abaixo** no portal e na página pública |
+| **2º** | Scanner de **QR** na prensa (reuso do `expo-camera`) · **data em BR** (DD/MM/AAAA mascarada) · **háptica** (`expo-haptics`) na prensa e coleta |
+| **3º** | **Identidade visual** (logo SVG inline + wordmark) no login, portal e validação pública · **bloqueio do app por biometria** (`expo-local-authentication`, opt-in por aparelho, defensivo) |
+| **4º** | Aterrissar na concretagem **recém-criada** · "Reimprimir falhas (N)" em lote · **busca** no painel do escritório |
+
+Domínio novo em `packages/shared`: `fckVerdict` (comparação indicativa vs fck, reusa a projeção 7/14→28d), helpers `maskBrDate`/`brDateToIso` e `BRAND` (identidade centralizada). Dois **bugs latentes** foram corrigidos de passagem: a data da concretagem era editável mas ignorada no salvamento (usava sempre "hoje"), e datas ISO vazavam cruas na tela de etiquetas. Suítes verdes na entrega: **shared 238, mobile 80, web 56** (374 no total); lint e typecheck limpos. **Único item adiado:** QW-23 (migração emoji→biblioteca de ícones), por ser decisão de design system melhor feita isolada.
 
 ### 🎯 Próximos Passos
 
@@ -69,6 +83,9 @@ Cobertura pgTAP nova: `supabase/tests/13_hardening_0018_test.sql`. Detalhamento 
 - 📄 [implementation_plan.md](./implementation_plan.md) — Esboço inicial da modelagem lógica do banco de dados (PostgreSQL/Supabase) e fluxo de telas.
 - 📄 [roteiro_entrevista_laboratorio.md](./roteiro_entrevista_laboratorio.md) — Mapeamento do fluxo operacional atual e gargalos detectados na entrevista inicial.
 - 📄 [MEMORIA_PROJETO.md](./MEMORIA_PROJETO.md) — Histórico conceitual do projeto e diretrizes de desenvolvimento.
+
+**Produto e UX (pós-MVP):**
+- 🎨 [auditoria_ux_quickwins_backlog_v2.md](./auditoria_ux_quickwins_backlog_v2.md) — Auditoria de UI/UX (atritos por jornada), os **24 quick wins** (com status de implementação) e o **Backlog V2** estratégico.
 
 ---
 
