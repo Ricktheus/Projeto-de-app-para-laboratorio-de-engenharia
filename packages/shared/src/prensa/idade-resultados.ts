@@ -1,4 +1,4 @@
-import type { CpStatus } from '../enums';
+import type { CpStatus } from '../enums.ts';
 
 /** A specimen reduced to what the per-age result classification needs. */
 export interface IdadeResultadoCp {

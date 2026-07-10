@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { tipoFraturaSchema } from './common';
+import { tipoFraturaSchema } from './common.ts';
 
 /**
  * Rupture data entered by the lab engineer at the press. `mpa_calculado` and

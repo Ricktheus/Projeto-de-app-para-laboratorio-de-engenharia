@@ -5,7 +5,7 @@
  * per age. Pure domain — reuses `consolidarLaudo` (the FCM-per-age rule lives
  * ONCE, DRY) and never exposes evidence photos or internal fields.
  */
-import { consolidarLaudo, type LaudoCpResultado } from './consolidacao';
+import { consolidarLaudo, type LaudoCpResultado } from './consolidacao.ts';
 
 /** One age row of the public validation response. */
 export interface ValidacaoPublicaResultado {

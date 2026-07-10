@@ -10,7 +10,7 @@
  * The UI uses these pure helpers to PREVIEW the plan before saving; it never
  * reimplements the rule.
  */
-import { addDaysIso, type DateInput } from '../lib/date';
+import { addDaysIso, type DateInput } from '../lib/date.ts';
 
 /** One row of the molding configuration: N specimens sharing a target age. */
 export interface MoldingConfigItem {

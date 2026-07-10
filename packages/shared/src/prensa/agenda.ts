@@ -1,5 +1,5 @@
-import type { CpStatus } from '../enums';
-import { toUtcDayNumber, type DateInput } from '../lib/date';
+import type { CpStatus } from '../enums.ts';
+import { toUtcDayNumber, type DateInput } from '../lib/date.ts';
 
 /**
  * A specimen-shaped row the press agenda needs to decide whether it is due for

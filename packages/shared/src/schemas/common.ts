@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { CP_STATUSES, LAUDO_STATUSES, LAUDO_TIPOS, TIPO_FRATURAS, USER_ROLES } from '../enums';
-import { isValidCnpj } from '../lib/cnpj';
+import { CP_STATUSES, LAUDO_STATUSES, LAUDO_TIPOS, TIPO_FRATURAS, USER_ROLES } from '../enums.ts';
+import { isValidCnpj } from '../lib/cnpj.ts';
 
 /**
  * Builds a `z.enum` from a readonly `as const` tuple while preserving the literal

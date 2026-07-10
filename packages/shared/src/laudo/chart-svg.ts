@@ -1,4 +1,4 @@
-import type { LaudoCurvaPonto } from './consolidacao';
+import type { LaudoCurvaPonto } from './consolidacao.ts';
 
 /**
  * Resistance-curve chart for the laudo PDF (F-S008-1, PRD §11 / P15). Builds the

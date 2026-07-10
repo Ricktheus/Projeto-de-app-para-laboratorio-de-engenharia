@@ -1,5 +1,5 @@
-import { MESSAGES } from '../messages/messages';
-import { messageForSupabaseError, type SupabaseErrorLike } from '../net/supabase-error';
+import { MESSAGES } from '../messages/messages.ts';
+import { messageForSupabaseError, type SupabaseErrorLike } from '../net/supabase-error.ts';
 
 /**
  * Machine tokens the laudo lifecycle RPCs (`marcar_pronto_assinatura`,

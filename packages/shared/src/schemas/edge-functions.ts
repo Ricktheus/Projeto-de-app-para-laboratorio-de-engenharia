@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { isoDateSchema, tipoFraturaSchema, uuidSchema } from './common';
+import { isoDateSchema, tipoFraturaSchema, uuidSchema } from './common.ts';
 
 /**
  * Wire contracts for the Edge Functions and RPCs (SPEC §5). Keys match the

@@ -1,4 +1,4 @@
-import { checkSlumpTolerance } from '../engineering/ranges';
+import { checkSlumpTolerance } from '../engineering/ranges.ts';
 
 /**
  * Report "considerações finais" composition (F-S008-1 / US14-CA3, PRD §11). The

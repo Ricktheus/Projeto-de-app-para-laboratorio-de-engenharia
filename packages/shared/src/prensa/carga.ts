@@ -1,5 +1,5 @@
-import { checkRange, type RangeSeverity } from '../engineering/ranges';
-import { MESSAGES } from '../messages/messages';
+import { checkRange, type RangeSeverity } from '../engineering/ranges.ts';
+import { MESSAGES } from '../messages/messages.ts';
 
 /**
  * Below this many kgf a rupture load was almost certainly typed in kN instead

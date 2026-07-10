@@ -4,4 +4,4 @@ export {
   readableIdFromCodigo,
   type CpLabelModel,
   type CpLabelInput,
-} from './label';
+} from './label.ts';

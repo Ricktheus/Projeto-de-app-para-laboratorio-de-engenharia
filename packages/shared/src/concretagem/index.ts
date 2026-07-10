@@ -8,7 +8,7 @@ export {
   type MoldingConfigItem,
   type CpPlanEntry,
   type MoldingShortcut,
-} from './molding';
+} from './molding.ts';
 export {
   OCR_FIELDS,
   OCR_REQUIRED_FIELDS,
@@ -19,4 +19,4 @@ export {
   type OcrRequiredField,
   type OcrFormField,
   type OcrFormState,
-} from './ocr-form';
+} from './ocr-form.ts';

@@ -1,5 +1,5 @@
-import { cpMandatorio28dMessage, MESSAGES } from '../messages/messages';
-import { messageForSupabaseError, type SupabaseErrorLike } from '../net/supabase-error';
+import { cpMandatorio28dMessage, MESSAGES } from '../messages/messages.ts';
+import { messageForSupabaseError, type SupabaseErrorLike } from '../net/supabase-error.ts';
 
 /**
  * Machine tokens the `registrar_ruptura` RPC raises as the exception MESSAGE

@@ -7,5 +7,5 @@ export {
   maskBrDate,
   brDateToIso,
   type DateInput,
-} from './date';
-export { isValidCnpj } from './cnpj';
+} from './date.ts';
+export { isValidCnpj } from './cnpj.ts';

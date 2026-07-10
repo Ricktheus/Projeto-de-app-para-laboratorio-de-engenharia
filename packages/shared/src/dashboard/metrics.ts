@@ -5,9 +5,9 @@
  * (DRY): the "collection overdue >24h" definition is reused from the collection
  * agenda (S005) — the very same rule the daily e-mail cron enforces server-side.
  */
-import { isCollectionDue, type CollectionCandidate } from '../coleta/agenda';
-import { type CpStatus } from '../enums';
-import { toUtcDayNumber, type DateInput } from '../lib/date';
+import { isCollectionDue, type CollectionCandidate } from '../coleta/agenda.ts';
+import { type CpStatus } from '../enums.ts';
+import { toUtcDayNumber, type DateInput } from '../lib/date.ts';
 
 /** Today + current-week counters for one operational metric. */
 export interface PeriodCount {

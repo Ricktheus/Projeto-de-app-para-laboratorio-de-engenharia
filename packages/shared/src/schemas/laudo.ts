@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { laudoTipoSchema, uuidSchema } from './common';
+import { laudoTipoSchema, uuidSchema } from './common.ts';
 
 /**
  * Laudo (report) create form payload. `codigo_verificacao`, `status`, `versao`

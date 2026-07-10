@@ -1,4 +1,4 @@
-import type { TipoFratura } from '../enums';
+import type { TipoFratura } from '../enums.ts';
 
 /** UI option: an enum value paired with its Portuguese label. */
 export interface FraturaTipoOption {

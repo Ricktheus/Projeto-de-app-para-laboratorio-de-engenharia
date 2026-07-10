@@ -3,9 +3,9 @@
  * central catalog (SPEC §3). Kept next to the auth domain so apps import a
  * single helper instead of reaching into the catalog shape.
  */
-import { MESSAGES } from '../messages/messages';
+import { MESSAGES } from '../messages/messages.ts';
 
-import { type AuthErrorCode } from './auth-errors';
+import { type AuthErrorCode } from './auth-errors.ts';
 
 const AUTH_CODE_MESSAGE: Readonly<Record<AuthErrorCode, string>> = {
   invalidCredentials: MESSAGES.auth.invalidCredentials,

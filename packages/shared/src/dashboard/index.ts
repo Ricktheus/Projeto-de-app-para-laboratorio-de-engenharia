@@ -6,4 +6,4 @@ export {
   type CpColetaRow,
   type PeriodCount,
   type RompimentoProgramado,
-} from './metrics';
+} from './metrics.ts';

@@ -5,5 +5,5 @@ export {
   selectCollectionAgenda,
   isLateCollection,
   type CollectionCandidate,
-} from './agenda';
-export { COLETAR_CP_TOKENS, messageForColetarCpError, type ColetarCpToken } from './collect-errors';
+} from './agenda.ts';
+export { COLETAR_CP_TOKENS, messageForColetarCpError, type ColetarCpToken } from './collect-errors.ts';

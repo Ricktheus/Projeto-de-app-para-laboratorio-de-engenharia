@@ -8,7 +8,7 @@
  * supabase-js `PostgrestError`, so `packages/shared` stays free of a runtime
  * dependency on supabase-js.
  */
-import { MESSAGES, messageForHttpStatus } from '../messages/messages';
+import { MESSAGES, messageForHttpStatus } from '../messages/messages.ts';
 
 /** The subset of a Supabase/PostgREST error this mapper reads. */
 export interface SupabaseErrorLike {

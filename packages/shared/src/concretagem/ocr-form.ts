@@ -5,7 +5,7 @@
  * `packages/shared` means the "which fields need review" rule is defined once and
  * covered by tests (DRY).
  */
-import type { OcrNotaFiscalResponse } from '../schemas/edge-functions';
+import type { OcrNotaFiscalResponse } from '../schemas/edge-functions.ts';
 
 /** The five fields the OCR extracts from the NF (SPEC §5.1). */
 export const OCR_FIELDS = [

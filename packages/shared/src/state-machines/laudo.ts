@@ -1,7 +1,7 @@
-import type { CpStatus, LaudoStatus } from '../enums';
+import type { CpStatus, LaudoStatus } from '../enums.ts';
 
-import { isCpTerminal } from './cp';
-import { allow, deny, type GuardResult } from './types';
+import { isCpTerminal } from './cp.ts';
+import { allow, deny, type GuardResult } from './types.ts';
 
 /**
  * Laudo (report) state machine — transitions per PRD §5.2:

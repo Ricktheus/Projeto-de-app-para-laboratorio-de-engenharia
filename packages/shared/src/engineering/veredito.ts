@@ -14,10 +14,10 @@
  * compared is the projected 28-day strength ({@link estimateF28}); for a final
  * age (no factor, e.g. 28/63d) the MEASURED strength is compared directly.
  */
-import { DEFAULT_PROJECTION_FACTORS, type ProjectionFactorMap } from '../constants/projection';
+import { DEFAULT_PROJECTION_FACTORS, type ProjectionFactorMap } from '../constants/projection.ts';
 
-import { estimateF28 } from './projection';
-import { roundMpa } from './rounding';
+import { estimateF28 } from './projection.ts';
+import { roundMpa } from './rounding.ts';
 
 /** The indicative verdict of a result versus the specified fck. */
 export type FckVeredito = 'conforme' | 'atencao' | 'abaixo' | 'indeterminado';

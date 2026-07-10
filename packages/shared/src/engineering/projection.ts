@@ -2,10 +2,10 @@ import {
   DEFAULT_PROJECTION_FACTORS,
   DEFAULT_PROJECTION_FACTORS_LOW,
   type ProjectionFactorMap,
-} from '../constants/projection';
-import { DomainError } from '../errors';
+} from '../constants/projection.ts';
+import { DomainError } from '../errors.ts';
 
-import { roundMpa } from './rounding';
+import { roundMpa } from './rounding.ts';
 
 export interface EstimateF28Input {
   /** Measured strength (MPa) at the early age. */

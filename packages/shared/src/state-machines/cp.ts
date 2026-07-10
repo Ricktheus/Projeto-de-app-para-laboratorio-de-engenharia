@@ -1,7 +1,7 @@
-import type { CpStatus } from '../enums';
-import { toUtcDayNumber, type DateInput } from '../lib/date';
+import type { CpStatus } from '../enums.ts';
+import { toUtcDayNumber, type DateInput } from '../lib/date.ts';
 
-import { allow, deny, type GuardResult } from './types';
+import { allow, deny, type GuardResult } from './types.ts';
 
 /**
  * Corpo de prova (specimen) state machine — transitions per PRD §5.1:

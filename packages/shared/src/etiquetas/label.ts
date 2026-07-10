@@ -1,4 +1,4 @@
-import { toDate, type DateInput } from '../lib/date';
+import { toDate, type DateInput } from '../lib/date.ts';
 
 /**
  * The printable contents of a single specimen label (F-S005-1). The physical
