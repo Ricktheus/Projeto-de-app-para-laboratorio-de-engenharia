@@ -1,7 +1,7 @@
 /**
- * Pure OCR logic (no I/O) so it can be unit-tested without a DB or the OpenAI
+ * Pure OCR logic (no I/O) so it can be unit-tested without a DB or the vision
  * API (SPEC §7.2 "OCR rate limit — Deno test"). The orchestrator (index.ts)
- * wires these decisions to Supabase and OpenAI.
+ * wires these decisions to Supabase and Gemini.
  */
 import { OCR_FIELDS, type OcrField, type OcrNotaFiscalResponse } from '@concreto/shared';
 
@@ -17,7 +17,7 @@ export const DEFAULT_OCR_CONFIDENCE_MIN = 0.75;
 /**
  * Default cap of OCR attempts PER USER in a rolling 24h window (H2). The per-
  * concretagem limit alone is bypassable because `concretagemRef` is a client-
- * chosen string; this per-user ceiling bounds the OpenAI cost of a leaked JWT.
+ * chosen string; this per-user ceiling bounds the vision-API cost of a leaked JWT.
  */
 export const DEFAULT_OCR_USER_DAILY_MAX = 50;
 

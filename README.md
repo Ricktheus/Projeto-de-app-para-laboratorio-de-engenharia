@@ -64,7 +64,7 @@ Domínio novo em `packages/shared`: `fckVerdict` (comparação indicativa vs fck
 ### 🎯 Próximos Passos
 
 1. **Iniciar a Sprint 001** com o comando `/go`, usando [prompt_desenvolver_sprint.md](./prompt_desenvolver_sprint.md) (já configurado para `S001`). Entrega: monorepo base + migrations Supabase + RLS/RBAC + auditoria + Auth, com testes pgTAP passando.
-2. **Provisionar o projeto Supabase** (chaves, buckets `evidencias`/`laudos`, variáveis de ambiente `OPENAI_API_KEY`/`RESEND_API_KEY`) antes das sprints que os consomem (S004/S006/S008/S009).
+2. **Provisionar o projeto Supabase** (chaves, buckets `evidencias`/`laudos`, variáveis de ambiente `GEMINI_API_KEY`/`RESEND_API_KEY`) antes das sprints que os consomem (S004/S006/S008/S009).
 3. **Avançar sprint a sprint**, trocando o "Sprint alvo" no topo do prompt (`S002`, `S003`…) e atualizando a tabela de progresso acima ao concluir cada uma.
 
 ---

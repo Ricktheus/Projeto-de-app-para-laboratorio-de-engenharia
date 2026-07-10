@@ -2,7 +2,7 @@
  * POST /functions/v1/ocr-nota-fiscal (SPEC §5.1 / F-S004-4).
  *
  * Flow: auth → rate-limit (≤ 3 attempts per concretagem, `ocr_attempts`) →
- * GPT-4o-mini Vision (10s timeout) → assemble `{ fields, lowConfidenceFields }`
+ * Gemini Vision (10s timeout) → assemble `{ fields, lowConfidenceFields }`
  * with the confidence threshold from `app_settings`. Errors use the exact §5.1
  * envelopes: 429 OCR_LIMITE, 504 OCR_TIMEOUT, 502 OCR_FALHA. The user ALWAYS
  * reviews the form before saving — this function only extracts.
@@ -15,7 +15,7 @@ import {
 
 import { errorResponse, handlePreflight, jsonResponse } from '../_shared/http.ts';
 import { resolveCaller, serviceClient } from '../_shared/supabase.ts';
-import { extractFromImage, OcrProviderError, OcrTimeoutError } from './openai.ts';
+import { extractFromImage, OcrProviderError, OcrTimeoutError } from './gemini.ts';
 import {
   assembleOcrResponse,
   DEFAULT_OCR_CONFIDENCE_MIN,
@@ -95,9 +95,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return errorResponse(429, 'OCR_LIMITE', MESSAGES.domain.OCR_LIMITE);
   }
 
-  const apiKey = Deno.env.get('OPENAI_API_KEY');
+  const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) {
-    console.error('[ocr-nota-fiscal] OPENAI_API_KEY ausente');
+    console.error('[ocr-nota-fiscal] GEMINI_API_KEY ausente');
     return errorResponse(502, 'OCR_FALHA', MESSAGES.domain.OCR_FALHA);
   }
 

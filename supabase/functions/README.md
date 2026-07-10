@@ -8,7 +8,7 @@ and validators are never reimplemented here (DRY / SPEC §6.2).
 
 | Function | Método | Auth | Descrição |
 |---|---|---|---|
-| `ocr-nota-fiscal` | POST | JWT | Lê a foto da NF com GPT-4o-mini Vision e devolve os campos extraídos com confiança (SPEC §5.1). Rate limit de 3 tentativas por concretagem (`ocr_attempts`) e timeout de 10s. |
+| `ocr-nota-fiscal` | POST | JWT | Lê a foto da NF com Google Gemini Vision e devolve os campos extraídos com confiança (SPEC §5.1). Rate limit de 3 tentativas por concretagem (`ocr_attempts`) e timeout de 10s. |
 | `admin-provisionar-usuario` | POST | JWT (admin) | Cadastra clientes e usuários internos via `inviteUserByEmail` (F-S004-1). |
 
 ## Functions (Sprint S008)
@@ -34,8 +34,9 @@ and validators are never reimplemented here (DRY / SPEC §6.2).
 ## Variáveis de ambiente (segredos — só no ambiente da função)
 
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — injetadas pelo runtime do Supabase.
-- `OPENAI_API_KEY` — chave da OpenAI (somente `ocr-nota-fiscal`). Defina com:
-  `supabase secrets set OPENAI_API_KEY=sk-...`
+- `GEMINI_API_KEY` — chave do Google Gemini (Google AI Studio), somente
+  `ocr-nota-fiscal`. Defina com: `supabase secrets set GEMINI_API_KEY=...`
+- `GEMINI_MODEL` — (opcional) modelo Gemini; default `gemini-2.0-flash`.
 - `LAUDO_VERIFICATION_SECRET` — segredo do hash anti-fraude `codigo_verificacao = sha256(laudo_id + secret)` (somente `gerar-laudo-pdf`, SPEC §7.1).
 - `PUBLIC_SITE_URL` — URL base pública para o QR de validação (`<site>/validar/<codigo>`) e para o link do portal nos e-mails (`<site>/portal`); default `https://laboratorio.example.com`.
 - `RESEND_API_KEY` — chave da Resend para e-mail transacional (somente `enviar-email`, SPEC §7.1).

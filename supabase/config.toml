@@ -46,7 +46,7 @@ port = 54323
 
 # ----- Edge Functions (S004) -----
 # Both require a valid JWT; the internal-role / admin guards run inside each
-# function. Secrets (OPENAI_API_KEY, SUPABASE_SERVICE_ROLE_KEY) live only in the
+# function. Secrets (GEMINI_API_KEY, SUPABASE_SERVICE_ROLE_KEY) live only in the
 # function environment (SPEC §7.1). The import map maps `@concreto/shared`,
 # `zod` and `@supabase/supabase-js` for Deno (SPEC §6.2).
 [functions.ocr-nota-fiscal]
