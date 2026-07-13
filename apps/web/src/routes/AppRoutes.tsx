@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { LoginPage } from '../features/auth/LoginPage';
+import { ResetPasswordPage } from '../features/auth/ResetPasswordPage';
 import { CampoPage } from '../features/campo/CampoPage';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { ExportacaoPage } from '../features/exportacao/ExportacaoPage';
@@ -24,6 +25,9 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      {/* Password recovery — public: captures the recovery token from the URL
+          or lets the user request a new reset link. */}
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       {/* PUBLIC anti-fraud validation surface — no auth (F-S009-2 / US19). */}
       <Route path="/validar/:codigo" element={<ValidacaoPublicaPage />} />
       <Route path="/" element={<RoleHomeRedirect />} />

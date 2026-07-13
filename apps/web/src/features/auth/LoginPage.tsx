@@ -1,7 +1,7 @@
 import { loginCredentialsSchema, roleHome, type LoginCredentials } from '@concreto/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 import { BrandMark } from '../../components/BrandMark';
 import { LoadingButton } from '../../components/ui';
@@ -98,6 +98,15 @@ export function LoginPage() {
             Entrar
           </LoadingButton>
         </form>
+
+        <div className="mt-4 text-center">
+          <Link
+            to="/reset-password"
+            className="text-field font-medium text-brand hover:underline"
+          >
+            Esqueci minha senha
+          </Link>
+        </div>
       </div>
     </main>
   );
