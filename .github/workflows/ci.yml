@@ -1,0 +1,46 @@
+name: CI
+
+# Runs the full test matrix on every push to main and every pull request.
+# The db-tests job spins up a local Supabase (Postgres) on the Linux runner —
+# which already has Docker — so the pgTAP suite runs in the cloud and you do NOT
+# need Docker working on your own machine.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ---- Database layer: pgTAP (RLS/RBAC, constraints, C1 anti-escalation, ...)
+  db-tests:
+    name: pgTAP (database)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase (Postgres)
+        run: supabase db start
+      - name: Run pgTAP suite (supabase/tests/*.sql)
+        run: supabase test db
+
+  # ---- App layer: typecheck, lint and the Vitest/Jest suites (shared/web/mobile)
+  app-tests:
+    name: typecheck · lint · tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Tests
+        run: pnpm test
