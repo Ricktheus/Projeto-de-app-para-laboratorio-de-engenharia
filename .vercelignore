@@ -1,0 +1,14 @@
+# Keep the Vercel upload to what the web build needs (vercel.json builds
+# @concreto/web from the monorepo root).
+node_modules
+**/node_modules
+**/dist
+**/.turbo
+.agent
+.github
+supabase
+apps/mobile
+apps/web/e2e
+*.md
+*.jpeg
+!README.md
