@@ -40,6 +40,16 @@ async function isEngineer(
   return role === 'eng_lab' || role === 'eng_escritorio';
 }
 
+/**
+ * RT printed under the signature line, from the lab configuration
+ * (`LAB_RT_NOME` / `LAB_RT_CREA`). Absent ⇒ blank line for handwriting/gov.br.
+ */
+function responsavelTecnicoFromEnv(): { nome: string; crea: string } | null {
+  const nome = Deno.env.get('LAB_RT_NOME')?.trim();
+  const crea = Deno.env.get('LAB_RT_CREA')?.trim();
+  return nome ? { nome, crea: crea ?? '' } : null;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   const preflight = handlePreflight(req);
   if (preflight) {
@@ -116,6 +126,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       chartGeometry: chart.geometry,
       qrPng,
       codigoVerificacao: codigo,
+      responsavelTecnico: responsavelTecnicoFromEnv(),
     });
 
     // ----- Store it (private bucket) and record the URL + code.

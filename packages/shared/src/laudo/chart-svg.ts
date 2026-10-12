@@ -66,10 +66,12 @@ export interface ResistenciaChartOptions {
   padding?: number;
 }
 
-const CURVE_COLOR = '#1d4ed8'; // blue-700
-const FCK_COLOR = '#dc2626'; // red-600
-const GRID_COLOR = '#e5e7eb'; // gray-200
-const AXIS_COLOR = '#374151'; // gray-700
+const CURVE_COLOR = '#2F54EB'; // cobalto-600 — the measured curve
+// The fck line is always neutral (graphite, dashed): red would suggest a
+// rejection the laboratory does not issue (PLANO_NOVO_APP.md §6.2).
+const FCK_COLOR = '#17181A';
+const GRID_COLOR = '#E7E7E2'; // concreto-100
+const AXIS_COLOR = '#6E6E67'; // concreto-500
 const POINT_RADIUS = 4;
 const Y_TICK_COUNT = 5;
 
@@ -190,7 +192,7 @@ export function buildResistenciaChart(
     ),
   );
 
-  // fck reference line (dashed red).
+  // fck reference line (dashed, neutral graphite).
   if (fckY !== null) {
     parts.push(
       line(
@@ -199,7 +201,7 @@ export function buildResistenciaChart(
         plot.x + plot.width,
         fckY,
         FCK_COLOR,
-        'stroke-width="2" stroke-dasharray="6 4"',
+        'stroke-width="1.5" stroke-dasharray="6 4"',
       ),
     );
   }
