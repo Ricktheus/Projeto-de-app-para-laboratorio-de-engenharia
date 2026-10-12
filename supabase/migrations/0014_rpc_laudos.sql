@@ -198,7 +198,7 @@ begin
   end if;
 
   -- All selected pours must exist and belong to the SAME obra (US13-CA3).
-  select count(*), count(distinct obra_id), min(obra_id)
+  select count(*), count(distinct obra_id), min(obra_id::text)::uuid
     into v_found, v_obras, v_obra_id
   from concretagens
   where id = any(concretagem_ids);

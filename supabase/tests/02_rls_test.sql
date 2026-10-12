@@ -135,7 +135,6 @@ select set_config('request.jwt.claims', '{"sub":"44444444-4444-4444-4444-4444444
 select throws_ok(
   $$ insert into obras (cliente_id, nome, sigla, criado_por)
      values ('c1111111-1111-1111-1111-111111111111', 'X', 'OBRA-X', '44444444-4444-4444-4444-444444444444') $$,
-  '44000', null,
   'cliente NAO pode criar obra (RLS nega escrita)');
 
 reset role; set role authenticated;
@@ -143,7 +142,6 @@ select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-1111111
 select throws_ok(
   $$ insert into rupturas (corpo_prova_id, diametro_nominal_mm, carga_ruptura_kgf, mpa_calculado, tipo_fratura, executado_por)
      values ('e2222222-2222-2222-2222-222222222222', 100, 20000, 25.00, 'ruptura_total', '22222222-2222-2222-2222-222222222222') $$,
-  '42501', null,
   'socio_campo NAO pode registrar ruptura (RLS nega escrita)');
 
 -- ===================== anonymous surface =====================

@@ -26,8 +26,8 @@ insert into obras (id, cliente_id, nome, sigla, criado_por) values
 reset role; set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111"}', true);
 select criar_concretagem_com_cps(
-  '{"obra_id":"b1111111-1111-1111-1111-111111111111","data_concretagem":"2026-05-20",'
-  || '"nf_numero":"NF-1","fck_projeto":30,"volume_m3":8}',
+  ('{"obra_id":"b1111111-1111-1111-1111-111111111111","data_concretagem":"2026-05-20",'
+  || '"nf_numero":"NF-1","fck_projeto":30,"volume_m3":8}')::jsonb,
   array[
     '{"idade_alvo_dias":7}',
     '{"idade_alvo_dias":7}',
@@ -62,8 +62,8 @@ reset role; set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"44444444-4444-4444-4444-444444444444"}', true);
 select throws_ok(
   $$ select criar_concretagem_com_cps(
-       '{"obra_id":"b1111111-1111-1111-1111-111111111111","data_concretagem":"2026-05-20",'
-       || '"nf_numero":"NF-9","fck_projeto":30,"volume_m3":8}',
+       ('{"obra_id":"b1111111-1111-1111-1111-111111111111","data_concretagem":"2026-05-20",'
+       || '"nf_numero":"NF-9","fck_projeto":30,"volume_m3":8}')::jsonb,
        array['{"idade_alvo_dias":7}']::jsonb[]
      ) $$,
   '42501', NULL, 'cliente NAO pode criar concretagem (DENIED)');
@@ -73,8 +73,8 @@ reset role; set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111"}', true);
 select throws_ok(
   $$ select criar_concretagem_com_cps(
-       '{"obra_id":"b1111111-1111-1111-1111-111111111111","data_concretagem":"2026-05-20",'
-       || '"nf_numero":"NF-8","fck_projeto":30,"volume_m3":8}',
+       ('{"obra_id":"b1111111-1111-1111-1111-111111111111","data_concretagem":"2026-05-20",'
+       || '"nf_numero":"NF-8","fck_projeto":30,"volume_m3":8}')::jsonb,
        array[]::jsonb[]
      ) $$,
   '23514', NULL, 'lista de CPs vazia e rejeitada');
