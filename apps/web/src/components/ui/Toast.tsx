@@ -27,7 +27,7 @@ function ToastCard({ toast }: { toast: ToastItem }) {
     <div
       role={toast.variant === 'error' ? 'alert' : 'status'}
       className={[
-        'pointer-events-auto flex animate-slide-in items-center gap-3 fixed-scale rounded-xl bg-grafite px-4 py-3 text-white shadow-raised',
+        'pointer-events-auto flex animate-fade-in items-center gap-3 fixed-scale rounded-xl bg-grafite px-4 py-3 text-white shadow-raised',
       ].join(' ')}
     >
       <span aria-hidden className="flex shrink-0">
@@ -53,8 +53,10 @@ function ToastCard({ toast }: { toast: ToastItem }) {
 export function Toaster() {
   const toasts = useToastStore((s) => s.toasts);
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-full max-w-sm flex-col gap-2 px-4">
-      {toasts.map((toast) => (
+    // Top-centre, newest 3 only: toasts must never cover the action buttons at the
+    // bottom of the side drawer (found in the guided tour).
+    <div className="pointer-events-none fixed inset-x-0 top-4 z-50 mx-auto flex w-full max-w-md flex-col items-stretch gap-2 px-4">
+      {toasts.slice(-3).map((toast) => (
         <ToastCard key={toast.id} toast={toast} />
       ))}
     </div>

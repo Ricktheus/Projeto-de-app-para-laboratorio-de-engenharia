@@ -210,7 +210,11 @@ export function ResetPasswordPage() {
   return (
     <AuthLayout
       title="Redefinir senha"
-      subtitle={phase === 'set' ? 'Defina sua nova senha.' : 'Redefinição de senha.'}
+      subtitle={
+        phase === 'set'
+          ? 'Defina sua nova senha.'
+          : 'Informe seu e-mail para receber o link de redefinição.'
+      }
     >
       {phase === 'checking' ? (
         <p className="text-center text-field text-gray-500">Verificando o link...</p>
