@@ -46,7 +46,7 @@ export function UsuariosSection() {
             {data.map((usuario) => (
               <li key={usuario.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-grafite">{usuario.nome}</p>
+                  <p className="truncate font-medium text-ink">{usuario.nome}</p>
                   <p className="truncate text-[13px] text-concreto-500">{usuario.email}</p>
                 </div>
                 {usuario.is_admin ? <StatusPill label="Admin" tone="info" /> : null}

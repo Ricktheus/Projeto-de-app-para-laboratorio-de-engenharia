@@ -12,12 +12,12 @@ export type BigButtonVariant = 'primary' | 'accent' | 'neutral' | 'ghost' | 'dan
 export type BigButtonSize = 'sm' | 'md' | 'lg';
 
 const VARIANT_CLASSES: Record<BigButtonVariant, string> = {
-  primary: 'bg-grafite text-white shadow-card hover:bg-grafite-700 active:bg-concreto-950',
+  primary: 'bg-ink text-ink-fg shadow-card hover:opacity-90 active:opacity-80',
   accent:
     'bg-sinal-500 text-grafite shadow-card ring-1 ring-inset ring-sinal-600 hover:bg-sinal-600 active:bg-sinal-600',
   neutral:
-    'border border-concreto-200 bg-white text-grafite shadow-card hover:border-concreto-300 hover:bg-concreto-25 active:bg-concreto-50',
-  ghost: 'text-concreto-600 hover:bg-concreto-50 hover:text-grafite',
+    'border border-concreto-200 bg-surface text-ink shadow-card hover:border-concreto-300 hover:bg-concreto-25 active:bg-concreto-50',
+  ghost: 'text-concreto-600 hover:bg-concreto-50 hover:text-ink',
   danger: 'bg-danger text-white shadow-card hover:brightness-95 active:brightness-90',
 };
 

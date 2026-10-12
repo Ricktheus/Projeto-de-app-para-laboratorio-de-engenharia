@@ -303,8 +303,8 @@ export function LaudosPage() {
                   className={[
                     'relative flex h-11 items-center gap-2 whitespace-nowrap px-3 text-[14px] font-medium transition-colors',
                     active
-                      ? 'text-grafite after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-grafite'
-                      : 'text-concreto-500 hover:text-grafite',
+                      ? 'text-ink after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-ink'
+                      : 'text-concreto-500 hover:text-ink',
                   ].join(' ')}
                 >
                   {chip.label}
@@ -423,7 +423,7 @@ export function LaudosPage() {
                         </td>
                       ) : null}
                       <td className="px-4">
-                        <span className="font-mono text-[13px] font-medium text-grafite">
+                        <span className="font-mono text-[13px] font-medium text-ink">
                           {laudo.numero}
                         </span>
                         {laudo.versao > 1 ? (
@@ -433,7 +433,7 @@ export function LaudosPage() {
                         ) : null}
                       </td>
                       <td className="px-4">
-                        <p className="font-medium text-grafite">{laudo.obra_sigla ?? 'Obra'}</p>
+                        <p className="font-medium text-ink">{laudo.obra_sigla ?? 'Obra'}</p>
                         <p className="text-[12px] text-concreto-500">{laudo.cliente_nome ?? ''}</p>
                       </td>
                       <td className="px-4 font-mono text-[13px] text-concreto-600">

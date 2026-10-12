@@ -169,12 +169,12 @@ export function ObrasPage() {
                 <div className="flex items-start gap-3">
                   <span
                     aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-concreto-50 font-display text-[13px] font-semibold text-grafite ring-1 ring-concreto-100"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-concreto-50 font-display text-[13px] font-semibold text-ink ring-1 ring-concreto-100"
                   >
                     <Buildings size={20} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-grafite">{obra.nome}</p>
+                    <p className="truncate font-medium text-ink">{obra.nome}</p>
                     <p className="truncate text-[13px] text-concreto-500">
                       <span className="font-mono">{obra.sigla}</span> ·{' '}
                       {obra.cliente_nome ?? 'Cliente'}

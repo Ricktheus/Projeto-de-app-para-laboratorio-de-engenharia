@@ -239,7 +239,7 @@ export function ConcretagemEditForm({
         />
       </fieldset>
 
-      <div className="sticky bottom-0 -mx-6 -mb-6 flex gap-2 border-t border-concreto-100 bg-white px-6 py-4">
+      <div className="sticky bottom-0 -mx-6 -mb-6 flex gap-2 border-t border-concreto-100 bg-surface px-6 py-4">
         <LoadingButton type="submit" loading={submitting} loadingLabel="Salvando...">
           Salvar alterações
         </LoadingButton>

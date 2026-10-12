@@ -9,21 +9,149 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens (plan §6.3). Colours are RGB triplets consumed by Tailwind as
+ * `rgb(var(--x) / <alpha>)`. Light is the default; dark follows the OS unless
+ * the viewer picked a theme (`data-theme` on <html>).
+ */
 :root {
   color-scheme: light;
+  --concreto-0: 255 255 255;
+  --concreto-25: 250 250 248;
+  --concreto-50: 243 243 240;
+  --concreto-100: 231 231 226;
+  --concreto-200: 210 210 203;
+  --concreto-300: 180 180 172;
+  --concreto-400: 142 142 134;
+  --concreto-500: 110 110 103;
+  --concreto-600: 85 85 79;
+  --concreto-700: 61 61 56;
+  --concreto-800: 42 42 39;
+  --concreto-900: 27 27 25;
+  --concreto-950: 17 17 16;
+  --surface: 255 255 255;
+  --ink: 23 24 26;
+  --ink-fg: 255 255 255;
+  --sinal-50: 255 247 214;
+  --sinal-100: 255 237 168;
+  --cobalto-50: 236 240 254;
+  --cobalto-100: 217 225 253;
+  --cobalto-600: 47 84 235;
+  --cobalto-700: 36 65 194;
+  --ia-50: 239 235 255;
+  --ia-600: 91 63 217;
+  --danger: 179 38 30;
+  --danger-soft: 253 232 232;
+  --success: 21 122 69;
+  --success-soft: 227 245 234;
+  --warning: 168 90 0;
+  --warning-soft: 255 240 219;
+  --yellow-900: 92 67 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --concreto-0: 27 27 25;
+    --concreto-25: 17 17 16;
+    --concreto-50: 27 27 25;
+    --concreto-100: 42 42 39;
+    --concreto-200: 58 58 54;
+    --concreto-300: 76 76 71;
+    --concreto-400: 126 126 118;
+    --concreto-500: 163 163 155;
+    --concreto-600: 189 189 181;
+    --concreto-700: 210 210 203;
+    --concreto-800: 231 231 226;
+    --concreto-900: 243 243 240;
+    --concreto-950: 250 250 248;
+    --surface: 27 27 25;
+    --ink: 243 243 240;
+    --ink-fg: 23 24 26;
+    --sinal-50: 46 38 8;
+    --sinal-100: 61 50 9;
+    --cobalto-50: 26 35 71;
+    --cobalto-100: 36 48 107;
+    --cobalto-600: 124 155 255;
+    --cobalto-700: 157 180 255;
+    --ia-50: 42 33 80;
+    --ia-600: 179 164 255;
+    --danger: 255 107 107;
+    --danger-soft: 63 22 20;
+    --success: 61 214 140;
+    --success-soft: 14 59 37;
+    --warning: 255 169 77;
+    --warning-soft: 61 42 16;
+    --yellow-900: 255 214 102;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --concreto-0: 27 27 25;
+  --concreto-25: 17 17 16;
+  --concreto-50: 27 27 25;
+  --concreto-100: 42 42 39;
+  --concreto-200: 58 58 54;
+  --concreto-300: 76 76 71;
+  --concreto-400: 126 126 118;
+  --concreto-500: 163 163 155;
+  --concreto-600: 189 189 181;
+  --concreto-700: 210 210 203;
+  --concreto-800: 231 231 226;
+  --concreto-900: 243 243 240;
+  --concreto-950: 250 250 248;
+  --surface: 27 27 25;
+  --ink: 243 243 240;
+  --ink-fg: 23 24 26;
+  --sinal-50: 46 38 8;
+  --sinal-100: 61 50 9;
+  --cobalto-50: 26 35 71;
+  --cobalto-100: 36 48 107;
+  --cobalto-600: 124 155 255;
+  --cobalto-700: 157 180 255;
+  --ia-50: 42 33 80;
+  --ia-600: 179 164 255;
+  --danger: 255 107 107;
+  --danger-soft: 63 22 20;
+  --success: 61 214 140;
+  --success-soft: 14 59 37;
+  --warning: 255 169 77;
+  --warning-soft: 61 42 16;
+  --yellow-900: 255 214 102;
+}
+
+/*
+ * Always-dark brand areas (graphite sidebar, header bands, toasts) were drawn
+ * with the light neutral scale on graphite: pin it there in both themes.
+ */
+.fixed-scale {
+  --concreto-0: 255 255 255;
+  --concreto-25: 250 250 248;
+  --concreto-50: 243 243 240;
+  --concreto-100: 231 231 226;
+  --concreto-200: 210 210 203;
+  --concreto-300: 180 180 172;
+  --concreto-400: 142 142 134;
+  --concreto-500: 110 110 103;
+  --concreto-600: 85 85 79;
+  --concreto-700: 61 61 56;
+  --concreto-800: 42 42 39;
+  --concreto-900: 27 27 25;
+  --concreto-950: 17 17 16;
 }
 
 @layer base {
   body {
     margin: 0;
-    @apply bg-concreto-25 font-sans text-[14px] leading-5 text-grafite antialiased;
+    @apply bg-concreto-25 font-sans text-[14px] leading-5 text-ink antialiased;
     font-feature-settings: 'tnum' 0;
   }
 
   h1,
   h2,
   h3 {
-    @apply text-grafite;
+    @apply text-ink;
   }
 
   /* Plan §6.9: visible cobalt focus ring, 2px with 2px offset. */
@@ -44,7 +172,7 @@
 @layer components {
   /* Generic surface used by cards, panels and table wrappers. */
   .surface {
-    @apply rounded-xl border border-concreto-100 bg-white shadow-card;
+    @apply rounded-xl border border-concreto-100 bg-surface shadow-card;
   }
 
   /* Small uppercase label above a value (tables, facts, KPIs). */
@@ -54,7 +182,7 @@
 
   /* Native form controls in the office density. */
   .control {
-    @apply min-h-touch w-full rounded-xl border border-concreto-200 bg-white px-3 text-field text-grafite transition-colors duration-150 ease-rastro placeholder:text-concreto-400 hover:border-concreto-300 focus:border-grafite focus:outline-none focus:ring-2 focus:ring-cobalto-600/20 disabled:bg-concreto-50;
+    @apply min-h-touch w-full rounded-xl border border-concreto-200 bg-surface px-3 text-field text-ink transition-colors duration-150 ease-rastro placeholder:text-concreto-400 hover:border-concreto-300 focus:border-ink focus:outline-none focus:ring-2 focus:ring-cobalto-600/20 disabled:bg-concreto-50;
   }
 
   /* Hazard stripe: the "sinalização" signature, used sparingly as an accent. */

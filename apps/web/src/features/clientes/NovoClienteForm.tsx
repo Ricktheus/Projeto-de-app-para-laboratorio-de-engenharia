@@ -47,7 +47,7 @@ export function NovoClienteForm() {
 
   return (
     <form className="surface flex flex-col gap-4 p-5" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <h3 className="font-display text-[18px] font-semibold text-grafite">Novo cliente</h3>
+      <h3 className="font-display text-[18px] font-semibold text-ink">Novo cliente</h3>
 
       {errorMessage ? (
         <div

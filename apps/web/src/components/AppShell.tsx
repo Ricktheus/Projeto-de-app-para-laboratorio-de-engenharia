@@ -6,6 +6,7 @@ import { signOut } from '../features/auth/auth-service';
 import { useAuthStore } from '../stores/auth-store';
 
 import { BrandGlyph, BrandMark } from './BrandMark';
+import { ThemeToggle } from './ThemeToggle';
 import {
   Buildings,
   ChartLineUp,
@@ -125,7 +126,7 @@ function PageHeader({ title, subtitle, actions, eyebrow }: Omit<AppShellProps, '
     <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-3">
       <div className="min-w-0 flex-1">
         <p className="eyebrow mb-1 first-letter:uppercase">{eyebrow ?? todayLabel()}</p>
-        <h1 className="font-display text-[30px] font-semibold leading-none tracking-[0.005em] text-grafite">
+        <h1 className="font-display text-[30px] font-semibold leading-none tracking-[0.005em] text-ink">
           {title}
         </h1>
         {subtitle ? <p className="mt-2 max-w-2xl text-concreto-500">{subtitle}</p> : null}
@@ -141,17 +142,18 @@ function PortalShell(props: AppShellProps) {
   const handleSignOut = useSignOut();
   return (
     <div className="min-h-screen bg-concreto-25">
-      <header className="sticky top-0 z-30 border-b border-concreto-100 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-concreto-100 bg-surface/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
           <BrandMark size="sm" tagline={false} />
           <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle tone="surface" />
             {profile ? (
               <span className="hidden text-concreto-600 sm:inline">{profile.nome}</span>
             ) : null}
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-concreto-200 px-3 text-[13px] font-medium text-grafite hover:bg-concreto-25"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-concreto-200 px-3 text-[13px] font-medium text-ink hover:bg-concreto-25"
             >
               <SignOut size={16} aria-hidden />
               Sair
@@ -224,6 +226,12 @@ function SidebarContent({ role, onNavigate }: { role: UserRole; onNavigate: () =
         })}
       </nav>
 
+      <div className="flex items-center justify-between px-5 pb-1">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-concreto-500">
+          Tema
+        </span>
+        <ThemeToggle />
+      </div>
       {profile ? (
         <div className="m-3 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
           <span
@@ -268,17 +276,17 @@ export function AppShell(props: AppShellProps) {
   return (
     <div className="min-h-screen bg-concreto-25 lg:pl-60">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 bg-grafite lg:block">
+      <aside className="fixed-scale fixed inset-y-0 left-0 z-30 hidden w-60 bg-grafite lg:block">
         {role ? <SidebarContent role={role} onNavigate={() => undefined} /> : null}
       </aside>
 
       {/* Mobile top bar + overlay sidebar */}
-      <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-concreto-100 bg-white/90 px-4 backdrop-blur lg:hidden">
+      <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-concreto-100 bg-surface/90 px-4 backdrop-blur lg:hidden">
         <button
           type="button"
           aria-label="Abrir menu"
           onClick={() => setMenuOpen(true)}
-          className="rounded-lg p-1.5 text-grafite hover:bg-concreto-50"
+          className="rounded-lg p-1.5 text-ink hover:bg-concreto-50"
         >
           <List size={22} />
         </button>
@@ -293,7 +301,7 @@ export function AppShell(props: AppShellProps) {
             className="absolute inset-0 bg-grafite/40"
             onClick={() => setMenuOpen(false)}
           />
-          <aside className="relative h-full w-64 animate-fade-in bg-grafite">
+          <aside className="fixed-scale relative h-full w-64 animate-fade-in bg-grafite">
             <button
               type="button"
               aria-label="Fechar"

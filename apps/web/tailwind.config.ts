@@ -11,49 +11,50 @@ import type { Config } from 'tailwindcss';
  *   unconfirmed AI suggestions.
  * Contrast ratios (WCAG 2.x) are documented in the plan, §6.2.
  */
-const concreto = {
-  0: '#FFFFFF',
-  25: '#FAFAF8',
-  50: '#F3F3F0',
-  100: '#E7E7E2',
-  200: '#D2D2CB',
-  300: '#B4B4AC',
-  400: '#8E8E86', // icons only (3.3:1)
-  500: '#6E6E67', // secondary text (5.1:1)
-  600: '#55554F', // supporting text (7.2:1)
-  700: '#3D3D38',
-  800: '#2A2A27',
-  900: '#1B1B19',
-  950: '#111110',
-};
+/** Colour backed by a CSS variable (RGB triplet) so light/dark swap at runtime. */
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
+// Neutral scale: inverted in dark mode (plan §6.3 — tokens, not `dark:` everywhere).
+const concreto = Object.fromEntries(
+  [0, 25, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((step) => [
+    step,
+    v(`concreto-${step}`),
+  ]),
+);
 
 const config: Config = {
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
         gray: concreto,
         concreto,
+        // Semantic surfaces/text (swap in dark mode).
+        surface: v('surface'),
+        ink: { DEFAULT: v('ink'), fg: v('ink-fg') },
+        // Brand graphite stays dark in both themes (sidebar, header bands).
         grafite: { DEFAULT: '#17181A', 700: '#2A2A27', 600: '#3A3B3E' },
-        sinal: { 50: '#FFF7D6', 100: '#FFEDA8', 500: '#FFC21A', 600: '#E6A800' },
-        cobalto: { 50: '#ECF0FE', 100: '#D9E1FD', 600: '#2F54EB', 700: '#2441C2' },
-        ia: { 50: '#EFEBFF', 600: '#5B3FD9' },
+        sinal: { 50: v('sinal-50'), 100: v('sinal-100'), 500: '#FFC21A', 600: '#E6A800' },
+        cobalto: {
+          50: v('cobalto-50'),
+          100: v('cobalto-100'),
+          600: v('cobalto-600'),
+          700: v('cobalto-700'),
+        },
+        ia: { 50: v('ia-50'), 600: v('ia-600') },
         terra: '#9C6B3F',
         agua: '#1590A8',
-        brand: {
-          DEFAULT: '#17181A', // graphite primary (17:1 on concreto-25)
-          dark: '#2A2A27',
-          fg: '#FFFFFF',
-        },
-        danger: { DEFAULT: '#B3261E', fg: '#FFFFFF', soft: '#FDE8E8' },
-        success: { DEFAULT: '#157A45', fg: '#FFFFFF', soft: '#E3F5EA' },
-        warning: { DEFAULT: '#A85A00', fg: '#FFFFFF', soft: '#FFF0DB' },
-        info: { DEFAULT: '#2F54EB', fg: '#FFFFFF', soft: '#ECF0FE' },
-        neutral: { DEFAULT: '#3D3D38', fg: '#FFFFFF' },
-        red: { 50: '#FDE8E8', 200: '#F5C2C0', 700: '#B3261E' },
-        green: { 50: '#E3F5EA', 700: '#157A45' },
-        amber: { 50: '#FFF0DB', 700: '#A85A00' },
-        yellow: { 50: '#FFF7D6', 900: '#5C4300' },
+        brand: { DEFAULT: v('ink'), dark: v('ink'), fg: v('ink-fg') },
+        danger: { DEFAULT: v('danger'), fg: '#FFFFFF', soft: v('danger-soft') },
+        success: { DEFAULT: v('success'), fg: '#FFFFFF', soft: v('success-soft') },
+        warning: { DEFAULT: v('warning'), fg: '#FFFFFF', soft: v('warning-soft') },
+        info: { DEFAULT: v('cobalto-600'), fg: '#FFFFFF', soft: v('cobalto-50') },
+        neutral: { DEFAULT: v('concreto-700'), fg: v('surface') },
+        red: { 50: v('danger-soft'), 200: v('danger-soft'), 700: v('danger') },
+        green: { 50: v('success-soft'), 700: v('success') },
+        amber: { 50: v('warning-soft'), 700: v('warning') },
+        yellow: { 50: v('sinal-50'), 900: v('yellow-900') },
       },
       fontFamily: {
         sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],

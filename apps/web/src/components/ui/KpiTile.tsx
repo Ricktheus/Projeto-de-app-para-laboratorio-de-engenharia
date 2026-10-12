@@ -10,9 +10,9 @@ export interface KpiTileProps {
 }
 
 const VALUE_TONE: Record<NonNullable<KpiTileProps['tone']>, string> = {
-  default: 'text-grafite',
+  default: 'text-ink',
   danger: 'text-danger',
-  accent: 'text-grafite',
+  accent: 'text-ink',
 };
 
 /** Big-number indicator in Barlow (plan §6.4: KPI 40px, tabular figures). */

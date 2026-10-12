@@ -72,7 +72,7 @@ const CONCLUSAO_STYLE: Record<
 function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-concreto-25">
-      <div className="bg-grafite">
+      <div className="fixed-scale bg-grafite">
         <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-20 pt-8">
           <BrandMark size="lg" tone="light" />
           <div>
@@ -185,7 +185,7 @@ function Field({ label, value, mono = false }: { label: string; value: string; m
   return (
     <div>
       <dt className="eyebrow">{label}</dt>
-      <dd className={`mt-0.5 text-[15px] text-grafite ${mono ? 'font-mono' : ''}`}>{value}</dd>
+      <dd className={`mt-0.5 text-[15px] text-ink ${mono ? 'font-mono' : ''}`}>{value}</dd>
     </div>
   );
 }

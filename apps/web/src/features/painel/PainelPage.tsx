@@ -51,7 +51,7 @@ function SlumpCell({ row }: { row: ConcretagemRow }) {
 /** "Live" indicator for the realtime subscription (plan §6.8: motion = info). */
 function LiveBadge() {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-concreto-200 bg-white px-3 py-1 text-[12px] font-medium text-concreto-600">
+    <span className="inline-flex items-center gap-2 rounded-full border border-concreto-200 bg-surface px-3 py-1 text-[12px] font-medium text-concreto-600">
       <span aria-hidden className="h-2 w-2 animate-pulse-dot rounded-full bg-success" />
       Ao vivo
     </span>
@@ -226,7 +226,7 @@ export function PainelPage() {
                           {formatIsoDateBr(row.data_concretagem)}
                         </td>
                         <td className="px-4">
-                          <p className="font-medium text-grafite">
+                          <p className="font-medium text-ink">
                             {row.obra_sigla ?? 'Obra'}{' '}
                             <span className="font-normal text-concreto-500">
                               · {row.obra_nome ?? '—'}

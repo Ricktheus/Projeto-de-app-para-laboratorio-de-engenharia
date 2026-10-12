@@ -53,16 +53,16 @@ export function Drawer({
         aria-modal="true"
         className={`relative flex h-full w-full ${widthClassName} animate-slide-in flex-col bg-concreto-25 shadow-drawer`}
       >
-        <header className="flex items-start gap-3 border-b border-concreto-100 bg-white px-6 py-4">
+        <header className="flex items-start gap-3 border-b border-concreto-100 bg-surface px-6 py-4">
           <div className="min-w-0 flex-1">
-            <h2 className="truncate font-display text-xl font-semibold text-grafite">{title}</h2>
+            <h2 className="truncate font-display text-xl font-semibold text-ink">{title}</h2>
             {subtitle ? <p className="truncate text-[13px] text-concreto-500">{subtitle}</p> : null}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-lg p-1.5 text-concreto-500 hover:bg-concreto-50 hover:text-grafite"
+            className="rounded-lg p-1.5 text-concreto-500 hover:bg-concreto-50 hover:text-ink"
           >
             <X size={18} />
           </button>

@@ -176,7 +176,7 @@ export function ExportacaoPage() {
                 {item.icon}
               </span>
               <div>
-                <p className="font-medium text-grafite">{item.title}</p>
+                <p className="font-medium text-ink">{item.title}</p>
                 <p className="text-[13px] text-concreto-500">{item.text}</p>
               </div>
             </div>

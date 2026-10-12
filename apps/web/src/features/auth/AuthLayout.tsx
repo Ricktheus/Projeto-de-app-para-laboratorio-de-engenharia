@@ -38,7 +38,7 @@ export function AuthLayout({
 }) {
   return (
     <main className="grid min-h-screen bg-concreto-25 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-grafite p-12 lg:flex">
+      <aside className="fixed-scale relative hidden flex-col justify-between overflow-hidden bg-grafite p-12 lg:flex">
         {/* Oversized specimen glyph as a quiet backdrop. */}
         <div aria-hidden className="pointer-events-none absolute -right-24 top-24 opacity-[0.06]">
           <BrandGlyph size={520} />

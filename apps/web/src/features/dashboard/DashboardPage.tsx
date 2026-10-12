@@ -121,9 +121,7 @@ function LaudosPendentesCard() {
           <ul className="divide-y divide-concreto-100 rounded-xl border border-concreto-100">
             {data.slice(0, 5).map((laudo) => (
               <li key={laudo.id} className="flex items-center gap-3 px-3 py-2.5">
-                <span className="font-mono text-[13px] font-medium text-grafite">
-                  {laudo.numero}
-                </span>
+                <span className="font-mono text-[13px] font-medium text-ink">{laudo.numero}</span>
                 <span className="ml-auto truncate text-[13px] text-concreto-500">
                   {laudo.obraSigla ?? laudo.obraNome ?? '—'}
                 </span>
@@ -177,7 +175,7 @@ function ConcretagensSemColetaCard() {
                 aria-hidden
                 className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-danger ring-offset-2 ring-offset-danger-soft"
               />
-              <span className="font-medium text-grafite">{c.obraSigla ?? '—'}</span>
+              <span className="font-medium text-ink">{c.obraSigla ?? '—'}</span>
               <span className="ml-auto font-mono text-[13px] text-concreto-600">
                 NF {c.nfNumero ?? '—'}
               </span>
@@ -221,7 +219,7 @@ function ProximosRompimentosCard() {
             <li key={date} className="relative pl-6">
               <span
                 aria-hidden
-                className="absolute left-0 top-1 h-[11px] w-[11px] rounded-full border-2 border-white bg-agua ring-1 ring-agua"
+                className="absolute left-0 top-1 h-[11px] w-[11px] rounded-full border-2 border-surface bg-agua ring-1 ring-agua"
               />
               <p className="eyebrow mb-1.5">{formatIsoDateBr(date)}</p>
               <ul className="flex flex-col gap-1.5">
@@ -230,7 +228,7 @@ function ProximosRompimentosCard() {
                     key={cp.codigoRastreio}
                     className="flex items-center gap-3 rounded-lg bg-concreto-25 px-3 py-2"
                   >
-                    <span className="font-mono text-[13px] font-medium text-grafite">
+                    <span className="font-mono text-[13px] font-medium text-ink">
                       {cp.codigoRastreio}
                     </span>
                     <span className="ml-auto text-[13px] text-concreto-500">

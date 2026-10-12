@@ -195,12 +195,12 @@ export function PortalPage() {
                     <div className="flex items-start gap-3">
                       <span
                         aria-hidden
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-grafite text-sinal-500"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-grafite text-sinal-500 ring-1 ring-concreto-200"
                       >
                         <FilePdf size={20} weight="bold" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-mono text-[14px] font-medium text-grafite">
+                        <p className="truncate font-mono text-[14px] font-medium text-ink">
                           {laudo.numero}
                         </p>
                         <p className="text-[13px] text-concreto-500">

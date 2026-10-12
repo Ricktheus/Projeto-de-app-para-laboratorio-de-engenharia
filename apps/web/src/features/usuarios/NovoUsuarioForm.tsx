@@ -51,7 +51,7 @@ export function NovoUsuarioForm() {
 
   return (
     <form className="surface flex flex-col gap-4 p-5" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <h3 className="font-display text-[18px] font-semibold text-grafite">Novo usuário</h3>
+      <h3 className="font-display text-[18px] font-semibold text-ink">Novo usuário</h3>
 
       {errorMessage ? (
         <div
@@ -91,7 +91,7 @@ export function NovoUsuarioForm() {
         </select>
       </div>
 
-      <label className="flex items-center gap-3 text-field text-grafite">
+      <label className="flex items-center gap-3 text-field text-ink">
         <input
           type="checkbox"
           disabled={isPending}

@@ -9,7 +9,7 @@ const TONE_CLASSES: Record<StatusTone, { pill: string; dot: string }> = {
   danger: { pill: 'bg-danger-soft text-danger ring-danger/20', dot: 'bg-danger' },
   ai: { pill: 'bg-ia-50 text-ia-600 ring-ia-600/30', dot: 'bg-ia-600' },
   accent: {
-    pill: 'bg-sinal-50 text-grafite ring-sinal-600/40',
+    pill: 'bg-sinal-50 text-ink ring-sinal-600/40',
     dot: 'bg-sinal-500 ring-1 ring-grafite',
   },
 };

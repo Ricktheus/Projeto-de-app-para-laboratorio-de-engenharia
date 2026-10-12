@@ -62,7 +62,7 @@ export function BrandMark({ size = 'lg', tagline, tone = 'dark' }: BrandMarkProp
           className={[
             'font-display font-semibold leading-tight tracking-[0.01em]',
             size === 'lg' ? 'text-[22px]' : 'text-[17px]',
-            tone === 'light' ? 'text-white' : 'text-grafite',
+            tone === 'light' ? 'text-white' : 'text-ink',
           ].join(' ')}
         >
           {BRAND.nome}

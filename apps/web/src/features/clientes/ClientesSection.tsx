@@ -40,7 +40,7 @@ export function ClientesSection() {
             {data.map((cliente) => (
               <li key={cliente.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-grafite">{cliente.nome}</p>
+                  <p className="truncate font-medium text-ink">{cliente.nome}</p>
                   <p className="truncate text-[13px] text-concreto-500">
                     {cliente.cnpj ?? 'Sem CNPJ'} · {cliente.email ?? 'Sem e-mail'}
                   </p>

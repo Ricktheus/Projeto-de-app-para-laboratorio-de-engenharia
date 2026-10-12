@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App';
+import { applyTheme, useThemeStore } from './stores/theme-store';
 
 import './index.css';
 
@@ -13,6 +14,9 @@ const queryClient = new QueryClient({
     queries: { retry: 1, refetchOnWindowFocus: false },
   },
 });
+
+// Apply the stored theme before the first paint of the React tree.
+applyTheme(useThemeStore.getState().preference);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

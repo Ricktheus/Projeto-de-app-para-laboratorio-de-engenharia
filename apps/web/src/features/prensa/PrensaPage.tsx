@@ -35,14 +35,14 @@ export function PrensaPage() {
                   {i + 1}
                 </span>
                 <div>
-                  <p className="font-medium text-grafite">{step.title}</p>
+                  <p className="font-medium text-ink">{step.title}</p>
                   <p className="text-concreto-500">{step.text}</p>
                 </div>
               </li>
             ))}
           </ol>
         </Card>
-        <div className="flex flex-col items-start gap-3 rounded-xl bg-grafite p-6 text-white">
+        <div className="flex flex-col items-start gap-3 fixed-scale rounded-xl bg-grafite p-6 text-white">
           <DeviceMobile size={28} className="text-sinal-500" aria-hidden />
           <p className="font-display text-[22px] font-semibold leading-tight">
             Use o app no celular

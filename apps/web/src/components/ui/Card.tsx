@@ -48,7 +48,7 @@ export function Card({
               {icon}
             </span>
           ) : null}
-          {title ? <h2 className="text-[14px] font-semibold text-grafite">{title}</h2> : null}
+          {title ? <h2 className="text-[14px] font-semibold text-ink">{title}</h2> : null}
           {meta ? <span className="text-[13px] text-concreto-500">{meta}</span> : null}
           {actions ? <div className="ml-auto flex items-center gap-2">{actions}</div> : null}
         </header>

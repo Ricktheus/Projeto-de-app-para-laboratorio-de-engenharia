@@ -97,7 +97,7 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
             <StatusPill label={`Versão ${detalhe.versao}`} tone="info" plain />
           ) : null}
         </div>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-concreto-100 bg-white p-4 sm:grid-cols-[1.4fr_1.2fr_0.8fr_0.8fr]">
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-concreto-100 bg-surface p-4 sm:grid-cols-[1.4fr_1.2fr_0.8fr_0.8fr]">
           <Fact
             label="Obra"
             value={`${detalhe.obra_sigla ?? 'Obra'} · ${detalhe.obra_nome ?? '—'}`}
@@ -125,14 +125,14 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
       <div className="flex flex-col gap-3">
         <h3 className="eyebrow">Resultados por idade</h3>
         {detalhe.consolidado.idades.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-concreto-200 bg-white px-4 py-6 text-center text-concreto-500">
+          <p className="rounded-xl border border-dashed border-concreto-200 bg-surface px-4 py-6 text-center text-concreto-500">
             Ainda não há corpos de prova para este laudo.
           </p>
         ) : (
           detalhe.consolidado.idades.map((idade) => (
             <div
               key={idade.idadeAlvoDias}
-              className="overflow-hidden rounded-xl border border-concreto-100 bg-white"
+              className="overflow-hidden rounded-xl border border-concreto-100 bg-surface"
             >
               <div className="flex flex-wrap items-center gap-3 border-b border-concreto-100 px-4 py-2.5">
                 <span className="font-display text-[20px] font-semibold leading-none">
@@ -183,13 +183,13 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
       </div>
 
       {/* Resistance curve + fck reference line. */}
-      <div className="rounded-xl border border-concreto-100 bg-white p-4">
+      <div className="rounded-xl border border-concreto-100 bg-surface p-4">
         <h3 className="eyebrow mb-3">Curva de resistência</h3>
         <ResistenciaChart curva={detalhe.consolidado.curva} fckProjeto={detalhe.fckProjeto} />
       </div>
 
       {/* Status-aware actions: the next step for this report. */}
-      <div className="flex flex-col gap-3 rounded-xl border border-concreto-100 bg-white p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-concreto-100 bg-surface p-4">
         <h3 className="eyebrow">Próxima etapa</h3>
         {detalhe.status === 'rascunho' ? (
           <RascunhoActions
@@ -224,9 +224,7 @@ function Fact({
   return (
     <div className={wide ? 'col-span-2' : ''}>
       <dt className="eyebrow">{label}</dt>
-      <dd className={`mt-0.5 truncate text-grafite ${mono ? 'font-mono text-[13px]' : ''}`}>
-        {value}
-      </dd>
+      <dd className={`mt-0.5 truncate text-ink ${mono ? 'font-mono text-[13px]' : ''}`}>{value}</dd>
     </div>
   );
 }
@@ -255,7 +253,7 @@ function NumeroEditor({
   return (
     <div
       className={`flex flex-col gap-3 rounded-xl border p-4 ${
-        pendente ? 'border-sinal-600/50 bg-sinal-50' : 'border-concreto-100 bg-white'
+        pendente ? 'border-sinal-600/50 bg-sinal-50' : 'border-concreto-100 bg-surface'
       }`}
     >
       <label className="flex flex-col gap-1">
@@ -446,7 +444,7 @@ function UploadAssinadoBlock({
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-dashed border-concreto-200 bg-concreto-25 p-4">
-      <p className="font-semibold text-grafite">Publicar laudo assinado</p>
+      <p className="font-semibold text-ink">Publicar laudo assinado</p>
       <label className="flex flex-col gap-1">
         <span className="text-[13px] font-medium text-concreto-600">
           PDF assinado (gov.br) — obrigatório
@@ -457,7 +455,7 @@ function UploadAssinadoBlock({
           aria-label="PDF assinado"
           disabled={enviandoAssinado}
           onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
-          className="text-[13px] file:mr-3 file:rounded-lg file:border file:border-concreto-200 file:bg-white file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-grafite hover:file:bg-concreto-25"
+          className="text-[13px] file:mr-3 file:rounded-lg file:border file:border-concreto-200 file:bg-surface file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-ink hover:file:bg-concreto-25"
         />
       </label>
       <label className="flex flex-col gap-1">
@@ -470,7 +468,7 @@ function UploadAssinadoBlock({
           aria-label="2ª assinatura (elaborador)"
           disabled={enviandoAssinado}
           onChange={(e) => setElaborador(e.target.files?.[0] ?? null)}
-          className="text-[13px] file:mr-3 file:rounded-lg file:border file:border-concreto-200 file:bg-white file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-grafite hover:file:bg-concreto-25"
+          className="text-[13px] file:mr-3 file:rounded-lg file:border file:border-concreto-200 file:bg-surface file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-ink hover:file:bg-concreto-25"
         />
       </label>
       <div>

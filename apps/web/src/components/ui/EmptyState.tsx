@@ -22,7 +22,7 @@ export function EmptyState({ icon, title, description, action, compact = false }
         'flex flex-col items-center justify-center gap-2 text-center',
         compact
           ? 'py-6'
-          : 'rounded-xl border border-dashed border-concreto-200 bg-white/70 px-6 py-14',
+          : 'rounded-xl border border-dashed border-concreto-200 bg-surface/70 px-6 py-14',
       ].join(' ')}
     >
       {icon ? (
@@ -33,7 +33,7 @@ export function EmptyState({ icon, title, description, action, compact = false }
           {icon}
         </div>
       ) : null}
-      <h2 className="text-field font-semibold text-grafite">{title}</h2>
+      <h2 className="text-field font-semibold text-ink">{title}</h2>
       {description ? <p className="max-w-sm text-concreto-500">{description}</p> : null}
       {action ? <div className="mt-3">{action}</div> : null}
     </div>

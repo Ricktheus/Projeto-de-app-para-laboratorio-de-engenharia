@@ -10,6 +10,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { isDarkActive, useThemeStore } from '../../stores/theme-store';
+
 export interface ResistenciaChartProps {
   /** Resistance curve points (age → FCM), ascending. */
   curva: LaudoCurvaPonto[];
@@ -17,12 +19,14 @@ export interface ResistenciaChartProps {
   fckProjeto: number | null;
 }
 
-const CURVE_COLOR = '#2F54EB'; // cobalto-600 — the measured curve
-// Plan §6.2: the fck line is ALWAYS neutral (graphite, dashed, labelled) — red
-// would suggest a rejection the laboratory does not issue.
-const FCK_COLOR = '#17181A';
-const GRID_COLOR = '#E7E7E2'; // concreto-100
-const AXIS_COLOR = '#6E6E67'; // concreto-500
+/**
+ * Chart palette per theme. Plan §6.2: the fck line is ALWAYS neutral (ink,
+ * dashed, labelled) — red would suggest a rejection the lab does not issue.
+ */
+const PALETTE = {
+  light: { curve: '#2F54EB', fck: '#17181A', grid: '#E7E7E2', axis: '#6E6E67', surface: '#FFFFFF' },
+  dark: { curve: '#7C9BFF', fck: '#F3F3F0', grid: '#2A2A27', axis: '#A3A39B', surface: '#1B1B19' },
+} as const;
 
 /**
  * Resistance growth curve for a report (F-S007-3 / US13-CA2): FCM per age plus a
@@ -31,6 +35,12 @@ const AXIS_COLOR = '#6E6E67'; // concreto-500
  * data. Renders a placeholder when no valid result exists yet.
  */
 export function ResistenciaChart({ curva, fckProjeto }: ResistenciaChartProps) {
+  const preference = useThemeStore((s) => s.preference);
+  const c = PALETTE[isDarkActive(preference) ? 'dark' : 'light'];
+  const CURVE_COLOR = c.curve;
+  const FCK_COLOR = c.fck;
+  const GRID_COLOR = c.grid;
+  const AXIS_COLOR = c.axis;
   if (curva.length === 0) {
     return (
       <p className="rounded-lg bg-concreto-25 px-4 py-8 text-center text-concreto-500">
@@ -73,7 +83,8 @@ export function ResistenciaChart({ curva, fckProjeto }: ResistenciaChartProps) {
           <Tooltip
             contentStyle={{
               borderRadius: 8,
-              border: '1px solid #E7E7E2',
+              border: `1px solid ${GRID_COLOR}`,
+              background: c.surface,
               boxShadow: '0 4px 16px -4px rgba(23,24,26,0.12)',
               fontFamily: 'IBM Plex Sans, sans-serif',
               fontSize: 13,
@@ -103,7 +114,7 @@ export function ResistenciaChart({ curva, fckProjeto }: ResistenciaChartProps) {
             stroke={CURVE_COLOR}
             strokeWidth={2.5}
             fill="url(#fcmFill)"
-            dot={{ r: 4, fill: '#FFFFFF', stroke: CURVE_COLOR, strokeWidth: 2 }}
+            dot={{ r: 4, fill: c.surface, stroke: CURVE_COLOR, strokeWidth: 2 }}
             activeDot={{ r: 6 }}
           />
         </ComposedChart>

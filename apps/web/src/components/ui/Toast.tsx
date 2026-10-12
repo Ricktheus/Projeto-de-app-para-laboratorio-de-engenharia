@@ -27,7 +27,7 @@ function ToastCard({ toast }: { toast: ToastItem }) {
     <div
       role={toast.variant === 'error' ? 'alert' : 'status'}
       className={[
-        'pointer-events-auto flex animate-slide-in items-center gap-3 rounded-xl bg-grafite px-4 py-3 text-white shadow-raised',
+        'pointer-events-auto flex animate-slide-in items-center gap-3 fixed-scale rounded-xl bg-grafite px-4 py-3 text-white shadow-raised',
       ].join(' ')}
     >
       <span aria-hidden className="flex shrink-0">

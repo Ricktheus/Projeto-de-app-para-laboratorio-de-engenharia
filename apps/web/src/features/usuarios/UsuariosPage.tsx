@@ -21,7 +21,7 @@ export function UsuariosPage() {
       subtitle="Clientes com acesso ao portal e usuários internos do laboratório."
     >
       <div
-        className="mb-6 inline-flex gap-1 rounded-xl border border-concreto-100 bg-white p-1 shadow-card"
+        className="mb-6 inline-flex gap-1 rounded-xl border border-concreto-100 bg-surface p-1 shadow-card"
         role="tablist"
         aria-label="Seções de gestão"
       >
@@ -32,7 +32,7 @@ export function UsuariosPage() {
           onClick={() => setTab('clientes')}
           className={[
             'h-9 rounded-lg px-4 text-[14px] font-medium transition-colors',
-            tab === 'clientes' ? 'bg-grafite text-white' : 'text-concreto-600 hover:text-grafite',
+            tab === 'clientes' ? 'bg-ink text-ink-fg' : 'text-concreto-600 hover:text-ink',
           ].join(' ')}
         >
           Clientes
@@ -44,7 +44,7 @@ export function UsuariosPage() {
           onClick={() => setTab('usuarios')}
           className={[
             'h-9 rounded-lg px-4 text-[14px] font-medium transition-colors',
-            tab === 'usuarios' ? 'bg-grafite text-white' : 'text-concreto-600 hover:text-grafite',
+            tab === 'usuarios' ? 'bg-ink text-ink-fg' : 'text-concreto-600 hover:text-ink',
           ].join(' ')}
         >
           Equipe
