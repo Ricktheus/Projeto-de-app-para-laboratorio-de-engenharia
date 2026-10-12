@@ -1,4 +1,7 @@
 import { formatIsoDateBr, MESSAGES, type PeriodCount } from '@concreto/shared';
+import { Link } from 'react-router-dom';
+
+import { AppShell } from '../../components/AppShell';
 import {
   ArrowRight,
   CalendarCheck,
@@ -8,10 +11,7 @@ import {
   Hammer,
   PenNib,
   Truck,
-} from '@phosphor-icons/react';
-import { Link } from 'react-router-dom';
-
-import { AppShell } from '../../components/AppShell';
+} from '../../components/icons';
 import { KpiTile, StatusPill } from '../../components/ui';
 
 import { DashboardCard } from './DashboardCard';

@@ -1,8 +1,8 @@
 import { formatIsoDateBr, formatNumberBr, MESSAGES } from '@concreto/shared';
-import { ArrowsClockwise, MagnifyingGlass, PencilSimple, Truck } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
+import { ArrowsClockwise, MagnifyingGlass, PencilSimple, Truck } from '../../components/icons';
 import {
   BigButton,
   Drawer,

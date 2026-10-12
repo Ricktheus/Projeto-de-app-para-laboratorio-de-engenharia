@@ -1,4 +1,7 @@
 import { MESSAGES, type LaudoTipo } from '@concreto/shared';
+import { useMemo, useState } from 'react';
+
+import { AppShell } from '../../components/AppShell';
 import {
   ArrowsClockwise,
   Buildings,
@@ -7,10 +10,7 @@ import {
   FilePdf,
   FileText,
   SealCheck,
-} from '@phosphor-icons/react';
-import { useMemo, useState } from 'react';
-
-import { AppShell } from '../../components/AppShell';
+} from '../../components/icons';
 import {
   BigButton,
   EmptyState,

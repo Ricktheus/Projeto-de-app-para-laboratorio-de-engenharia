@@ -7,11 +7,11 @@ import {
   type FckVeredito,
   type ValidarLaudoResponse,
 } from '@concreto/shared';
-import { CheckCircle, Info, SealCheck, WarningCircle, XCircle } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
 import { BrandMark } from '../../components/BrandMark';
+import { CheckCircle, Info, SealCheck, WarningCircle, XCircle } from '../../components/icons';
 import { StatusPill } from '../../components/ui';
 
 import { validarLaudoPublico, type ValidacaoResultado } from './validacao-service';

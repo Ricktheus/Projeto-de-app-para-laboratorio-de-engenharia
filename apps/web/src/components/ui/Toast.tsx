@@ -1,7 +1,7 @@
-import { CheckCircle, Info, WarningCircle, X } from '@phosphor-icons/react';
 import { useEffect, type ReactNode } from 'react';
 
 import { useToastStore, type ToastItem, type ToastVariant } from '../../stores/toast-store';
+import { CheckCircle, Info, WarningCircle, X } from '../icons';
 
 const VARIANT_ICON: Record<ToastVariant, ReactNode> = {
   success: <CheckCircle size={18} weight="fill" className="text-[#3DD68C]" />,

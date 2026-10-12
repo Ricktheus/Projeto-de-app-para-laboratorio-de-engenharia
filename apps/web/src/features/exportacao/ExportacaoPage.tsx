@@ -1,8 +1,8 @@
 import { exportarExcelRequestSchema, MESSAGES, type ExportarExcelRequest } from '@concreto/shared';
-import { ChartBar, MicrosoftExcelLogo, Scales, Truck } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
+import { ChartBar, MicrosoftExcelLogo, Scales, Truck } from '../../components/icons';
 import { LoadingButton, useToast } from '../../components/ui';
 import { useObras } from '../obras/useObras';
 

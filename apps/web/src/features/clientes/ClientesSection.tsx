@@ -1,6 +1,6 @@
 import { MESSAGES } from '@concreto/shared';
-import { Briefcase } from '@phosphor-icons/react';
 
+import { Briefcase } from '../../components/icons';
 import { EmptyState, ErrorState, StatusPill } from '../../components/ui';
 
 import { NovoClienteForm } from './NovoClienteForm';

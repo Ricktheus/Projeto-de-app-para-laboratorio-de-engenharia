@@ -1,5 +1,6 @@
-import { X } from '@phosphor-icons/react';
 import { useEffect, type ReactNode } from 'react';
+
+import { X } from '../icons';
 
 export interface DrawerProps {
   open: boolean;

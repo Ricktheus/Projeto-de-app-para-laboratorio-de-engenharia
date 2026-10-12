@@ -1,5 +1,6 @@
-import { WarningCircle } from '@phosphor-icons/react';
 import { type ReactNode } from 'react';
+
+import { WarningCircle } from '../icons';
 
 /** Inline error UI-state: message + optional retry action. */
 export function ErrorState({ message, action }: { message: string; action?: ReactNode }) {

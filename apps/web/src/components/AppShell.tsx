@@ -1,4 +1,11 @@
 import { canAccessArea, type NavArea, type UserRole } from '@concreto/shared';
+import { useState, type ReactNode } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+
+import { signOut } from '../features/auth/auth-service';
+import { useAuthStore } from '../stores/auth-store';
+
+import { BrandGlyph, BrandMark } from './BrandMark';
 import {
   Buildings,
   ChartLineUp,
@@ -11,14 +18,7 @@ import {
   Truck,
   UsersThree,
   X,
-} from '@phosphor-icons/react';
-import { useState, type ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-
-import { signOut } from '../features/auth/auth-service';
-import { useAuthStore } from '../stores/auth-store';
-
-import { BrandGlyph, BrandMark } from './BrandMark';
+} from './icons';
 
 /** Human-readable PT labels for each role, shown in the user block. */
 const ROLE_LABELS: Readonly<Record<UserRole, string>> = {

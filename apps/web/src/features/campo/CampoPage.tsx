@@ -1,6 +1,5 @@
-import { ClipboardText, DeviceMobile } from '@phosphor-icons/react';
-
 import { AppShell } from '../../components/AppShell';
+import { ClipboardText, DeviceMobile } from '../../components/icons';
 import { Card } from '../../components/ui';
 
 const STEPS = [

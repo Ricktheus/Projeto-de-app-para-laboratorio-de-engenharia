@@ -1,8 +1,8 @@
 import { BRAND } from '@concreto/shared';
-import { FileText, QrCode, Timer } from '@phosphor-icons/react';
 import { type ReactNode } from 'react';
 
 import { BrandGlyph, BrandMark } from '../../components/BrandMark';
+import { FileText, QrCode, Timer } from '../../components/icons';
 
 const PILLARS = [
   {

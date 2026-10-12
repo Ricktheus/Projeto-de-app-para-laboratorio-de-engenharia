@@ -1,8 +1,8 @@
 import { MESSAGES, type LaudoStatus, type LaudoTipo } from '@concreto/shared';
-import { ArrowsClockwise, FileText, MagnifyingGlass, Stack, X } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
+import { ArrowsClockwise, FileText, MagnifyingGlass, Stack, X } from '../../components/icons';
 import {
   BigButton,
   Drawer,

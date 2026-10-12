@@ -1,6 +1,6 @@
 import { MESSAGES, type UserRole } from '@concreto/shared';
-import { UsersThree } from '@phosphor-icons/react';
 
+import { UsersThree } from '../../components/icons';
 import { EmptyState, ErrorState, StatusPill } from '../../components/ui';
 
 import { NovoUsuarioForm } from './NovoUsuarioForm';

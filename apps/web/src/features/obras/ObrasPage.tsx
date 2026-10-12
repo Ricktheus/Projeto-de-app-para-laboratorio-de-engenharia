@@ -1,8 +1,8 @@
 import { MESSAGES } from '@concreto/shared';
-import { Buildings, Plus, X } from '@phosphor-icons/react';
 import { useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
+import { Buildings, Plus, X } from '../../components/icons';
 import {
   BigButton,
   EmptyState,

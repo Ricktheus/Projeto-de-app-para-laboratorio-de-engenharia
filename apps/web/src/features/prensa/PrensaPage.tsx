@@ -1,6 +1,5 @@
-import { ChartLineUp, DeviceMobile } from '@phosphor-icons/react';
-
 import { AppShell } from '../../components/AppShell';
+import { ChartLineUp, DeviceMobile } from '../../components/icons';
 import { Card } from '../../components/ui';
 
 const STEPS = [
