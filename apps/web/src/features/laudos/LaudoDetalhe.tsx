@@ -15,6 +15,7 @@ import {
   useToast,
   type StatusTone,
 } from '../../components/ui';
+import { appUrl } from '../../lib/app-url';
 
 import { ResistenciaChart } from './ResistenciaChart';
 import { type LaudoDetalhe as LaudoDetalheData } from './laudos-service';
@@ -415,7 +416,7 @@ function AssinadoActions({
  */
 function CopiarLinkValidacao({ codigo }: { codigo: string }) {
   const { show } = useToast();
-  const url = `${window.location.origin}/validar/${codigo}`;
+  const url = appUrl(`/validar/${codigo}`);
 
   async function handleCopiar() {
     try {

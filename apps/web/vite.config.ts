@@ -4,6 +4,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
+  // Deploy base path: '/' on Vercel/Netlify, '/<repo>/' on GitHub Pages.
+  base: process.env.VITE_BASE ?? '/',
   server: { port: 5173 },
   build: {
     rollupOptions: {

@@ -1,3 +1,4 @@
+import { appUrl } from '../../lib/app-url';
 import { supabase } from '../../services/supabase';
 
 /**
@@ -51,7 +52,7 @@ export async function establishRecoverySession(hash: string): Promise<RecoveryIn
  */
 export async function requestPasswordReset(email: string): Promise<void> {
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
+    redirectTo: appUrl('/reset-password'),
   });
 }
 

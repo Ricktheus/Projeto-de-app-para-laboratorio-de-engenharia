@@ -21,6 +21,7 @@ import {
   StatusPill,
   useToast,
 } from '../../components/ui';
+import { appPath } from '../../lib/app-url';
 
 import { type PortalLaudoRow } from './portal-service';
 import { usePortalLaudos, useBaixarLaudoAssinado } from './usePortal';
@@ -230,7 +231,7 @@ export function PortalPage() {
                       </LoadingButton>
                       {laudo.codigo_verificacao ? (
                         <a
-                          href={`/validar/${laudo.codigo_verificacao}`}
+                          href={appPath(`/validar/${laudo.codigo_verificacao}`)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex h-8 items-center gap-1.5 rounded-xl px-3 text-[13px] font-medium text-cobalto-600 hover:bg-cobalto-50"
