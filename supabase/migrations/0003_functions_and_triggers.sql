@@ -101,15 +101,18 @@ declare
   v_role     user_role;
   v_is_admin boolean;
   v_cliente  uuid;
+  v_meta     jsonb;
 begin
+  v_meta := coalesce(new.raw_app_meta_data, '{}'::jsonb) || coalesce(new.raw_user_meta_data, '{}'::jsonb);
+
   v_role := coalesce(
-    nullif(new.raw_user_meta_data ->> 'role', '')::user_role,
+    nullif(v_meta ->> 'role', '')::user_role,
     'cliente'
   );
-  v_is_admin := coalesce((new.raw_user_meta_data ->> 'is_admin')::boolean, false);
+  v_is_admin := coalesce((v_meta ->> 'is_admin')::boolean, false);
   v_cliente := case
     when v_role = 'cliente'
-      then nullif(new.raw_user_meta_data ->> 'cliente_id', '')::uuid
+      then nullif(v_meta ->> 'cliente_id', '')::uuid
     else null
   end;
 
@@ -117,8 +120,8 @@ begin
   values (
     new.id,
     coalesce(
-      nullif(new.raw_user_meta_data ->> 'nome', ''),
-      nullif(new.raw_user_meta_data ->> 'name', ''),
+      nullif(v_meta ->> 'nome', ''),
+      nullif(v_meta ->> 'name', ''),
       split_part(new.email, '@', 1)
     ),
     new.email,

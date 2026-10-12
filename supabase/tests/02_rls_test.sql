@@ -135,7 +135,7 @@ select set_config('request.jwt.claims', '{"sub":"44444444-4444-4444-4444-4444444
 select throws_ok(
   $$ insert into obras (cliente_id, nome, sigla, criado_por)
      values ('c1111111-1111-1111-1111-111111111111', 'X', 'OBRA-X', '44444444-4444-4444-4444-444444444444') $$,
-  '42501', null,
+  '44000', null,
   'cliente NAO pode criar obra (RLS nega escrita)');
 
 reset role; set role authenticated;

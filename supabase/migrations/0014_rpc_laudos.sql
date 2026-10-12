@@ -44,7 +44,7 @@ $$;
 revoke execute on function _assert_laudo_eng() from public, anon;
 
 -- ---------- marcar_pronto_assinatura: rascunho -> pronto_assinatura ----------
-create or replace function marcar_pronto_assinatura(laudo_id uuid)
+create or replace function marcar_pronto_assinatura(p_laudo_id uuid)
   returns jsonb
   language plpgsql
   security definer
@@ -56,7 +56,7 @@ declare
 begin
   perform _assert_laudo_eng();
 
-  select * into v_laudo from laudos where id = laudo_id;
+  select * into v_laudo from laudos where id = p_laudo_id;
   if not found then
     raise exception 'LAUDO_NAO_ENCONTRADO';
   end if;
@@ -71,7 +71,7 @@ begin
     into v_pendentes
   from laudo_concretagens lc
   join corpos_prova cp on cp.concretagem_id = lc.concretagem_id
-  where lc.laudo_id = laudo_id
+  where lc.laudo_id = p_laudo_id
     and cp.status in ('moldado', 'coletado')
     and (
       v_laudo.tipo_laudo = 'final_28d'
@@ -86,9 +86,9 @@ begin
   update laudos
      set status = 'pronto_assinatura',
          data_emissao = coalesce(data_emissao, current_date)
-   where id = laudo_id;
+   where id = p_laudo_id;
 
-  return jsonb_build_object('id', laudo_id, 'status', 'pronto_assinatura');
+  return jsonb_build_object('id', p_laudo_id, 'status', 'pronto_assinatura');
 end;
 $$;
 
@@ -96,7 +96,7 @@ revoke execute on function marcar_pronto_assinatura(uuid) from public, anon;
 grant execute on function marcar_pronto_assinatura(uuid) to authenticated, service_role;
 
 -- ---------- emitir_laudo_parcial: on-demand 7d|14d partial draft ----------
-create or replace function emitir_laudo_parcial(concretagem_id uuid, idade_dias int)
+create or replace function emitir_laudo_parcial(p_concretagem_id uuid, p_idade_dias int)
   returns jsonb
   language plpgsql
   security definer
@@ -112,7 +112,7 @@ declare
 begin
   perform _assert_laudo_eng();
 
-  v_tipo := case idade_dias
+  v_tipo := case p_idade_dias
     when 7  then 'parcial_7d'::laudo_tipo
     when 14 then 'parcial_14d'::laudo_tipo
     else null
@@ -121,7 +121,7 @@ begin
     raise exception 'IDADE_PARCIAL_INVALIDA';
   end if;
 
-  select * into v_conc from concretagens where id = concretagem_id;
+  select * into v_conc from concretagens where id = p_concretagem_id;
   if not found then
     raise exception 'LAUDO_NAO_ENCONTRADO';
   end if;
@@ -131,8 +131,8 @@ begin
   select count(*)
     into v_validos
   from corpos_prova cp
-  where cp.concretagem_id = concretagem_id
-    and cp.idade_alvo_dias = idade_dias
+  where cp.concretagem_id = p_concretagem_id
+    and cp.idade_alvo_dias = p_idade_dias
     and cp.status = 'rompido';
   if v_validos = 0 then
     raise exception 'SEM_RESULTADOS';
@@ -142,7 +142,7 @@ begin
   select l.id into v_laudo_id
   from laudos l
   join laudo_concretagens lc on lc.laudo_id = l.id
-  where lc.concretagem_id = concretagem_id
+  where lc.concretagem_id = p_concretagem_id
     and l.tipo_laudo = v_tipo
     and l.status = 'rascunho'
   limit 1;
@@ -155,7 +155,7 @@ begin
       v_obra.cliente_id,
       v_obra.id,
       v_tipo,
-      'RASCUNHO ' || v_obra.sigla || ' NF ' || v_conc.nf_numero || ' (' || idade_dias || 'd)',
+      'RASCUNHO ' || v_obra.sigla || ' NF ' || v_conc.nf_numero || ' (' || p_idade_dias || 'd)',
       replace(gen_random_uuid()::text, '-', ''),
       'rascunho',
       v_uid
@@ -163,7 +163,7 @@ begin
     returning id into v_laudo_id;
 
     insert into laudo_concretagens (laudo_id, concretagem_id)
-    values (v_laudo_id, concretagem_id)
+    values (v_laudo_id, p_concretagem_id)
     on conflict do nothing;
   end if;
 

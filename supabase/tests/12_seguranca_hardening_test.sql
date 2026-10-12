@@ -52,7 +52,8 @@ values ('d1111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-2222222
 insert into email_events (evento, destinatario, payload)
 values ('laudo_assinado', 'cliente@obra.test', '{"laudo_id":"a1111111-1111-1111-1111-111111111111"}');
 insert into app_settings (key, value)
-values ('projection_factor_7d', '0.70');
+values ('projection_factor_7d', '0.70')
+on conflict (key) do update set value = excluded.value;
 
 -- ===================== 1. Physical DELETE guard (23001) =====================
 -- reset role => superuser (RLS bypassed): the DELETE reaches the guard trigger.
