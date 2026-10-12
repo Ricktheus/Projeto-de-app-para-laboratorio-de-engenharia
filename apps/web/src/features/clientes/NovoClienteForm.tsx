@@ -46,17 +46,13 @@ export function NovoClienteForm() {
   }
 
   return (
-    <form
-      className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6"
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-    >
-      <h3 className="text-field font-semibold text-gray-900">Novo cliente</h3>
+    <form className="surface flex flex-col gap-4 p-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <h3 className="font-display text-[18px] font-semibold text-ink">Novo cliente</h3>
 
       {errorMessage ? (
         <div
           role="alert"
-          className="rounded-lg bg-red-50 px-4 py-3 text-field font-medium text-danger"
+          className="rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-field font-medium text-danger"
         >
           {errorMessage}
         </div>

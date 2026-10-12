@@ -6,13 +6,13 @@ export interface LoadingButtonProps extends BigButtonProps {
   loadingLabel?: string;
 }
 
-/** Inline spinner (no external asset). */
+/** Inline spinner (no external asset); inherits the button's text colour. */
 function Spinner() {
   return (
     <span
       role="status"
       aria-label="Carregando"
-      className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white"
+      className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-80"
     />
   );
 }
@@ -27,10 +27,16 @@ export function LoadingButton({
   loadingLabel,
   disabled = false,
   children,
+  icon,
   ...rest
 }: LoadingButtonProps) {
   return (
-    <BigButton disabled={disabled || loading} aria-busy={loading} {...rest}>
+    <BigButton
+      disabled={disabled || loading}
+      aria-busy={loading}
+      icon={loading ? undefined : icon}
+      {...rest}
+    >
       {loading ? (
         <>
           <Spinner />

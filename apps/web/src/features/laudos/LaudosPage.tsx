@@ -1,9 +1,19 @@
-import { MESSAGES, type LaudoStatus } from '@concreto/shared';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { MESSAGES, type LaudoStatus, type LaudoTipo } from '@concreto/shared';
+import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
-import { ManagementNav } from '../../components/ManagementNav';
-import { BigButton, EmptyState, LoadingButton, StatusPill, useToast } from '../../components/ui';
+import { ArrowsClockwise, FileText, MagnifyingGlass, Stack, X } from '../../components/icons';
+import {
+  BigButton,
+  Drawer,
+  EmptyState,
+  ErrorState,
+  LoadingButton,
+  SkeletonRows,
+  StatusPill,
+  useToast,
+  type StatusTone,
+} from '../../components/ui';
 
 import { LaudoDetalheView } from './LaudoDetalhe';
 import { type LaudoListRow } from './laudos-service';
@@ -20,16 +30,20 @@ import {
   useUploadAssinado,
 } from './useLaudos';
 
-const STATUS_PILL: Readonly<
-  Record<LaudoStatus, { label: string; tone: 'info' | 'warning' | 'success' | 'danger' }>
-> = {
-  rascunho: { label: 'Rascunho', tone: 'warning' },
-  pronto_assinatura: { label: 'Pronto p/ assinatura', tone: 'info' },
+const STATUS_PILL: Readonly<Record<LaudoStatus, { label: string; tone: StatusTone }>> = {
+  rascunho: { label: 'Rascunho', tone: 'neutral' },
+  pronto_assinatura: { label: 'Pronto p/ assinatura', tone: 'accent' },
   assinado: { label: 'Assinado', tone: 'success' },
-  substituido: { label: 'Substituído', tone: 'danger' },
+  substituido: { label: 'Substituído', tone: 'neutral' },
 };
 
-/** A status filter chip: a status subset + its human label. */
+const TIPO_LABEL: Readonly<Record<LaudoTipo, string>> = {
+  parcial_7d: 'Parcial 7d',
+  parcial_14d: 'Parcial 14d',
+  final_28d: 'Final 28d',
+};
+
+/** A status filter tab: a status subset + its human label. */
 type StatusFilter = 'todos' | LaudoStatus;
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'todos', label: 'Todos' },
@@ -49,11 +63,25 @@ function obraOptions(laudos: LaudoListRow[]): { id: string; label: string }[] {
   return [...byId.entries()].map(([id, label]) => ({ id, label }));
 }
 
+const dateTimeBr = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+});
+
+function formatUpdated(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '—' : dateTimeBr.format(d);
+}
+
 /**
- * Reports workspace (F-S007-3 / US13 + S008). Lists the active reports (rascunho
- * / pronto / assinado), filterable by obra / NF, and opens a consolidated detail
- * with the STATUS-AWARE actions: draft (emitir parcial, marcar pronto), pronto
- * (gerar PDF, baixar, enviar assinado) and assinado (baixar, corrigir).
+ * Reports workspace (F-S007-3 / US13 + S008). A dense table of the active
+ * reports with status tabs (the signature queue highlighted), obra / NF filters,
+ * and the consolidated detail in a side drawer with the STATUS-AWARE actions:
+ * draft (emitir parcial, marcar pronto), pronto (gerar PDF, baixar, enviar
+ * assinado) and assinado (baixar, corrigir).
  */
 export function LaudosPage() {
   const { show } = useToast();
@@ -65,7 +93,6 @@ export function LaudosPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos');
   const [grouping, setGrouping] = useState(false);
   const [selectedForGroup, setSelectedForGroup] = useState<string[]>([]);
-  const detalheRef = useRef<HTMLDivElement>(null);
 
   const detalhe = useLaudoDetalhe(selectedId);
   const definirNumero = useDefinirNumero();
@@ -79,10 +106,19 @@ export function LaudosPage() {
 
   const lista = useMemo(() => laudos ?? [], [laudos]);
   const options = useMemo(() => obraOptions(lista), [lista]);
-  const aguardandoAssinatura = useMemo(
-    () => lista.filter((l) => l.status === 'pronto_assinatura').length,
-    [lista],
-  );
+  const countByStatus = useMemo(() => {
+    const counts: Record<StatusFilter, number> = {
+      todos: lista.length,
+      rascunho: 0,
+      pronto_assinatura: 0,
+      assinado: 0,
+      substituido: 0,
+    };
+    for (const l of lista) {
+      counts[l.status] += 1;
+    }
+    return counts;
+  }, [lista]);
   const filtered = useMemo(
     () =>
       lista.filter(
@@ -94,14 +130,6 @@ export function LaudosPage() {
       ),
     [lista, statusFilter, obraFilter, nfFilter],
   );
-
-  // QW-16: bring the detail into view when a report is opened (it renders below
-  // a potentially long list, where the click can otherwise look like a no-op).
-  useEffect(() => {
-    if (selectedId && !grouping && typeof detalheRef.current?.scrollIntoView === 'function') {
-      detalheRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [selectedId, grouping]);
 
   // Grouping is over single-NF DRAFTS of the SAME obra (US13-CA3).
   const selectedRows = lista.filter((l) => selectedForGroup.includes(l.id));
@@ -209,95 +237,101 @@ export function LaudosPage() {
     }
   }
 
-  return (
-    <AppShell title="Laudos">
-      <ManagementNav />
+  const selectedRow = lista.find((l) => l.id === selectedId) ?? null;
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-gray-600">Laudos pré-prontos, geração de PDF, assinatura e correção.</p>
+  return (
+    <AppShell
+      title="Laudos"
+      subtitle="Laudos pré-prontos, geração de PDF, assinatura gov.br e correção."
+      actions={
         <BigButton
           variant="neutral"
+          icon={grouping ? <X size={16} /> : <Stack size={16} />}
           onClick={() => {
             setGrouping((v) => !v);
             setSelectedForGroup([]);
+            setSelectedId(null);
           }}
         >
           {grouping ? 'Cancelar agrupamento' : 'Agrupar laudos'}
         </BigButton>
-      </div>
-
+      }
+    >
       {isLoading ? (
-        <ul className="flex flex-col gap-3" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <li key={i} className="h-24 animate-pulse rounded-xl bg-gray-200" />
-          ))}
-        </ul>
+        <SkeletonRows rows={5} className="h-12" />
       ) : isError ? (
-        <div
-          role="alert"
-          className="flex flex-col items-start gap-3 rounded-lg bg-red-50 px-4 py-3 text-field text-danger"
-        >
-          <span className="font-medium">{MESSAGES.http.serverError}</span>
-          <BigButton variant="neutral" onClick={() => void refetch()}>
-            {MESSAGES.feature.painelTentarNovamente}
-          </BigButton>
-        </div>
+        <ErrorState
+          message={MESSAGES.http.serverError}
+          action={
+            <BigButton variant="neutral" size="sm" onClick={() => void refetch()}>
+              {MESSAGES.feature.painelTentarNovamente}
+            </BigButton>
+          }
+        />
       ) : lista.length === 0 ? (
         <EmptyState
-          icon="📄"
+          icon={<FileText size={24} />}
           title={MESSAGES.feature.emptyLaudos}
           action={
-            <BigButton variant="neutral" onClick={() => void refetch()}>
+            <BigButton
+              variant="neutral"
+              icon={<ArrowsClockwise size={16} />}
+              onClick={() => void refetch()}
+            >
               Atualizar
             </BigButton>
           }
         />
       ) : (
-        <div className="flex flex-col gap-6">
-          {/* QW-13: the signature queue — the costliest pending state — surfaced. */}
-          {aguardandoAssinatura > 0 ? (
-            <button
-              type="button"
-              onClick={() => setStatusFilter('pronto_assinatura')}
-              className="flex items-center gap-3 self-start rounded-xl bg-blue-50 px-4 py-3 text-left hover:bg-blue-100"
-            >
-              <span className="text-2xl font-bold tabular-nums text-brand">
-                {aguardandoAssinatura}
-              </span>
-              <span className="text-field font-medium text-blue-900">
-                laudo(s) aguardando assinatura — clique para filtrar
-              </span>
-            </button>
-          ) : null}
-
-          {/* QW-13: status chips. */}
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por status">
-            {STATUS_FILTERS.map((chip) => (
-              <button
-                key={chip.value}
-                type="button"
-                aria-pressed={statusFilter === chip.value}
-                onClick={() => setStatusFilter(chip.value)}
-                className={[
-                  'min-h-touch rounded-xl px-4 text-field font-medium',
-                  statusFilter === chip.value
-                    ? 'bg-brand text-brand-fg'
-                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-                ].join(' ')}
-              >
-                {chip.label}
-              </button>
-            ))}
+        <div className="surface overflow-hidden">
+          {/* QW-13: status tabs with counts — the signature queue stands out. */}
+          <div
+            className="flex gap-1 overflow-x-auto border-b border-concreto-100 px-3 pt-2"
+            role="group"
+            aria-label="Filtrar por status"
+          >
+            {STATUS_FILTERS.map((chip) => {
+              const active = statusFilter === chip.value;
+              const queue =
+                chip.value === 'pronto_assinatura' && countByStatus.pronto_assinatura > 0;
+              return (
+                <button
+                  key={chip.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setStatusFilter(chip.value)}
+                  className={[
+                    'relative flex h-11 items-center gap-2 whitespace-nowrap px-3 text-[14px] font-medium transition-colors',
+                    active
+                      ? 'text-ink after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-ink'
+                      : 'text-concreto-500 hover:text-ink',
+                  ].join(' ')}
+                >
+                  {chip.label}
+                  <span
+                    className={[
+                      'rounded-md px-1.5 text-[12px] tabular-nums',
+                      queue
+                        ? 'bg-sinal-500 font-semibold text-grafite'
+                        : 'bg-concreto-50 text-concreto-600',
+                    ].join(' ')}
+                  >
+                    {countByStatus[chip.value]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Filters. */}
-          <div className="flex flex-wrap gap-3">
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-gray-700">Obra</span>
+          <div className="flex flex-wrap items-center gap-3 border-b border-concreto-100 px-4 py-3">
+            <label className="flex items-center gap-2">
+              <span className="sr-only">Obra</span>
               <select
                 value={obraFilter}
                 onChange={(e) => setObraFilter(e.target.value)}
-                className="min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field"
+                aria-label="Obra"
+                className="control w-48"
               >
                 <option value="">Todas as obras</option>
                 {options.map((o) => (
@@ -307,23 +341,34 @@ export function LaudosPage() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-gray-700">NF</span>
+            <label className="relative">
+              <span className="sr-only">NF</span>
+              <MagnifyingGlass
+                size={16}
+                aria-hidden
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-concreto-400"
+              />
               <input
                 value={nfFilter}
                 onChange={(e) => setNfFilter(e.target.value)}
                 placeholder="Filtrar por NF"
-                className="min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field"
+                aria-label="NF"
+                className="control w-56 pl-9"
               />
             </label>
+            <span className="ml-auto text-[13px] text-concreto-500">
+              {filtered.length} de {lista.length}
+            </span>
           </div>
 
           {grouping ? (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl bg-blue-50 px-4 py-3">
-              <span className="text-field text-blue-900">
+            <div className="flex flex-wrap items-center gap-3 border-b border-cobalto-100 bg-cobalto-50 px-4 py-3">
+              <span className="text-field text-cobalto-700">
                 Selecione 2 ou mais rascunhos da mesma obra para consolidar.
               </span>
               <LoadingButton
+                size="sm"
+                className="ml-auto"
                 loading={agrupar.isPending}
                 loadingLabel="Agrupando..."
                 disabled={!sameObra}
@@ -334,77 +379,136 @@ export function LaudosPage() {
             </div>
           ) : null}
 
-          {/* Report list. */}
-          <ul className="flex flex-col gap-3">
-            {filtered.map((laudo) => (
-              <li
-                key={laudo.id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-4"
-              >
-                {grouping ? (
-                  <input
-                    type="checkbox"
-                    aria-label={`Selecionar ${laudo.numero}`}
-                    checked={selectedForGroup.includes(laudo.id)}
-                    disabled={laudo.status !== 'rascunho'}
-                    onChange={() => toggleGroupSelection(laudo.id)}
-                    className="h-6 w-6 accent-brand disabled:opacity-40"
-                  />
-                ) : null}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-field font-medium text-gray-900">{laudo.numero}</p>
-                  <p className="truncate text-sm text-gray-500">
-                    {laudo.obra_sigla ?? 'Obra'} · NF {laudo.nfs.join(', ') || '—'}
-                  </p>
-                </div>
-                <StatusPill
-                  label={STATUS_PILL[laudo.status].label}
-                  tone={STATUS_PILL[laudo.status].tone}
-                />
-                {!grouping ? (
-                  <BigButton
-                    variant="neutral"
-                    onClick={() => setSelectedId((cur) => (cur === laudo.id ? null : laudo.id))}
-                  >
-                    {selectedId === laudo.id ? 'Fechar' : 'Ver laudo'}
-                  </BigButton>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-
-          {/* Selected report detail. */}
-          {selectedId && !grouping ? (
-            <div ref={detalheRef}>
-              {detalhe.isLoading ? (
-                <div className="h-64 animate-pulse rounded-2xl bg-gray-200" aria-hidden />
-              ) : detalhe.isError || !detalhe.data ? (
-                <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-field text-danger">
-                  {MESSAGES.http.serverError}
-                </div>
-              ) : (
-                <LaudoDetalheView
-                  detalhe={detalhe.data}
-                  onDefinirNumero={handleDefinirNumero}
-                  definindoNumero={definirNumero.isPending}
-                  onMarcarPronto={handleMarcarPronto}
-                  marcandoPronto={marcarPronto.isPending}
-                  onEmitirParcial={handleEmitirParcial}
-                  emitindoParcial={emitirParcial.isPending}
-                  onGerarPdf={handleGerarPdf}
-                  gerandoPdf={gerarPdf.isPending}
-                  onBaixarPdf={handleBaixarPdf}
-                  baixandoPdf={baixarPdf.isPending}
-                  onUploadAssinado={handleUploadAssinado}
-                  enviandoAssinado={uploadAssinado.isPending}
-                  onCorrigir={handleCorrigir}
-                  corrigindo={corrigir.isPending}
-                />
-              )}
+          {filtered.length === 0 ? (
+            <EmptyState
+              compact
+              icon={<MagnifyingGlass size={22} />}
+              title="Nenhum laudo para os filtros selecionados."
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[820px] text-left">
+                <thead className="bg-concreto-25">
+                  <tr className="eyebrow">
+                    {grouping ? <th className="w-10 px-4 py-2.5" aria-label="Selecionar" /> : null}
+                    <th className="px-4 py-2.5 font-semibold">Laudo</th>
+                    <th className="px-4 py-2.5 font-semibold">Obra</th>
+                    <th className="px-4 py-2.5 font-semibold">NF</th>
+                    <th className="px-4 py-2.5 font-semibold">Tipo</th>
+                    <th className="px-4 py-2.5 font-semibold">Situação</th>
+                    <th className="px-4 py-2.5 font-semibold">Atualizado</th>
+                    {!grouping ? <th className="px-4 py-2.5" aria-label="Ações" /> : null}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-concreto-100">
+                  {filtered.map((laudo) => (
+                    <tr
+                      key={laudo.id}
+                      className={[
+                        'h-12 transition-colors duration-150',
+                        selectedId === laudo.id ? 'bg-cobalto-50/60' : 'hover:bg-concreto-25',
+                        laudo.status === 'pronto_assinatura' ? 'bg-sinal-50/40' : '',
+                      ].join(' ')}
+                    >
+                      {grouping ? (
+                        <td className="px-4">
+                          <input
+                            type="checkbox"
+                            aria-label={`Selecionar ${laudo.numero}`}
+                            checked={selectedForGroup.includes(laudo.id)}
+                            disabled={laudo.status !== 'rascunho'}
+                            onChange={() => toggleGroupSelection(laudo.id)}
+                            className="h-4 w-4 accent-grafite disabled:opacity-40"
+                          />
+                        </td>
+                      ) : null}
+                      <td className="px-4">
+                        <span className="font-mono text-[13px] font-medium text-ink">
+                          {laudo.numero}
+                        </span>
+                        {laudo.versao > 1 ? (
+                          <span className="ml-2 text-[12px] text-concreto-500">
+                            v{laudo.versao}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-4">
+                        <p className="font-medium text-ink">{laudo.obra_sigla ?? 'Obra'}</p>
+                        <p className="text-[12px] text-concreto-500">{laudo.cliente_nome ?? ''}</p>
+                      </td>
+                      <td className="px-4 font-mono text-[13px] text-concreto-600">
+                        {laudo.nfs.join(', ') || '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-4 text-concreto-600">
+                        {TIPO_LABEL[laudo.tipo_laudo]}
+                      </td>
+                      <td className="px-4">
+                        <StatusPill
+                          label={STATUS_PILL[laudo.status].label}
+                          tone={STATUS_PILL[laudo.status].tone}
+                        />
+                      </td>
+                      <td className="whitespace-nowrap px-4 tabular-nums text-concreto-500">
+                        {formatUpdated(laudo.updated_at)}
+                      </td>
+                      {!grouping ? (
+                        <td className="px-4 text-right">
+                          <BigButton
+                            variant="neutral"
+                            size="sm"
+                            onClick={() =>
+                              setSelectedId((cur) => (cur === laudo.id ? null : laudo.id))
+                            }
+                          >
+                            {selectedId === laudo.id ? 'Fechar' : 'Ver laudo'}
+                          </BigButton>
+                        </td>
+                      ) : null}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ) : null}
+          )}
         </div>
       )}
+
+      {/* Selected report detail, in a side drawer (plan §6.5). */}
+      <Drawer
+        open={selectedId !== null && !grouping}
+        onClose={() => setSelectedId(null)}
+        title={detalhe.data?.numero ?? selectedRow?.numero ?? 'Laudo'}
+        subtitle={
+          selectedRow
+            ? `${selectedRow.obra_sigla ?? 'Obra'} · ${selectedRow.cliente_nome ?? 'Cliente'}`
+            : undefined
+        }
+        widthClassName="max-w-[760px]"
+      >
+        {detalhe.isLoading ? (
+          <SkeletonRows rows={4} className="h-24" />
+        ) : detalhe.isError || !detalhe.data ? (
+          <ErrorState message={MESSAGES.http.serverError} />
+        ) : (
+          <LaudoDetalheView
+            detalhe={detalhe.data}
+            onDefinirNumero={handleDefinirNumero}
+            definindoNumero={definirNumero.isPending}
+            onMarcarPronto={handleMarcarPronto}
+            marcandoPronto={marcarPronto.isPending}
+            onEmitirParcial={handleEmitirParcial}
+            emitindoParcial={emitirParcial.isPending}
+            onGerarPdf={handleGerarPdf}
+            gerandoPdf={gerarPdf.isPending}
+            onBaixarPdf={handleBaixarPdf}
+            baixandoPdf={baixarPdf.isPending}
+            onUploadAssinado={handleUploadAssinado}
+            enviandoAssinado={uploadAssinado.isPending}
+            onCorrigir={handleCorrigir}
+            corrigindo={corrigir.isPending}
+          />
+        )}
+      </Drawer>
     </AppShell>
   );
 }

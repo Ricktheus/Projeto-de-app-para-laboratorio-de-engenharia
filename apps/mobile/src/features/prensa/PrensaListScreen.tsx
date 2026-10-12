@@ -1,11 +1,13 @@
 import { MESSAGES } from '@concreto/shared';
 import { useRouter } from 'expo-router';
+import { CaretRight, CheckCircle, MagnifyingGlass, QrCode } from 'phosphor-react-native';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { QrScanner } from '../../components/QrScanner';
 import { BigButton, EmptyState, StatusPill, TextField } from '../../components/ui';
 import { hapticLight } from '../../services/haptics';
+import { COLORS, FONTS } from '../../theme/tokens';
 
 import { type PrensaCpRow } from './prensa-service';
 import { useRupturaAgenda } from './usePrensa';
@@ -68,39 +70,66 @@ export function PrensaListScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator accessibilityLabel="Carregando" />
+        <ActivityIndicator accessibilityLabel="Carregando" color={COLORS.sinal} />
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-        <Text className="font-medium text-white">{MESSAGES.http.serverError}</Text>
+      <View
+        className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+        accessibilityRole="alert"
+      >
+        <Text className="font-medium text-danger">{MESSAGES.http.serverError}</Text>
       </View>
     );
   }
 
   if (!data || data.length === 0) {
-    return <EmptyState icon="⚙️" title={MESSAGES.feature.emptyPrensa} />;
+    return (
+      <EmptyState
+        icon={<CheckCircle size={28} color={COLORS.success} />}
+        title={MESSAGES.feature.emptyPrensa}
+      />
+    );
   }
 
   return (
     <View className="flex-1 gap-4">
-      <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
-        {data.length} {data.length === 1 ? 'CP para romper hoje' : 'CPs para romper hoje'}
-      </Text>
-      <BigButton label="📷 Bipar QR do CP" variant="neutral" onPress={() => setScanning(true)} />
-      <TextField
-        label={MESSAGES.feature.buscarCpQr}
-        placeholder="Código do CP, obra ou NF"
-        autoCapitalize="characters"
-        value={query}
-        onChangeText={setQuery}
+      <View className="flex-row items-baseline gap-2">
+        <Text
+          style={{ fontSize: 56, lineHeight: 60, fontFamily: FONTS.displayBold }}
+          className="text-white"
+        >
+          {data.length}
+        </Text>
+        <Text style={{ fontSize: 18, fontFamily: FONTS.sansMedium }} className="text-concreto-300">
+          {data.length === 1 ? 'CP para romper hoje' : 'CPs para romper hoje'}
+        </Text>
+      </View>
+      <BigButton
+        label="Bipar QR do CP"
+        variant="accent"
+        size="bench"
+        icon={(c) => <QrCode size={28} color={c} weight="bold" />}
+        onPress={() => setScanning(true)}
       />
+      <View className="rounded-2xl bg-white p-4">
+        <TextField
+          label={MESSAGES.feature.buscarCpQr}
+          placeholder="Código do CP, obra ou NF"
+          autoCapitalize="characters"
+          value={query}
+          onChangeText={setQuery}
+        />
+      </View>
 
       {filtered.length === 0 ? (
-        <EmptyState icon="🔍" title={MESSAGES.domain.CP_NAO_ENCONTRADO} />
+        <EmptyState
+          icon={<MagnifyingGlass size={28} color={COLORS.concreto500} />}
+          title={MESSAGES.domain.CP_NAO_ENCONTRADO}
+        />
       ) : (
         <ScrollView contentContainerClassName="gap-3 pb-6">
           {filtered.map((row) => (
@@ -109,25 +138,39 @@ export function PrensaListScreen() {
               accessibilityRole="button"
               accessibilityLabel={`Romper ${row.codigoRastreio}`}
               onPress={() => router.push(`/ruptura/${row.cpId}`)}
-              style={{ minHeight: 56 }}
-              className="gap-2 rounded-2xl border border-gray-200 bg-white p-4 active:bg-gray-50"
+              style={{ minHeight: 72 }}
+              className="flex-row items-center gap-3 rounded-2xl border border-concreto-800 bg-concreto-900 p-4 active:bg-concreto-800"
             >
-              <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
-                {row.obraSigla} · {row.idadeAlvoDias}d
-              </Text>
-              <Text className="text-gray-500">
-                {row.obraNome} · NF {row.nfNumero}
-              </Text>
-              <View className="flex-row flex-wrap items-center gap-2">
-                <StatusPill tone="info" label={row.codigoRastreio} />
-                {row.mandatorio28d ? <StatusPill tone="warning" label="Obrigatório" /> : null}
-                {overdueDays(row.dataRupturaPlanejada, today) > 0 ? (
-                  <StatusPill
-                    tone="danger"
-                    label={`Atrasado ${overdueDays(row.dataRupturaPlanejada, today)}d`}
-                  />
-                ) : null}
+              <View className="h-14 w-14 items-center justify-center rounded-xl bg-concreto-800">
+                <Text
+                  style={{ fontSize: 24, fontFamily: FONTS.displayBold }}
+                  className="text-white"
+                >
+                  {row.idadeAlvoDias}d
+                </Text>
               </View>
+              <View className="flex-1 gap-1.5">
+                <Text
+                  style={{ fontSize: 20, fontFamily: FONTS.displayBold }}
+                  className="text-white"
+                >
+                  {row.obraSigla} · {row.idadeAlvoDias}d
+                </Text>
+                <Text style={{ fontSize: 15 }} className="text-concreto-400">
+                  {row.obraNome} · NF {row.nfNumero}
+                </Text>
+                <View className="flex-row flex-wrap items-center gap-2">
+                  <StatusPill tone="info" label={row.codigoRastreio} />
+                  {row.mandatorio28d ? <StatusPill tone="warning" label="Obrigatório" /> : null}
+                  {overdueDays(row.dataRupturaPlanejada, today) > 0 ? (
+                    <StatusPill
+                      tone="danger"
+                      label={`Atrasado ${overdueDays(row.dataRupturaPlanejada, today)}d`}
+                    />
+                  ) : null}
+                </View>
+              </View>
+              <CaretRight size={24} color={COLORS.concreto400} />
             </Pressable>
           ))}
         </ScrollView>

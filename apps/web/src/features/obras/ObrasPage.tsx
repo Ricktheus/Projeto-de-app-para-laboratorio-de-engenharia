@@ -2,8 +2,16 @@ import { MESSAGES } from '@concreto/shared';
 import { useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
-import { ManagementNav } from '../../components/ManagementNav';
-import { BigButton, EmptyState, LoadingButton, StatusPill, useToast } from '../../components/ui';
+import { Buildings, Plus, X } from '../../components/icons';
+import {
+  BigButton,
+  EmptyState,
+  ErrorState,
+  LoadingButton,
+  SkeletonRows,
+  StatusPill,
+  useToast,
+} from '../../components/ui';
 import { useClientes } from '../clientes/useClientes';
 
 import { ObraForm, type ObraFormValues } from './ObraForm';
@@ -92,16 +100,18 @@ export function ObrasPage() {
   }
 
   return (
-    <AppShell title="Obras">
-      <ManagementNav />
-
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <p className="text-gray-600">Cadastro e manutenção das obras por cliente.</p>
-        <BigButton onClick={() => setShowCreate((v) => !v)}>
-          {showCreate ? 'Fechar' : '+ Nova obra'}
+    <AppShell
+      title="Obras"
+      subtitle="Cadastro e manutenção das obras por cliente."
+      actions={
+        <BigButton
+          icon={showCreate ? <X size={16} /> : <Plus size={16} weight="bold" />}
+          onClick={() => setShowCreate((v) => !v)}
+        >
+          {showCreate ? 'Fechar' : 'Nova obra'}
         </BigButton>
-      </div>
-
+      }
+    >
       {showCreate ? (
         <div className="mb-6">
           <ObraForm
@@ -116,26 +126,24 @@ export function ObrasPage() {
       ) : null}
 
       {isLoading ? (
-        <ul className="flex flex-col gap-2" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <li key={i} className="h-20 animate-pulse rounded-xl bg-gray-200" />
-          ))}
-        </ul>
+        <SkeletonRows rows={3} className="h-20" />
       ) : isError ? (
-        <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-field text-danger">
-          {MESSAGES.http.serverError}
-        </div>
+        <ErrorState message={MESSAGES.http.serverError} />
       ) : !obras || obras.length === 0 ? (
         <EmptyState
-          icon="📋"
+          icon={<Buildings size={24} />}
           title={MESSAGES.feature.emptyObras}
-          action={<BigButton onClick={() => setShowCreate(true)}>+ Nova obra</BigButton>}
+          action={
+            <BigButton icon={<Plus size={16} weight="bold" />} onClick={() => setShowCreate(true)}>
+              Nova obra
+            </BigButton>
+          }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 lg:grid-cols-2">
           {obras.map((obra) =>
             editingId === obra.id ? (
-              <li key={obra.id}>
+              <li key={obra.id} className="lg:col-span-2">
                 <ObraForm
                   clientes={clienteList}
                   initial={{
@@ -156,14 +164,19 @@ export function ObrasPage() {
             ) : (
               <li
                 key={obra.id}
-                className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4"
+                className={`surface flex flex-col gap-4 p-5 ${obra.ativo ? '' : 'opacity-70'}`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-3">
+                  <span
+                    aria-hidden
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-concreto-50 font-display text-[13px] font-semibold text-ink ring-1 ring-concreto-100"
+                  >
+                    <Buildings size={20} />
+                  </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-field font-medium text-gray-900">
-                      {obra.nome} <span className="text-gray-400">·</span> {obra.sigla}
-                    </p>
-                    <p className="truncate text-sm text-gray-500">
+                    <p className="truncate font-medium text-ink">{obra.nome}</p>
+                    <p className="truncate text-[13px] text-concreto-500">
+                      <span className="font-mono">{obra.sigla}</span> ·{' '}
                       {obra.cliente_nome ?? 'Cliente'}
                     </p>
                   </div>
@@ -176,11 +189,12 @@ export function ObrasPage() {
                 {blocked?.id === obra.id ? (
                   <div
                     role="alert"
-                    className="rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-900"
+                    className="rounded-xl border border-warning/20 bg-warning-soft px-4 py-3 text-[13px] text-warning"
                   >
                     <p className="font-medium">{blocked.message}</p>
                     <LoadingButton
                       variant="neutral"
+                      size="sm"
                       className="mt-2"
                       loading={inativar.isPending}
                       onClick={() => handleInativar(obra.id)}
@@ -190,9 +204,10 @@ export function ObrasPage() {
                   </div>
                 ) : null}
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 border-t border-concreto-100 pt-3">
                   <BigButton
                     variant="neutral"
+                    size="sm"
                     onClick={() => {
                       setEditError(null);
                       setEditingId(obra.id);
@@ -201,11 +216,16 @@ export function ObrasPage() {
                     Editar
                   </BigButton>
                   {obra.ativo ? (
-                    <BigButton variant="neutral" onClick={() => handleInativar(obra.id)}>
+                    <BigButton variant="ghost" size="sm" onClick={() => handleInativar(obra.id)}>
                       Inativar
                     </BigButton>
                   ) : null}
-                  <BigButton variant="danger" onClick={() => handleExcluir(obra)}>
+                  <BigButton
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto !text-danger hover:!bg-danger-soft"
+                    onClick={() => handleExcluir(obra)}
+                  >
                     Excluir
                   </BigButton>
                 </div>

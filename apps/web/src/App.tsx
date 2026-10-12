@@ -8,7 +8,7 @@ import { AppRoutes } from './routes/AppRoutes';
 export function App() {
   useInitAuth();
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || undefined}>
       <AppRoutes />
       <Toaster />
     </BrowserRouter>

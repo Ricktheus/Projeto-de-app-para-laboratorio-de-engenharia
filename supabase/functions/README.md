@@ -38,6 +38,7 @@ and validators are never reimplemented here (DRY / SPEC §6.2).
   `ocr-nota-fiscal`. Defina com: `supabase secrets set GEMINI_API_KEY=...`
 - `GEMINI_MODEL` — (opcional) modelo Gemini; default `gemini-2.0-flash`.
 - `LAUDO_VERIFICATION_SECRET` — segredo do hash anti-fraude `codigo_verificacao = sha256(laudo_id + secret)` (somente `gerar-laudo-pdf`, SPEC §7.1).
+- `LAB_RT_NOME` / `LAB_RT_CREA` — nome e CREA da Responsável Técnica impressos sob a linha de assinatura do laudo (opcional; somente `gerar-laudo-pdf`).
 - `PUBLIC_SITE_URL` — URL base pública para o QR de validação (`<site>/validar/<codigo>`) e para o link do portal nos e-mails (`<site>/portal`); default `https://laboratorio.example.com`.
 - `RESEND_API_KEY` — chave da Resend para e-mail transacional (somente `enviar-email`, SPEC §7.1).
 - `EMAIL_FROM` — remetente verificado na Resend (somente `enviar-email`).

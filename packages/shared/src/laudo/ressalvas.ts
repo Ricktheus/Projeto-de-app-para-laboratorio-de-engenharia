@@ -13,8 +13,9 @@ import { checkSlumpTolerance } from '../engineering/ranges.ts';
 
 /** Standard NBR 5739 closing paragraph, always present in the report. */
 export const CONSIDERACOES_FINAIS_PADRAO =
-  'Os corpos de prova foram moldados, curados e ensaiados à compressão conforme a ' +
-  'ABNT NBR 5739. Os resultados deste relatório referem-se exclusivamente às amostras ensaiadas.';
+  'Os corpos de prova foram moldados e curados conforme a ABNT NBR 5738 e ensaiados à ' +
+  'compressão conforme a ABNT NBR 5739. Os resultados deste relatório referem-se ' +
+  'exclusivamente às amostras ensaiadas.';
 
 /** Caveat added when any specimen was collected more than 24h after molding. */
 export const RESSALVA_COLETA_ATRASADA =

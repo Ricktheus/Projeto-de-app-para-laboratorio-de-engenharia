@@ -10,6 +10,7 @@ import { LockOverlay } from '../features/auth/LockOverlay';
 import { useAppLock } from '../features/auth/useAppLock';
 import { useInitAuth } from '../features/auth/useInitAuth';
 import { useAuthStore } from '../stores/auth-store';
+import { useAppFonts } from '../theme/fonts';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 
 /** Bootstraps auth, renders the navigator and the global toast layer. */
 function AuthGate() {
+  useAppFonts();
   useInitAuth();
   useAppLock();
   const locked = useAuthStore((s) => s.locked);
@@ -41,7 +43,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <StatusBar style="dark" />
+          <StatusBar style="light" />
           <AuthGate />
         </GestureHandlerRootView>
       </SafeAreaProvider>

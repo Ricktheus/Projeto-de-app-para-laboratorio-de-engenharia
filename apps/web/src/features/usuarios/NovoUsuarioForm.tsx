@@ -50,17 +50,13 @@ export function NovoUsuarioForm() {
   }
 
   return (
-    <form
-      className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6"
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-    >
-      <h3 className="text-field font-semibold text-gray-900">Novo usuário</h3>
+    <form className="surface flex flex-col gap-4 p-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <h3 className="font-display text-[18px] font-semibold text-ink">Novo usuário</h3>
 
       {errorMessage ? (
         <div
           role="alert"
-          className="rounded-lg bg-red-50 px-4 py-3 text-field font-medium text-danger"
+          className="rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-field font-medium text-danger"
         >
           {errorMessage}
         </div>
@@ -83,15 +79,10 @@ export function NovoUsuarioForm() {
       />
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="role" className="text-field font-medium text-gray-800">
+        <label htmlFor="role" className="text-[13px] font-medium text-concreto-600">
           Papel
         </label>
-        <select
-          id="role"
-          disabled={isPending}
-          className="min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field focus:outline focus:outline-2 focus:outline-brand disabled:bg-gray-100"
-          {...register('role')}
-        >
+        <select id="role" disabled={isPending} className="control" {...register('role')}>
           {ROLE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -100,11 +91,11 @@ export function NovoUsuarioForm() {
         </select>
       </div>
 
-      <label className="flex items-center gap-3 text-field text-gray-800">
+      <label className="flex items-center gap-3 text-field text-ink">
         <input
           type="checkbox"
           disabled={isPending}
-          className="h-6 w-6 rounded border-gray-300"
+          className="h-4 w-4 rounded accent-grafite"
           {...register('isAdmin')}
         />
         Administrador (gestão de usuários)

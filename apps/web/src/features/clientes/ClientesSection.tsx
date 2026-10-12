@@ -1,6 +1,7 @@
 import { MESSAGES } from '@concreto/shared';
 
-import { EmptyState, StatusPill } from '../../components/ui';
+import { Briefcase } from '../../components/icons';
+import { EmptyState, ErrorState, StatusPill } from '../../components/ui';
 
 import { NovoClienteForm } from './NovoClienteForm';
 import { useClientes } from './useClientes';
@@ -10,7 +11,7 @@ function ListSkeleton() {
   return (
     <ul className="flex flex-col gap-2" aria-hidden>
       {[0, 1, 2].map((i) => (
-        <li key={i} className="h-16 animate-pulse rounded-xl bg-gray-200" />
+        <li key={i} className="h-16 animate-pulse rounded-xl bg-concreto-100" />
       ))}
     </ul>
   );
@@ -31,21 +32,16 @@ export function ClientesSection() {
         {isLoading ? (
           <ListSkeleton />
         ) : isError ? (
-          <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-field text-danger">
-            {MESSAGES.http.serverError}
-          </div>
+          <ErrorState message={MESSAGES.http.serverError} />
         ) : !data || data.length === 0 ? (
-          <EmptyState icon="🏢" title={MESSAGES.feature.emptyClientes} />
+          <EmptyState icon={<Briefcase size={24} />} title={MESSAGES.feature.emptyClientes} />
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="surface divide-y divide-concreto-100">
             {data.map((cliente) => (
-              <li
-                key={cliente.id}
-                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4"
-              >
+              <li key={cliente.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-field font-medium text-gray-900">{cliente.nome}</p>
-                  <p className="truncate text-sm text-gray-500">
+                  <p className="truncate font-medium text-ink">{cliente.nome}</p>
+                  <p className="truncate text-[13px] text-concreto-500">
                     {cliente.cnpj ?? 'Sem CNPJ'} · {cliente.email ?? 'Sem e-mail'}
                   </p>
                 </div>

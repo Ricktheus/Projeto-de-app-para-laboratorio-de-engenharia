@@ -4,14 +4,13 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-import { BrandMark } from '../../components/BrandMark';
 import { LoadingButton } from '../../components/ui';
 import { useToastStore } from '../../stores/toast-store';
 
+import { AuthLayout } from './AuthLayout';
 import { establishRecoverySession, requestPasswordReset, updatePassword } from './reset-service';
 
-const inputClass =
-  'min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field focus:outline focus:outline-2 focus:outline-brand disabled:bg-gray-100';
+const inputClass = 'control h-11';
 
 type Phase = 'checking' | 'request' | 'set' | 'invalid';
 
@@ -43,8 +42,8 @@ function RequestResetForm() {
   if (sent) {
     return (
       <p className="text-center text-field text-gray-700">
-        Se existir uma conta com este e-mail, você receberá um link para redefinir a senha. Verifique
-        a caixa de entrada e o spam.
+        Se existir uma conta com este e-mail, você receberá um link para redefinir a senha.
+        Verifique a caixa de entrada e o spam.
       </p>
     );
   }
@@ -52,7 +51,7 @@ function RequestResetForm() {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-field font-medium text-gray-800">
+        <label htmlFor="email" className="text-[13px] font-medium text-concreto-600">
           E-mail
         </label>
         <input
@@ -65,7 +64,7 @@ function RequestResetForm() {
           {...register('email')}
         />
         {errors.email ? (
-          <p className="text-sm font-medium text-danger">{errors.email.message}</p>
+          <p className="text-[13px] font-medium text-danger">{errors.email.message}</p>
         ) : null}
       </div>
       <LoadingButton type="submit" fullWidth loading={isSubmitting} loadingLabel="Enviando...">
@@ -116,7 +115,7 @@ function SetPasswordForm() {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-field font-medium text-gray-800">
+        <label htmlFor="password" className="text-[13px] font-medium text-concreto-600">
           Nova senha
         </label>
         <input
@@ -129,11 +128,11 @@ function SetPasswordForm() {
           {...register('password')}
         />
         {errors.password ? (
-          <p className="text-sm font-medium text-danger">{errors.password.message}</p>
+          <p className="text-[13px] font-medium text-danger">{errors.password.message}</p>
         ) : null}
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="confirm" className="text-field font-medium text-gray-800">
+        <label htmlFor="confirm" className="text-[13px] font-medium text-concreto-600">
           Confirmar nova senha
         </label>
         <input
@@ -146,7 +145,7 @@ function SetPasswordForm() {
           {...register('confirm')}
         />
         {errors.confirm ? (
-          <p className="text-sm font-medium text-danger">{errors.confirm.message}</p>
+          <p className="text-[13px] font-medium text-danger">{errors.confirm.message}</p>
         ) : null}
       </div>
       <LoadingButton type="submit" fullWidth loading={isSubmitting} loadingLabel="Salvando...">
@@ -184,46 +183,40 @@ export function ResetPasswordPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
-        <header className="mb-6 flex flex-col items-center gap-3 text-center">
-          <BrandMark size="lg" />
-          <p className="text-gray-500">
-            {phase === 'set' ? 'Defina sua nova senha.' : 'Redefinição de senha.'}
-          </p>
-        </header>
+    <AuthLayout
+      title="Redefinir senha"
+      subtitle={phase === 'set' ? 'Defina sua nova senha.' : 'Redefinição de senha.'}
+    >
+      {phase === 'checking' ? (
+        <p className="text-center text-field text-gray-500">Verificando o link...</p>
+      ) : null}
 
-        {phase === 'checking' ? (
-          <p className="text-center text-field text-gray-500">Verificando o link...</p>
-        ) : null}
+      {phase === 'request' ? <RequestResetForm /> : null}
+      {phase === 'set' ? <SetPasswordForm /> : null}
 
-        {phase === 'request' ? <RequestResetForm /> : null}
-        {phase === 'set' ? <SetPasswordForm /> : null}
-
-        {phase === 'invalid' ? (
-          <div className="flex flex-col gap-4">
-            <div
-              role="alert"
-              className="rounded-lg bg-red-50 px-4 py-3 text-field font-medium text-danger"
-            >
-              O link de redefinição é inválido ou expirou. Solicite um novo.
-            </div>
-            <button
-              type="button"
-              onClick={() => setPhase('request')}
-              className="text-field font-medium text-brand hover:underline"
-            >
-              Solicitar novo link
-            </button>
+      {phase === 'invalid' ? (
+        <div className="flex flex-col gap-4">
+          <div
+            role="alert"
+            className="rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-field font-medium text-danger"
+          >
+            O link de redefinição é inválido ou expirou. Solicite um novo.
           </div>
-        ) : null}
-
-        <div className="mt-6 text-center">
-          <Link to="/login" className="text-field font-medium text-brand hover:underline">
-            Voltar ao login
-          </Link>
+          <button
+            type="button"
+            onClick={() => setPhase('request')}
+            className="text-field font-medium text-cobalto-600 hover:underline"
+          >
+            Solicitar novo link
+          </button>
         </div>
+      ) : null}
+
+      <div className="mt-6 text-center">
+        <Link to="/login" className="text-field font-medium text-cobalto-600 hover:underline">
+          Voltar ao login
+        </Link>
       </div>
-    </main>
+    </AuthLayout>
   );
 }

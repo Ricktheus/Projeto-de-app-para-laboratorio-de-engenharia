@@ -159,7 +159,10 @@ export function ConcretagemForm({
   return (
     <ScrollView className="w-full" contentContainerClassName="gap-4 pb-10">
       {bannerError ? (
-        <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
+        <View
+          className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+          accessibilityRole="alert"
+        >
           <Text style={{ fontSize: 16 }} className="font-medium text-white">
             {bannerError}
           </Text>

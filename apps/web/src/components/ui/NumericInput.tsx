@@ -24,7 +24,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(func
   const errorId = `${inputId}-error`;
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-field font-medium text-gray-800">
+      <label htmlFor={inputId} className="text-[13px] font-medium text-concreto-600">
         {label}
       </label>
       <div className="relative">
@@ -36,9 +36,8 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(func
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className={[
-            'min-h-touch w-full rounded-xl border bg-white px-4 text-field tabular-nums',
-            'focus:outline focus:outline-2 focus:outline-offset-0 focus:outline-brand',
-            error ? 'border-danger' : 'border-gray-300',
+            'control tabular-nums',
+            error ? '!border-danger' : '',
             suffix ? 'pr-14' : '',
             className,
           ]
@@ -47,13 +46,13 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(func
           {...rest}
         />
         {suffix ? (
-          <span className="absolute inset-y-0 right-4 flex items-center text-field text-gray-500">
+          <span className="absolute inset-y-0 right-3 flex items-center text-[13px] text-concreto-500">
             {suffix}
           </span>
         ) : null}
       </div>
       {error ? (
-        <p id={errorId} className="text-sm font-medium text-danger">
+        <p id={errorId} className="text-[13px] font-medium text-danger">
           {error}
         </p>
       ) : null}

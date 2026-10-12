@@ -28,7 +28,7 @@ test.describe('Validação pública por QR (F-S009-2)', () => {
     await expect(page.getByText('N-003AGEHAB')).toBeVisible();
     await expect(page.getByText('Construtora Alfa')).toBeVisible();
     // FCM do resultado de 28 dias.
-    await expect(page.getByText('32.4')).toBeVisible();
+    await expect(page.getByText('32,40')).toBeVisible();
   });
 
   test('código inexistente mostra "não encontrado / não autêntico"', async ({ page }) => {

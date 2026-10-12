@@ -1,4 +1,5 @@
 import { buildWatermarkLines, MESSAGES } from '@concreto/shared';
+import { Camera } from 'phosphor-react-native';
 import { useRef, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 
@@ -111,8 +112,11 @@ export function EvidenciaCapture({ rupturaId }: EvidenciaCaptureProps) {
           </View>
 
           {error ? (
-            <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-              <Text className="font-medium text-white">{error}</Text>
+            <View
+              className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+              accessibilityRole="alert"
+            >
+              <Text className="font-medium text-danger">{error}</Text>
             </View>
           ) : null}
 
@@ -134,7 +138,8 @@ export function EvidenciaCapture({ rupturaId }: EvidenciaCaptureProps) {
         </View>
       ) : (
         <LoadingButton
-          label={`📷 Tirar foto (${tipo})`}
+          label={`Tirar foto (${tipo})`}
+          icon={(c) => <Camera size={22} color={c} weight="bold" />}
           loadingLabel="Abrindo câmera..."
           loading={capturing}
           onPress={handleTirarFoto}
@@ -144,7 +149,7 @@ export function EvidenciaCapture({ rupturaId }: EvidenciaCaptureProps) {
       {uploaded.length > 0 ? (
         <View className="flex-row flex-wrap gap-2">
           {uploaded.map((value) => (
-            <StatusPill key={value} tone="success" label={`✓ ${value} enviada`} />
+            <StatusPill key={value} tone="success" label={`${value} enviada`} />
           ))}
         </View>
       ) : null}

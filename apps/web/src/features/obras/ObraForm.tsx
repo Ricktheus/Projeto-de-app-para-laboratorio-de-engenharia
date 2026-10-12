@@ -50,29 +50,25 @@ export function ObraForm({
   });
 
   return (
-    <form
-      className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6"
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-    >
+    <form className="surface flex flex-col gap-4 p-5" onSubmit={handleSubmit(onSubmit)} noValidate>
       {errorMessage ? (
         <div
           role="alert"
-          className="rounded-lg bg-red-50 px-4 py-3 text-field font-medium text-danger"
+          className="rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-field font-medium text-danger"
         >
           {errorMessage}
         </div>
       ) : null}
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="clienteId" className="text-field font-medium text-gray-800">
+        <label htmlFor="clienteId" className="text-[13px] font-medium text-concreto-600">
           Cliente
         </label>
         <select
           id="clienteId"
           disabled={submitting || lockCliente}
           aria-invalid={errors.clienteId ? true : undefined}
-          className="min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field focus:outline focus:outline-2 focus:outline-brand disabled:bg-gray-100"
+          className="control"
           {...register('clienteId')}
         >
           <option value="">Selecione um cliente…</option>
@@ -83,7 +79,7 @@ export function ObraForm({
           ))}
         </select>
         {errors.clienteId ? (
-          <p className="text-sm font-medium text-danger">Selecione um cliente.</p>
+          <p className="text-[13px] font-medium text-danger">Selecione um cliente.</p>
         ) : null}
       </div>
 

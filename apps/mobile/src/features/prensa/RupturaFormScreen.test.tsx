@@ -96,7 +96,7 @@ describe('RupturaFormScreen (F-S006-2/3)', () => {
     render(<RupturaFormScreen cpId="cp-1" />);
     expect(screen.getByLabelText('MPa calculado').props.children).toBe('—');
     fireEvent.changeText(screen.getByLabelText('Carga de ruptura'), '23562');
-    expect(screen.getByLabelText('MPa calculado').props.children).toBe('29.42');
+    expect(screen.getByLabelText('MPa calculado').props.children).toBe('29,42');
   });
 
   it('keeps "Salvar Ruptura" disabled until the load is valid', () => {

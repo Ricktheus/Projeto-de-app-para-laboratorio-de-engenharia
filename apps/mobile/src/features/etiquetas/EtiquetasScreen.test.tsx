@@ -117,7 +117,7 @@ describe('EtiquetasScreen (F-S005-1/F-S005-2) — UI states', () => {
   it('badges the just-created concretagem (QW-09)', () => {
     etiquetasState({ isLoading: false, isError: false, data: [concretagem] });
     render(<EtiquetasScreen obraId="obra-1" highlightId="ct-1" />);
-    expect(screen.getByText('✨ Recém-criada')).toBeTruthy();
+    expect(screen.getByText('Recém-criada')).toBeTruthy();
   });
 
   it('offers a bulk reprint of only the failed labels (QW-10)', () => {

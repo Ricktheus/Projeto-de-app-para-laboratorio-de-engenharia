@@ -1,6 +1,8 @@
 import {
   fckVerdict,
   FCK_VEREDITO_LABELS,
+  formatMpaBr,
+  formatNumberBr,
   MESSAGES,
   type FckVeredito,
   type ValidarLaudoResponse,
@@ -9,6 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
 import { BrandMark } from '../../components/BrandMark';
+import { CheckCircle, Info, SealCheck, WarningCircle, XCircle } from '../../components/icons';
+import { StatusPill } from '../../components/ui';
 
 import { validarLaudoPublico, type ValidacaoResultado } from './validacao-service';
 
@@ -45,112 +49,143 @@ function conclusaoVeredito(
   return veredito === 'indeterminado' ? null : veredito;
 }
 
-/** Conclusion banner styling per verdict. */
+/** Conclusion banner styling per verdict (status = icon + text, never colour only). */
 const CONCLUSAO_STYLE: Record<
   Exclude<FckVeredito, 'indeterminado'>,
-  { bg: string; text: string; icon: string }
+  { box: string; icon: React.ReactNode }
 > = {
-  conforme: { bg: 'bg-green-50', text: 'text-success', icon: '✓' },
-  atencao: { bg: 'bg-amber-50', text: 'text-amber-700', icon: '!' },
-  abaixo: { bg: 'bg-red-50', text: 'text-danger', icon: '✕' },
+  conforme: {
+    box: 'border-success/20 bg-success-soft text-success',
+    icon: <CheckCircle size={20} weight="fill" />,
+  },
+  atencao: {
+    box: 'border-warning/20 bg-warning-soft text-warning',
+    icon: <Info size={20} weight="fill" />,
+  },
+  abaixo: {
+    box: 'border-danger/20 bg-danger-soft text-danger',
+    icon: <WarningCircle size={20} weight="fill" />,
+  },
 };
 
 /** Standalone public shell (no app chrome / no sign-out — anonymous surface). */
 function PublicShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gray-100 px-4 py-10">
-      <header className="mb-6 flex flex-col items-center gap-3 text-center">
-        <BrandMark size="lg" />
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Validação de Laudo</h1>
-          <p className="text-sm text-gray-500">Verificação pública de autenticidade</p>
+    <div className="min-h-screen bg-concreto-25">
+      <div className="fixed-scale bg-grafite">
+        <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-20 pt-8">
+          <BrandMark size="lg" tone="light" />
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-sinal-500">
+              Verificação pública
+            </p>
+            <h1 className="mt-1 font-display text-[32px] font-semibold leading-tight text-white">
+              Validação de Laudo
+            </h1>
+            <p className="text-concreto-300">Verificação pública de autenticidade</p>
+          </div>
         </div>
-      </header>
-      <main className="w-full max-w-xl">{children}</main>
+        <div className="hazard h-1.5" aria-hidden />
+      </div>
+      <main className="mx-auto -mt-14 w-full max-w-2xl px-4 pb-12">{children}</main>
+      <footer className="mx-auto max-w-2xl px-4 pb-10 text-center text-[12px] text-concreto-500">
+        Os dados exibidos são lidos diretamente do registro do laboratório. Os resultados referem-se
+        exclusivamente às amostras ensaiadas.
+      </footer>
     </div>
   );
 }
 
-/** Green authenticity banner + the report's public data. */
+/** Green authenticity seal + the report's public data. */
 function LaudoAutentico({ laudo }: { laudo: ValidarLaudoResponse }) {
   const conclusao = conclusaoVeredito(laudo.resultados);
   return (
-    <section className="flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6">
-      <div
-        className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3 text-success"
-        role="status"
-      >
-        <span aria-hidden className="text-2xl">
-          ✓
+    <section className="surface flex flex-col overflow-hidden shadow-raised">
+      <div className="flex items-center gap-4 border-b border-concreto-100 px-6 py-5" role="status">
+        <span
+          aria-hidden
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-success-soft text-success ring-4 ring-success/10"
+        >
+          <SealCheck size={32} weight="fill" />
         </span>
-        <span className="text-field font-semibold">{MESSAGES.feature.validacaoAutentico}</span>
-      </div>
-
-      {conclusao ? (
-        <div
-          className={`flex items-center gap-2 rounded-xl px-4 py-3 ${CONCLUSAO_STYLE[conclusao].bg} ${CONCLUSAO_STYLE[conclusao].text}`}
-          role="status"
-        >
-          <span aria-hidden className="text-xl font-bold">
-            {CONCLUSAO_STYLE[conclusao].icon}
-          </span>
-          <span className="text-field font-semibold">{FCK_VEREDITO_LABELS[conclusao]}</span>
+        <div>
+          <p className="font-display text-[22px] font-semibold leading-tight text-success">
+            {MESSAGES.feature.validacaoAutentico}
+          </p>
+          <p className="text-[13px] text-concreto-500">
+            Registro conferido no sistema do laboratório.
+          </p>
         </div>
-      ) : null}
-
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field label="Laudo nº" value={laudo.numero} />
-        <Field label="Versão" value={String(laudo.versao)} />
-        <Field label="Cliente" value={laudo.cliente ?? '—'} />
-        <Field label="Obra" value={laudo.obra ?? '—'} />
-        <Field label="Data de emissão" value={formatDate(laudo.data_emissao)} />
-      </dl>
-
-      <div>
-        <h2 className="mb-2 text-field font-semibold text-gray-800">Resultados por idade</h2>
-        {laudo.resultados.length === 0 ? (
-          <p className="text-sm text-gray-500">Sem resultados publicados para este laudo.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-xs uppercase tracking-wide text-gray-400">
-                  <th className="px-3 py-2 font-medium">Idade (dias)</th>
-                  <th className="px-3 py-2 font-medium">FCM (MPa)</th>
-                  <th className="px-3 py-2 font-medium">FCK projeto (MPa)</th>
-                </tr>
-              </thead>
-              <tbody className="tabular-nums">
-                {laudo.resultados.map((r) => (
-                  <tr key={r.idade_dias} className="border-t border-gray-100">
-                    <td className="px-3 py-2 text-gray-900">{r.idade_dias}</td>
-                    <td className="px-3 py-2 text-gray-900">{r.fcm_mpa}</td>
-                    <td className="px-3 py-2 text-gray-500">{r.fck_projeto ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
-      {!laudo.autentico ? (
-        <p
-          role="status"
-          className="rounded-xl bg-amber-50 px-4 py-3 text-field font-medium text-amber-700"
-        >
-          {MESSAGES.feature.validacaoEmAtualizacao}
-        </p>
-      ) : null}
+      <div className="flex flex-col gap-6 p-6">
+        {conclusao ? (
+          <div
+            className={`flex items-center gap-2 rounded-xl border px-4 py-3 ${CONCLUSAO_STYLE[conclusao].box}`}
+            role="status"
+          >
+            <span aria-hidden className="flex">
+              {CONCLUSAO_STYLE[conclusao].icon}
+            </span>
+            <span className="text-field font-semibold">{FCK_VEREDITO_LABELS[conclusao]}</span>
+          </div>
+        ) : null}
+
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+          <Field label="Laudo nº" value={laudo.numero} mono />
+          <Field label="Versão" value={String(laudo.versao)} />
+          <Field label="Cliente" value={laudo.cliente ?? '—'} />
+          <Field label="Obra" value={laudo.obra ?? '—'} />
+          <Field label="Data de emissão" value={formatDate(laudo.data_emissao)} />
+        </dl>
+
+        <div>
+          <h2 className="eyebrow mb-2">Resultados por idade</h2>
+          {laudo.resultados.length === 0 ? (
+            <p className="text-concreto-500">Sem resultados publicados para este laudo.</p>
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-concreto-100">
+              <table className="w-full text-left">
+                <thead className="bg-concreto-25">
+                  <tr className="eyebrow">
+                    <th className="px-4 py-2.5 font-semibold">Idade (dias)</th>
+                    <th className="px-4 py-2.5 text-right font-semibold">FCM (MPa)</th>
+                    <th className="px-4 py-2.5 text-right font-semibold">FCK projeto (MPa)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-concreto-100">
+                  {laudo.resultados.map((r) => (
+                    <tr key={r.idade_dias}>
+                      <td className="px-4 py-3">{r.idade_dias}</td>
+                      <td className="px-4 py-3 text-right font-display text-[18px] font-semibold">
+                        {formatMpaBr(r.fcm_mpa)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-concreto-500">
+                        {formatNumberBr(r.fck_projeto)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {!laudo.autentico ? (
+          <p role="status" className="flex items-center gap-2">
+            <StatusPill tone="warning" label={MESSAGES.feature.validacaoEmAtualizacao} />
+          </p>
+        ) : null}
+      </div>
     </section>
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-gray-400">{label}</dt>
-      <dd className="text-field text-gray-900">{value}</dd>
+      <dt className="eyebrow">{label}</dt>
+      <dd className={`mt-0.5 text-[15px] text-ink ${mono ? 'font-mono' : ''}`}>{value}</dd>
     </div>
   );
 }
@@ -160,12 +195,15 @@ function MensagemErro({ message }: { message: string }) {
   return (
     <section
       role="alert"
-      className="flex flex-col items-center gap-2 rounded-2xl border border-red-200 bg-white p-8 text-center"
+      className="surface flex flex-col items-center gap-3 p-10 text-center shadow-raised"
     >
-      <span aria-hidden className="text-3xl">
-        ⚠️
+      <span
+        aria-hidden
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-danger-soft text-danger"
+      >
+        <XCircle size={32} weight="fill" />
       </span>
-      <p className="text-field font-semibold text-danger">{message}</p>
+      <p className="max-w-sm text-field font-semibold text-danger">{message}</p>
     </section>
   );
 }
@@ -194,8 +232,8 @@ export function ValidacaoPublicaPage() {
   return (
     <PublicShell>
       {isLoading || !data ? (
-        <div className="flex items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white p-10 text-gray-500">
-          <span className="h-6 w-6 animate-spin rounded-full border-4 border-gray-300 border-t-brand" />
+        <div className="surface flex items-center justify-center gap-3 p-10 text-concreto-500 shadow-raised">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-concreto-200 border-t-grafite" />
           <span className="text-field">Validando laudo…</span>
         </div>
       ) : data.status === 'encontrado' ? (

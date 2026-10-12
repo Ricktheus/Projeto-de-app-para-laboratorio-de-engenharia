@@ -49,8 +49,8 @@ describe('ValidacaoPublicaPage (F-S009-2 / US19)', () => {
     expect(screen.getByText('N°003AGEHAB')).toBeInTheDocument();
     expect(screen.getByText('AGEHAB')).toBeInTheDocument();
     expect(screen.getByText('Residencial X')).toBeInTheDocument();
-    expect(screen.getByText('27.44')).toBeInTheDocument();
-    expect(screen.getByText('32.1')).toBeInTheDocument();
+    expect(screen.getByText('27,44')).toBeInTheDocument();
+    expect(screen.getByText('32,10')).toBeInTheDocument();
     // QW-20: conclusion verdict from the 28d result (32.1 ≥ fck 30).
     expect(screen.getByText('Conforme o fck')).toBeInTheDocument();
   });

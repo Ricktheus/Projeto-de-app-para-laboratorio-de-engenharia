@@ -5,9 +5,11 @@ import {
   type CpPlanEntry,
   type MoldingConfigItem,
 } from '@concreto/shared';
+import { Trash } from 'phosphor-react-native';
 import { Pressable, Text, View } from 'react-native';
 
 import { NumericInput } from '../../components/ui';
+import { COLORS } from '../../theme/tokens';
 
 export interface MoldagemConfigProps {
   items: MoldingConfigItem[];
@@ -113,9 +115,9 @@ export function MoldagemConfig({ items, onChange, dataMoldagem }: MoldagemConfig
             accessibilityLabel={`Remover idade ${index + 1}`}
             onPress={() => removeItem(index)}
             style={{ minHeight: 56, minWidth: 56 }}
-            className="items-center justify-center rounded-2xl border border-gray-300"
+            className="items-center justify-center rounded-xl border-2 border-concreto-200 bg-white"
           >
-            <Text style={{ fontSize: 20 }}>🗑️</Text>
+            <Trash size={22} color={COLORS.danger} />
           </Pressable>
         </View>
       ))}

@@ -40,6 +40,10 @@ test.describe('Portal do cliente (F-S009-1)', () => {
   test('portal sem laudos mostra o estado vazio', async ({ page }) => {
     await stubLaudosList(page, []);
     await loginAsClient(page, 'cliente2@obra.com');
-    await expect(page.getByText('Você ainda não possui laudos disponíveis.')).toBeVisible();
+    await expect(
+      page.getByText(
+        'Seus laudos aparecerão aqui assim que forem assinados pelo responsável técnico.',
+      ),
+    ).toBeVisible();
   });
 });

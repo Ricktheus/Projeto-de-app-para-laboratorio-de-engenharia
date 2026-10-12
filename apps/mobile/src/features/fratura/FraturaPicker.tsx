@@ -1,20 +1,9 @@
 import { FRATURA_TIPOS, type TipoFratura } from '@concreto/shared';
 import { Pressable, Text, View } from 'react-native';
 
-/**
- * Didactic icon per fracture type (US09 — "classificar por ícones"). The exact
- * glyphs are a UI choice ([PREMISSA]: the SPEC prescribes the 6 labels/order,
- * not the icon set); the labels come from the shared `FRATURA_TIPOS` so the
- * wording never drifts.
- */
-const FRATURA_ICONS: Readonly<Record<TipoFratura, string>> = {
-  ruptura_cabeca: '🔺',
-  ruptura_face: '🔻',
-  ruptura_parcial: '🌗',
-  ruptura_total: '💥',
-  ruptura_cisalhamento: '↘️',
-  ruptura_trinca: '⚡',
-};
+import { COLORS, FONTS } from '../../theme/tokens';
+
+import { FraturaGlyph } from './FraturaGlyph';
 
 export interface FraturaPickerProps {
   value: TipoFratura | null;
@@ -25,17 +14,18 @@ export interface FraturaPickerProps {
 }
 
 /**
- * Fracture-type picker (F-S006-3, US09): the 6 laboratory types as large,
- * high-contrast icon cards. Selecting one stores the enum value in
+ * Fracture-type picker (F-S006-3, US09): the 6 laboratory types as large cards
+ * with a technical drawing of the ruptured specimen (plan §6.6, 120dp-class
+ * targets for gloved hands). Selecting one stores the enum value in
  * `rupturas.tipo_fratura`. The exact labels/order come from `FRATURA_TIPOS`.
  */
 export function FraturaPicker({ value, onChange, error, disabled = false }: FraturaPickerProps) {
   return (
-    <View className="w-full gap-2">
-      <Text style={{ fontSize: 18 }} className="font-medium text-gray-800">
+    <View className="w-full gap-3">
+      <Text style={{ fontSize: 16, fontFamily: FONTS.sansMedium }} className="text-concreto-600">
         Tipo de fratura
       </Text>
-      <View className="flex-row flex-wrap gap-2">
+      <View className="flex-row flex-wrap justify-between gap-y-3">
         {FRATURA_TIPOS.map((option) => {
           const selected = value === option.value;
           return (
@@ -46,24 +36,33 @@ export function FraturaPicker({ value, onChange, error, disabled = false }: Frat
               accessibilityLabel={option.label}
               disabled={disabled}
               onPress={() => onChange(option.value)}
-              style={{ minHeight: 56, width: '48%' }}
-              className={`flex-row items-center gap-2 rounded-2xl border px-3 py-2 ${
-                selected ? 'border-brand bg-blue-50' : 'border-gray-300 bg-white'
+              style={{ minHeight: 132, width: '31.5%' }}
+              className={`items-center justify-between rounded-xl border-2 px-1 py-2 ${
+                selected ? 'border-grafite bg-sinal-500' : 'border-concreto-200 bg-concreto-25'
               }`}
             >
-              <Text style={{ fontSize: 24 }}>{FRATURA_ICONS[option.value]}</Text>
+              <FraturaGlyph
+                tipo={option.value}
+                size={40}
+                color={selected ? COLORS.grafite : COLORS.concreto500}
+                lineColor={selected ? COLORS.grafite : COLORS.danger}
+              />
               <Text
-                style={{ fontSize: 15 }}
-                className={`flex-1 font-medium ${selected ? 'text-brand-dark' : 'text-gray-800'}`}
+                style={{ fontSize: 13, lineHeight: 16, fontFamily: FONTS.sansSemibold }}
+                className="text-center text-grafite"
               >
-                {option.label}
+                {option.label.replace('Ruptura ', '').replace(/^de /, '')}
               </Text>
             </Pressable>
           );
         })}
       </View>
       {error ? (
-        <Text className="font-medium text-danger" accessibilityRole="alert">
+        <Text
+          style={{ fontSize: 15, fontFamily: FONTS.sansMedium }}
+          className="text-danger"
+          accessibilityRole="alert"
+        >
           {error}
         </Text>
       ) : null}
