@@ -46,14 +46,35 @@ export async function establishRecoverySession(hash: string): Promise<RecoveryIn
 }
 
 /**
+ * Thrown when the recovery e-mail could NOT be sent (rate limit, SMTP/server
+ * failure, network). Its message is safe to show: it never says whether the
+ * address exists (US17-CA2) — Supabase answers an unknown address with success.
+ */
+export class PasswordResetSendError extends Error {}
+
+/**
  * Sends the recovery e-mail. The link returns the user to
- * `${origin}/reset-password`. Callers must NOT reveal whether the address
- * exists (US17-CA2), so the UI always shows the same confirmation.
+ * `<app base>/reset-password`. Callers must NOT reveal whether the address
+ * exists (US17-CA2): on success the UI shows the same neutral confirmation.
+ * Delivery failures (e.g. the 429 e-mail rate limit of the Supabase built-in
+ * SMTP) are surfaced instead of being reported as "sent".
  */
 export async function requestPasswordReset(email: string): Promise<void> {
-  await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: appUrl('/reset-password'),
   });
+  if (!error) {
+    return;
+  }
+  const status = (error as { status?: number }).status;
+  if (status === 429) {
+    throw new PasswordResetSendError(
+      'Muitos pedidos de redefinição em pouco tempo. Aguarde alguns minutos e tente de novo.',
+    );
+  }
+  throw new PasswordResetSendError(
+    'Não foi possível enviar o e-mail de redefinição agora. Tente novamente em instantes.',
+  );
 }
 
 /**

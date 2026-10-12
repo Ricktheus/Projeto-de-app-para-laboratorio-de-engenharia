@@ -13,6 +13,7 @@ vi.mock('./reset-service', () => ({
   establishRecoverySession: vi.fn(),
   requestPasswordReset: vi.fn(),
   updatePassword: vi.fn(),
+  PasswordResetSendError: class PasswordResetSendError extends Error {},
 }));
 
 const mockedEstablish = vi.mocked(establishRecoverySession);
@@ -51,6 +52,21 @@ describe('ResetPasswordPage', () => {
     // Unique to the persistent confirmation paragraph (the toast shares the prefix).
     expect(await screen.findByText(/você receberá um link/)).toBeInTheDocument();
     expect(mockedUpdate).not.toHaveBeenCalled();
+  });
+
+  it('when the e-mail cannot be sent (rate limit), says so instead of "sent"', async () => {
+    mockedEstablish.mockResolvedValue('none');
+    const { PasswordResetSendError } = await import('./reset-service');
+    mockedRequest.mockRejectedValue(
+      new PasswordResetSendError('Muitos pedidos de redefinição em pouco tempo.'),
+    );
+    renderPage();
+
+    await userEvent.type(await screen.findByLabelText('E-mail'), 'eng@lab.com');
+    await userEvent.click(screen.getByRole('button', { name: /Enviar link/ }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Muitos pedidos de redefinição');
+    expect(screen.queryByText(/você receberá um link/)).not.toBeInTheDocument();
   });
 
   it('with a valid recovery token, sets the new password and returns to login', async () => {

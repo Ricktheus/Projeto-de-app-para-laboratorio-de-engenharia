@@ -8,7 +8,12 @@ import { LoadingButton } from '../../components/ui';
 import { useToastStore } from '../../stores/toast-store';
 
 import { AuthLayout } from './AuthLayout';
-import { establishRecoverySession, requestPasswordReset, updatePassword } from './reset-service';
+import {
+  establishRecoverySession,
+  PasswordResetSendError,
+  requestPasswordReset,
+  updatePassword,
+} from './reset-service';
 
 const inputClass = 'control h-11';
 
@@ -23,6 +28,7 @@ type RequestValues = z.infer<typeof requestSchema>;
 function RequestResetForm() {
   const showToast = useToastStore((s) => s.show);
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -33,7 +39,18 @@ function RequestResetForm() {
   });
 
   const onSubmit = async ({ email }: RequestValues): Promise<void> => {
-    await requestPasswordReset(email);
+    setSendError(null);
+    try {
+      await requestPasswordReset(email);
+    } catch (error) {
+      // Delivery failed (rate limit / server): say so instead of "sent".
+      setSendError(
+        error instanceof PasswordResetSendError
+          ? error.message
+          : 'Não foi possível enviar o e-mail de redefinição agora. Tente novamente em instantes.',
+      );
+      return;
+    }
     // Never reveal whether the address exists (US17-CA2): same message always.
     setSent(true);
     showToast('Se existir uma conta com este e-mail, enviamos um link de redefinição.', 'success');
@@ -50,6 +67,14 @@ function RequestResetForm() {
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+      {sendError ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-field font-medium text-danger"
+        >
+          {sendError}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-[13px] font-medium text-concreto-600">
           E-mail
