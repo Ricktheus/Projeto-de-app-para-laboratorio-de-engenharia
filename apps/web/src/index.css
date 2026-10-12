@@ -1,3 +1,10 @@
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/barlow-semi-condensed/600.css';
+@import '@fontsource/barlow-semi-condensed/700.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,14 +13,65 @@
   color-scheme: light;
 }
 
-body {
-  margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
-  background-color: #f3f4f6;
-  color: #111827;
+@layer base {
+  body {
+    margin: 0;
+    @apply bg-concreto-25 font-sans text-[14px] leading-5 text-grafite antialiased;
+    font-feature-settings: 'tnum' 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply text-grafite;
+  }
+
+  /* Plan §6.9: visible cobalt focus ring, 2px with 2px offset. */
+  :focus-visible {
+    outline: 2px solid theme('colors.cobalto.600');
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: theme('colors.cobalto.100');
+  }
+
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Generic surface used by cards, panels and table wrappers. */
+  .surface {
+    @apply rounded-xl border border-concreto-100 bg-white shadow-card;
+  }
+
+  /* Small uppercase label above a value (tables, facts, KPIs). */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-concreto-500;
+  }
+
+  /* Native form controls in the office density. */
+  .control {
+    @apply min-h-touch w-full rounded-xl border border-concreto-200 bg-white px-3 text-field text-grafite transition-colors duration-150 ease-rastro placeholder:text-concreto-400 hover:border-concreto-300 focus:border-grafite focus:outline-none focus:ring-2 focus:ring-cobalto-600/20 disabled:bg-concreto-50;
+  }
+
+  /* Hazard stripe: the "sinalização" signature, used sparingly as an accent. */
+  .hazard {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      theme('colors.sinal.500') 0 10px,
+      theme('colors.grafite.DEFAULT') 10px 20px
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
 }

@@ -136,21 +136,22 @@ export function ConcretagemEditForm({
 
   return (
     <form
-      className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6"
+      className="flex flex-col gap-6"
       onSubmit={handleSubmit((values) => onSubmit(toPatch(values)))}
       noValidate
     >
       {errorMessage ? (
         <div
           role="alert"
-          className="flex flex-col gap-2 rounded-lg bg-red-50 px-4 py-3 text-field font-medium text-danger"
+          className="flex flex-col items-start gap-2 rounded-xl border border-danger/20 bg-danger-soft px-4 py-3 text-field font-medium text-danger"
         >
           <span>{errorMessage}</span>
           {errorAction}
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <fieldset className="grid gap-4 sm:grid-cols-2">
+        <legend className="eyebrow mb-3">Concreto</legend>
         <NumericInput
           label="FCK de projeto (MPa)"
           suffix="MPa"
@@ -171,6 +172,22 @@ export function ConcretagemEditForm({
           error={errors.concreteira?.message}
           {...register('concreteira')}
         />
+        <TextField
+          label="Traço"
+          disabled={submitting}
+          error={errors.traco?.message}
+          {...register('traco')}
+        />
+        <TextField
+          label="Aditivo"
+          disabled={submitting}
+          error={errors.aditivo?.message}
+          {...register('aditivo')}
+        />
+      </fieldset>
+
+      <fieldset className="grid gap-4 sm:grid-cols-3">
+        <legend className="eyebrow mb-3">Abatimento (slump)</legend>
         <NumericInput
           label="Slump de projeto (mm)"
           suffix="mm"
@@ -192,18 +209,21 @@ export function ConcretagemEditForm({
           error={errors.slumpMedidoMm?.message}
           {...register('slumpMedidoMm')}
         />
+      </fieldset>
+
+      <fieldset className="grid gap-4 sm:grid-cols-2">
+        <legend className="eyebrow mb-3">Rastreabilidade na obra</legend>
         <TextField
           label="Quadra"
           disabled={submitting}
           error={errors.quadra?.message}
           {...register('quadra')}
         />
-        <TextField label="Lote" disabled={submitting} error={errors.lote?.message} {...register('lote')} />
         <TextField
-          label="Traço"
+          label="Lote"
           disabled={submitting}
-          error={errors.traco?.message}
-          {...register('traco')}
+          error={errors.lote?.message}
+          {...register('lote')}
         />
         <TextField
           label="Placa do caminhão"
@@ -217,15 +237,9 @@ export function ConcretagemEditForm({
           error={errors.lacreCaminhao?.message}
           {...register('lacreCaminhao')}
         />
-        <TextField
-          label="Aditivo"
-          disabled={submitting}
-          error={errors.aditivo?.message}
-          {...register('aditivo')}
-        />
-      </div>
+      </fieldset>
 
-      <div className="mt-2 flex gap-2">
+      <div className="sticky bottom-0 -mx-6 -mb-6 flex gap-2 border-t border-concreto-100 bg-white px-6 py-4">
         <LoadingButton type="submit" loading={submitting} loadingLabel="Salvando...">
           Salvar alterações
         </LoadingButton>

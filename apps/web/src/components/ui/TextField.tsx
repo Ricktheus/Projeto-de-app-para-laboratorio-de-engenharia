@@ -5,7 +5,7 @@ export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   /** Field error message; when set the input renders in the error state. */
   error?: string;
   /**
-   * Highlights the field in amber for "needs review" (OCR low-confidence,
+   * Highlights the field in AI violet (plan §6.1) for "needs review" (OCR low-confidence,
    * US01-CA2). Independent from `error` (which is red).
    */
   highlight?: boolean;
@@ -21,14 +21,10 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
 ) {
   const inputId = id ?? `field-${label.replace(/\s+/g, '-').toLowerCase()}`;
   const errorId = `${inputId}-error`;
-  const borderClass = error
-    ? 'border-danger'
-    : highlight
-      ? 'border-warning bg-yellow-50'
-      : 'border-gray-300';
+  const borderClass = error ? '!border-danger' : highlight ? '!border-ia-600 !bg-ia-50' : '';
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-field font-medium text-gray-800">
+      <label htmlFor={inputId} className="text-[13px] font-medium text-concreto-600">
         {label}
       </label>
       <input
@@ -36,19 +32,11 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         id={inputId}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
-        className={[
-          'min-h-touch w-full rounded-xl border bg-white px-4 text-field',
-          'focus:outline focus:outline-2 focus:outline-offset-0 focus:outline-brand',
-          'disabled:bg-gray-100',
-          borderClass,
-          className,
-        ]
-          .filter(Boolean)
-          .join(' ')}
+        className={['control', borderClass, className].filter(Boolean).join(' ')}
         {...rest}
       />
       {error ? (
-        <p id={errorId} className="text-sm font-medium text-danger">
+        <p id={errorId} className="text-[13px] font-medium text-danger">
           {error}
         </p>
       ) : null}

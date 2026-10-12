@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
-import { ManagementNav } from '../../components/ManagementNav';
 import { ClientesSection } from '../clientes/ClientesSection';
 
 import { UsuariosSection } from './UsuariosSection';
@@ -17,20 +16,23 @@ export function UsuariosPage() {
   const [tab, setTab] = useState<Tab>('clientes');
 
   return (
-    <AppShell title="Clientes e Usuários">
-      <ManagementNav />
-
-      <div className="mb-6 flex gap-2" role="tablist" aria-label="Seções de gestão">
+    <AppShell
+      title="Clientes e equipe"
+      subtitle="Clientes com acesso ao portal e usuários internos do laboratório."
+    >
+      <div
+        className="mb-6 inline-flex gap-1 rounded-xl border border-concreto-100 bg-white p-1 shadow-card"
+        role="tablist"
+        aria-label="Seções de gestão"
+      >
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'clientes'}
           onClick={() => setTab('clientes')}
           className={[
-            'min-h-touch rounded-xl px-5 text-field font-medium',
-            tab === 'clientes'
-              ? 'bg-brand text-brand-fg'
-              : 'border border-gray-300 bg-white text-gray-700',
+            'h-9 rounded-lg px-4 text-[14px] font-medium transition-colors',
+            tab === 'clientes' ? 'bg-grafite text-white' : 'text-concreto-600 hover:text-grafite',
           ].join(' ')}
         >
           Clientes
@@ -41,10 +43,8 @@ export function UsuariosPage() {
           aria-selected={tab === 'usuarios'}
           onClick={() => setTab('usuarios')}
           className={[
-            'min-h-touch rounded-xl px-5 text-field font-medium',
-            tab === 'usuarios'
-              ? 'bg-brand text-brand-fg'
-              : 'border border-gray-300 bg-white text-gray-700',
+            'h-9 rounded-lg px-4 text-[14px] font-medium transition-colors',
+            tab === 'usuarios' ? 'bg-grafite text-white' : 'text-concreto-600 hover:text-grafite',
           ].join(' ')}
         >
           Equipe

@@ -1,9 +1,18 @@
 import { formatIsoDateBr, MESSAGES } from '@concreto/shared';
+import { ArrowsClockwise, MagnifyingGlass, PencilSimple, Truck } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
 import { AppShell } from '../../components/AppShell';
-import { ManagementNav } from '../../components/ManagementNav';
-import { BigButton, EmptyState, StatusPill, useToast } from '../../components/ui';
+import {
+  BigButton,
+  Drawer,
+  EmptyState,
+  ErrorState,
+  KpiTile,
+  SkeletonRows,
+  StatusPill,
+  useToast,
+} from '../../components/ui';
 import { useAuthStore } from '../../stores/auth-store';
 import { ConcretagemEditForm } from '../concretagens/ConcretagemEditForm';
 import {
@@ -17,21 +26,46 @@ import {
   useConcretagensRealtime,
 } from '../concretagens/useConcretagens';
 
-/** One labelled fact of a concretagem card. */
-function Fact({ label, value }: { label: string; value: string }) {
+const numberBr = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+
+/** Slump measured vs project ± tolerance — a field fact, shown neutrally. */
+function SlumpCell({ row }: { row: ConcretagemRow }) {
+  if (row.slump_medido == null) {
+    return <span className="text-concreto-400">—</span>;
+  }
+  const hasSpec = row.slump_projeto != null && row.slump_tolerancia != null;
+  const within =
+    hasSpec &&
+    Math.abs(row.slump_medido - (row.slump_projeto as number)) <= (row.slump_tolerancia as number);
   return (
-    <div className="flex flex-col">
-      <span className="text-xs uppercase tracking-wide text-gray-400">{label}</span>
-      <span className="text-field text-gray-900">{value}</span>
-    </div>
+    <span className="flex items-center gap-2">
+      <span className="tabular-nums">{row.slump_medido} mm</span>
+      {hasSpec ? (
+        <StatusPill
+          tone={within ? 'neutral' : 'warning'}
+          label={within ? 'na tolerância' : 'fora da tolerância'}
+        />
+      ) : null}
+    </span>
+  );
+}
+
+/** "Live" indicator for the realtime subscription (plan §6.8: motion = info). */
+function LiveBadge() {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-concreto-200 bg-white px-3 py-1 text-[12px] font-medium text-concreto-600">
+      <span aria-hidden className="h-2 w-2 animate-pulse-dot rounded-full bg-success" />
+      Ao vivo
+    </span>
   );
 }
 
 /**
- * Office panel (escritório). Shows every field concretagem in real time
- * (F-S007-1 / US12 — Supabase Realtime keeps the list live) and lets the
- * engineers edit a pour with optimistic locking (F-S007-2 / US12b). Covers the
- * four UI-states; a concurrent edit surfaces the exact 409 copy + "Recarregar".
+ * Concretagens (office panel). Every field pour in real time (F-S007-1 / US12 —
+ * Supabase Realtime keeps the table live) with a dense, searchable table and
+ * editing in a side drawer with optimistic locking (F-S007-2 / US12b). Covers
+ * the four UI-states; a concurrent edit surfaces the exact 409 copy +
+ * "Recarregar".
  */
 export function PainelPage() {
   const { show } = useToast();
@@ -54,11 +88,22 @@ export function PainelPage() {
       return concretagens ?? [];
     }
     return concretagens.filter((row) =>
-      [row.obra_sigla, row.obra_nome, row.cliente_nome, row.nf_numero].some((field) =>
-        (field ?? '').toLowerCase().includes(needle),
+      [row.obra_sigla, row.obra_nome, row.cliente_nome, row.nf_numero, row.concreteira].some(
+        (field) => (field ?? '').toLowerCase().includes(needle),
       ),
     );
   }, [concretagens, search]);
+
+  const resumo = useMemo(() => {
+    const rows = concretagens ?? [];
+    return {
+      total: rows.length,
+      volume: rows.reduce((sum, r) => sum + (Number(r.volume_m3) || 0), 0),
+      obras: new Set(rows.map((r) => r.obra_id)).size,
+    };
+  }, [concretagens]);
+
+  const editing = concretagens?.find((row) => row.id === editingId) ?? null;
 
   async function handleEdit(row: ConcretagemRow, patch: ConcretagemPatch) {
     setEditError(null);
@@ -91,111 +136,170 @@ export function PainelPage() {
   }
 
   return (
-    <AppShell title="Painel do Escritório">
-      <ManagementNav />
-
-      <p className="mb-6 text-gray-600">
-        Concretagens recebidas do campo, atualizadas em tempo real.
-      </p>
-
+    <AppShell
+      title="Concretagens"
+      subtitle="Concretagens recebidas do campo, atualizadas em tempo real."
+      actions={<LiveBadge />}
+    >
       {isLoading ? (
-        <ul className="flex flex-col gap-3" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <li key={i} className="h-28 animate-pulse rounded-xl bg-gray-200" />
-          ))}
-        </ul>
+        <SkeletonRows rows={5} className="h-12" />
       ) : isError ? (
-        <div
-          role="alert"
-          className="flex flex-col items-start gap-3 rounded-lg bg-red-50 px-4 py-3 text-field text-danger"
-        >
-          <span className="font-medium">{MESSAGES.feature.painelErroCarregar}</span>
-          <BigButton variant="neutral" onClick={() => void refetch()}>
-            {MESSAGES.feature.painelTentarNovamente}
-          </BigButton>
-        </div>
+        <ErrorState
+          message={MESSAGES.feature.painelErroCarregar}
+          action={
+            <BigButton variant="neutral" size="sm" onClick={() => void refetch()}>
+              {MESSAGES.feature.painelTentarNovamente}
+            </BigButton>
+          }
+        />
       ) : !concretagens || concretagens.length === 0 ? (
         <EmptyState
-          icon="🏗️"
+          icon={<Truck size={24} />}
           title={MESSAGES.feature.emptyConcretagensPainel}
           description="As concretagens salvas no aplicativo de campo aparecem aqui automaticamente."
           action={
-            <BigButton variant="neutral" onClick={() => void refetch()}>
+            <BigButton
+              variant="neutral"
+              icon={<ArrowsClockwise size={16} />}
+              onClick={() => void refetch()}
+            >
               Atualizar
             </BigButton>
           }
         />
       ) : (
-        <>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por obra, cliente ou NF"
-            aria-label="Buscar concretagens"
-            className="mb-4 w-full max-w-md min-h-touch rounded-xl border border-gray-300 bg-white px-4 text-field"
-          />
-          {filtered.length === 0 ? (
-            <EmptyState icon="🔍" title="Nenhuma concretagem encontrada para a busca." />
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {filtered.map((row) =>
-                editingId === row.id ? (
-                  <li key={row.id}>
-                    <ConcretagemEditForm
-                      concretagem={row}
-                      submitting={atualizar.isPending}
-                      errorMessage={editError}
-                      errorAction={
-                        conflict ? (
-                          <BigButton variant="neutral" onClick={handleReload}>
-                            {MESSAGES.feature.concretagemRecarregar}
-                          </BigButton>
-                        ) : undefined
-                      }
-                      onSubmit={(patch) => handleEdit(row, patch)}
-                      onCancel={() => setEditingId(null)}
-                    />
-                  </li>
-                ) : (
-                  <li
-                    key={row.id}
-                    className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-field font-medium text-gray-900">
-                          {row.obra_sigla ?? 'Obra'} <span className="text-gray-400">·</span>{' '}
-                          {row.obra_nome ?? '—'}
-                        </p>
-                        <p className="truncate text-sm text-gray-500">
-                          {row.cliente_nome ?? 'Cliente'}
-                        </p>
-                      </div>
-                      <StatusPill label={`NF ${row.nf_numero}`} tone="info" />
-                    </div>
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <KpiTile label="Concretagens" value={resumo.total} />
+            <KpiTile label="Volume total" value={`${numberBr.format(resumo.volume)} m³`} />
+            <KpiTile label="Obras" value={resumo.obras} />
+          </div>
 
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                      <Fact label="Data" value={formatIsoDateBr(row.data_concretagem)} />
-                      <Fact label="FCK" value={`${row.fck_projeto} MPa`} />
-                      <Fact label="Volume" value={`${row.volume_m3} m³`} />
-                      <Fact label="Concreteira" value={row.concreteira ?? '—'} />
-                    </div>
+          <div className="surface overflow-hidden">
+            <div className="flex flex-wrap items-center gap-3 border-b border-concreto-100 px-4 py-3">
+              <label className="relative w-full max-w-sm">
+                <MagnifyingGlass
+                  size={16}
+                  aria-hidden
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-concreto-400"
+                />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar por obra, cliente, NF ou concreteira"
+                  aria-label="Buscar concretagens"
+                  className="control pl-9"
+                />
+              </label>
+              <span className="ml-auto text-[13px] text-concreto-500">
+                {filtered.length} de {concretagens.length}
+              </span>
+            </div>
 
-                    {canEdit ? (
-                      <div className="flex flex-wrap gap-2">
-                        <BigButton variant="neutral" onClick={() => startEditing(row.id)}>
-                          Editar
-                        </BigButton>
-                      </div>
-                    ) : null}
-                  </li>
-                ),
-              )}
-            </ul>
-          )}
-        </>
+            {filtered.length === 0 ? (
+              <EmptyState
+                compact
+                icon={<MagnifyingGlass size={22} />}
+                title="Nenhuma concretagem encontrada para a busca."
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[860px] text-left">
+                  <thead className="bg-concreto-25">
+                    <tr className="eyebrow">
+                      <th className="px-4 py-2.5 font-semibold">Data</th>
+                      <th className="px-4 py-2.5 font-semibold">Obra</th>
+                      <th className="px-4 py-2.5 font-semibold">NF</th>
+                      <th className="px-4 py-2.5 text-right font-semibold">FCK</th>
+                      <th className="px-4 py-2.5 text-right font-semibold">Volume</th>
+                      <th className="px-4 py-2.5 font-semibold">Slump</th>
+                      <th className="px-4 py-2.5 font-semibold">Concreteira</th>
+                      <th className="px-4 py-2.5" aria-label="Ações" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-concreto-100">
+                    {filtered.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="h-12 transition-colors duration-150 hover:bg-concreto-25"
+                      >
+                        <td className="whitespace-nowrap px-4 tabular-nums text-concreto-600">
+                          {formatIsoDateBr(row.data_concretagem)}
+                        </td>
+                        <td className="px-4">
+                          <p className="font-medium text-grafite">
+                            {row.obra_sigla ?? 'Obra'}{' '}
+                            <span className="font-normal text-concreto-500">
+                              · {row.obra_nome ?? '—'}
+                            </span>
+                          </p>
+                          <p className="text-[12px] text-concreto-500">
+                            {row.cliente_nome ?? 'Cliente'}
+                          </p>
+                        </td>
+                        <td className="whitespace-nowrap px-4 font-mono text-[13px]">
+                          NF {row.nf_numero}
+                        </td>
+                        <td className="whitespace-nowrap px-4 text-right font-medium">
+                          {row.fck_projeto} MPa
+                        </td>
+                        <td className="whitespace-nowrap px-4 text-right">
+                          {numberBr.format(row.volume_m3)} m³
+                        </td>
+                        <td className="whitespace-nowrap px-4">
+                          <SlumpCell row={row} />
+                        </td>
+                        <td className="px-4 text-concreto-600">{row.concreteira ?? '—'}</td>
+                        <td className="px-4 text-right">
+                          {canEdit ? (
+                            <BigButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<PencilSimple size={15} />}
+                              onClick={() => startEditing(row.id)}
+                            >
+                              Editar
+                            </BigButton>
+                          ) : null}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
       )}
+
+      <Drawer
+        open={editing !== null}
+        onClose={() => setEditingId(null)}
+        title={editing ? `NF ${editing.nf_numero}` : ''}
+        subtitle={
+          editing
+            ? `${editing.obra_sigla ?? 'Obra'} · ${editing.cliente_nome ?? 'Cliente'} · ${formatIsoDateBr(editing.data_concretagem)}`
+            : undefined
+        }
+      >
+        {editing ? (
+          <ConcretagemEditForm
+            concretagem={editing}
+            submitting={atualizar.isPending}
+            errorMessage={editError}
+            errorAction={
+              conflict ? (
+                <BigButton variant="neutral" size="sm" onClick={handleReload}>
+                  {MESSAGES.feature.concretagemRecarregar}
+                </BigButton>
+              ) : undefined
+            }
+            onSubmit={(patch) => handleEdit(editing, patch)}
+            onCancel={() => setEditingId(null)}
+          />
+        ) : null}
+      </Drawer>
     </AppShell>
   );
 }

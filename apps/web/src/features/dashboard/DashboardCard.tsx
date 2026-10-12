@@ -1,7 +1,7 @@
 import { MESSAGES } from '@concreto/shared';
 import { type ReactNode } from 'react';
 
-import { BigButton } from '../../components/ui';
+import { BigButton, Card, ErrorState, Skeleton } from '../../components/ui';
 
 export interface DashboardCardProps {
   title: string;
@@ -14,14 +14,22 @@ export interface DashboardCardProps {
   /** Data loaded but empty — shows `emptyText` instead of `children`. */
   isEmpty: boolean;
   emptyText: string;
+  /** Header icon. */
+  icon?: ReactNode;
+  /** Header meta (e.g. a count). */
+  meta?: ReactNode;
+  /** Right-aligned header content. */
+  actions?: ReactNode;
+  /** Attention rail when the card holds work to do now. */
+  attention?: 'accent' | 'danger';
+  className?: string;
   children: ReactNode;
 }
 
 /**
- * Shared shell for every operational-dashboard card (F-S010-1). Encapsulates the
- * four required UI-states — Loading (skeleton), Error (exact copy + retry), Empty
- * (message) and Success (children) — so each card handles them identically and
- * one card's failure never blanks the rest of the board.
+ * Shared shell for every cockpit card (F-S010-1). Encapsulates the four required
+ * UI-states — Loading (skeleton), Error (exact copy + retry), Empty (message) and
+ * Success (children) — so one card's failure never blanks the rest of the board.
  */
 export function DashboardCard({
   title,
@@ -30,33 +38,46 @@ export function DashboardCard({
   onRetry,
   isEmpty,
   emptyText,
+  icon,
+  meta,
+  actions,
+  attention,
+  className,
   children,
 }: DashboardCardProps) {
+  const ready = !isLoading && !isError && !isEmpty;
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5">
-      <h2 className="text-field font-semibold text-gray-800">{title}</h2>
-
+    <Card
+      title={title}
+      icon={icon}
+      meta={ready ? meta : undefined}
+      actions={ready ? actions : undefined}
+      attention={ready ? attention : undefined}
+      className={className}
+    >
       {isLoading ? (
-        <div
-          className="flex items-center gap-3 text-gray-400"
-          role="status"
-          aria-label="Carregando"
-        >
-          <span className="h-5 w-5 animate-spin rounded-full border-4 border-gray-200 border-t-brand" />
-          <div className="h-10 flex-1 animate-pulse rounded-lg bg-gray-100" />
+        <div className="flex flex-col gap-2" role="status" aria-label="Carregando">
+          <Skeleton className="h-9" />
+          <Skeleton className="h-9 w-4/5" />
+          <Skeleton className="h-9 w-3/5" />
         </div>
       ) : isError ? (
-        <div role="alert" className="flex flex-col items-start gap-3 text-field text-danger">
-          <span>{MESSAGES.feature.dashboardErroCard}</span>
-          <BigButton variant="neutral" onClick={onRetry}>
-            {MESSAGES.feature.dashboardTentarNovamente}
-          </BigButton>
-        </div>
+        <ErrorState
+          message={MESSAGES.feature.dashboardErroCard}
+          action={
+            <BigButton variant="neutral" size="sm" onClick={onRetry}>
+              {MESSAGES.feature.dashboardTentarNovamente}
+            </BigButton>
+          }
+        />
       ) : isEmpty ? (
-        <p className="text-gray-500">{emptyText}</p>
+        <p className="flex items-center gap-2 py-3 text-concreto-500">
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-success" />
+          {emptyText}
+        </p>
       ) : (
         children
       )}
-    </section>
+    </Card>
   );
 }
