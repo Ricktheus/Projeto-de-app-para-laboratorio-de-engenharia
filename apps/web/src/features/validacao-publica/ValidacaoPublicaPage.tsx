@@ -1,6 +1,8 @@
 import {
   fckVerdict,
   FCK_VEREDITO_LABELS,
+  formatMpaBr,
+  formatNumberBr,
   MESSAGES,
   type FckVeredito,
   type ValidarLaudoResponse,
@@ -156,10 +158,10 @@ function LaudoAutentico({ laudo }: { laudo: ValidarLaudoResponse }) {
                     <tr key={r.idade_dias}>
                       <td className="px-4 py-3">{r.idade_dias}</td>
                       <td className="px-4 py-3 text-right font-display text-[18px] font-semibold">
-                        {r.fcm_mpa}
+                        {formatMpaBr(r.fcm_mpa)}
                       </td>
                       <td className="px-4 py-3 text-right text-concreto-500">
-                        {r.fck_projeto ?? '—'}
+                        {formatNumberBr(r.fck_projeto)}
                       </td>
                     </tr>
                   ))}

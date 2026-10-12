@@ -1,4 +1,4 @@
-import { type LaudoCurvaPonto } from '@concreto/shared';
+import { formatMpaBr, formatNumberBr, type LaudoCurvaPonto } from '@concreto/shared';
 import {
   Area,
   CartesianGrid,
@@ -78,7 +78,7 @@ export function ResistenciaChart({ curva, fckProjeto }: ResistenciaChartProps) {
               fontFamily: 'IBM Plex Sans, sans-serif',
               fontSize: 13,
             }}
-            formatter={(value: number) => [`${value} MPa`, 'FCM']}
+            formatter={(value: number) => [`${formatMpaBr(value)} MPa`, 'FCM']}
             labelFormatter={(label: number) => `${label} dias`}
           />
           {fckProjeto !== null ? (
@@ -88,7 +88,7 @@ export function ResistenciaChart({ curva, fckProjeto }: ResistenciaChartProps) {
               strokeDasharray="6 4"
               strokeWidth={1.25}
               label={{
-                value: `fck ${fckProjeto} MPa`,
+                value: `fck ${formatNumberBr(fckProjeto)} MPa`,
                 position: 'insideTopRight',
                 fill: FCK_COLOR,
                 fontSize: 12,

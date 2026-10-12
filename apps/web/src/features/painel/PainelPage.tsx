@@ -1,4 +1,4 @@
-import { formatIsoDateBr, MESSAGES } from '@concreto/shared';
+import { formatIsoDateBr, formatNumberBr, MESSAGES } from '@concreto/shared';
 import { ArrowsClockwise, MagnifyingGlass, PencilSimple, Truck } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 
@@ -26,8 +26,6 @@ import {
   useConcretagensRealtime,
 } from '../concretagens/useConcretagens';
 
-const numberBr = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
-
 /** Slump measured vs project ± tolerance — a field fact, shown neutrally. */
 function SlumpCell({ row }: { row: ConcretagemRow }) {
   if (row.slump_medido == null) {
@@ -39,7 +37,7 @@ function SlumpCell({ row }: { row: ConcretagemRow }) {
     Math.abs(row.slump_medido - (row.slump_projeto as number)) <= (row.slump_tolerancia as number);
   return (
     <span className="flex items-center gap-2">
-      <span className="tabular-nums">{row.slump_medido} mm</span>
+      <span className="tabular-nums">{formatNumberBr(row.slump_medido)} mm</span>
       {hasSpec ? (
         <StatusPill
           tone={within ? 'neutral' : 'warning'}
@@ -171,7 +169,7 @@ export function PainelPage() {
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <KpiTile label="Concretagens" value={resumo.total} />
-            <KpiTile label="Volume total" value={`${numberBr.format(resumo.volume)} m³`} />
+            <KpiTile label="Volume total" value={`${formatNumberBr(resumo.volume)} m³`} />
             <KpiTile label="Obras" value={resumo.obras} />
           </div>
 
@@ -242,10 +240,10 @@ export function PainelPage() {
                           NF {row.nf_numero}
                         </td>
                         <td className="whitespace-nowrap px-4 text-right font-medium">
-                          {row.fck_projeto} MPa
+                          {formatNumberBr(row.fck_projeto)} MPa
                         </td>
                         <td className="whitespace-nowrap px-4 text-right">
-                          {numberBr.format(row.volume_m3)} m³
+                          {formatNumberBr(row.volume_m3)} m³
                         </td>
                         <td className="whitespace-nowrap px-4">
                           <SlumpCell row={row} />

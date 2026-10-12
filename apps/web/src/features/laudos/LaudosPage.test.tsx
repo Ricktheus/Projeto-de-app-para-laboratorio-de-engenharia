@@ -194,7 +194,7 @@ describe('LaudosPage (F-S007-3 + S008)', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: 'Ver laudo' }));
 
-    expect(await screen.findByText('FCM 27.44 MPa')).toBeInTheDocument();
+    expect(await screen.findByText('FCM 27,44 MPa')).toBeInTheDocument();
     expect(screen.getByText('CP-7')).toBeInTheDocument();
     expect(screen.getByText('CPs pendentes')).toBeInTheDocument(); // 28d still pending
     expect(screen.getByTestId('resistencia-chart')).toBeInTheDocument();

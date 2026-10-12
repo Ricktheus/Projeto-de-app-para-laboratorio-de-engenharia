@@ -1,4 +1,11 @@
-import { MESSAGES, type CpStatus, type LaudoStatus, type LaudoTipo } from '@concreto/shared';
+import {
+  formatMpaBr,
+  formatNumberBr,
+  MESSAGES,
+  type CpStatus,
+  type LaudoStatus,
+  type LaudoTipo,
+} from '@concreto/shared';
 import { useState } from 'react';
 
 import {
@@ -99,7 +106,7 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
           <Fact label="NF" value={nfs} mono />
           <Fact
             label="fck de projeto"
-            value={detalhe.fckProjeto !== null ? `${detalhe.fckProjeto} MPa` : '—'}
+            value={detalhe.fckProjeto !== null ? `${formatNumberBr(detalhe.fckProjeto)} MPa` : '—'}
           />
         </dl>
       </header>
@@ -139,7 +146,7 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
                   ) : idade.pendente ? (
                     <StatusPill label="CPs pendentes" tone="info" />
                   ) : (
-                    <StatusPill label={`FCM ${idade.fcm} MPa`} tone="success" />
+                    <StatusPill label={`FCM ${formatMpaBr(idade.fcm)} MPa`} tone="success" />
                   )}
                 </span>
               </div>
@@ -160,10 +167,10 @@ export function LaudoDetalheView(props: LaudoDetalheViewProps) {
                     >
                       <td className="px-4 py-2 font-mono text-[13px]">{cp.codigoRastreio}</td>
                       <td className="px-4 py-2 text-right">
-                        {cp.status === 'rompido' ? (cp.cargaRupturaKgf ?? '—') : '—'}
+                        {cp.status === 'rompido' ? formatNumberBr(cp.cargaRupturaKgf) : '—'}
                       </td>
                       <td className="px-4 py-2 text-right font-display text-[16px] font-semibold">
-                        {cp.status === 'rompido' ? (cp.mpaCalculado ?? '—') : '—'}
+                        {cp.status === 'rompido' ? formatMpaBr(cp.mpaCalculado) : '—'}
                       </td>
                       <td className="px-4 py-2 text-concreto-500">{CP_STATUS_LABELS[cp.status]}</td>
                     </tr>
