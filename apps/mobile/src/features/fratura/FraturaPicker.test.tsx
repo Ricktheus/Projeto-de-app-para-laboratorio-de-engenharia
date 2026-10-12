@@ -25,7 +25,9 @@ describe('FraturaPicker (F-S006-3)', () => {
   });
 
   it('shows the sad-path error when required and unset', () => {
-    render(<FraturaPicker value={null} onChange={jest.fn()} error="Selecione o tipo de fratura." />);
+    render(
+      <FraturaPicker value={null} onChange={jest.fn()} error="Selecione o tipo de fratura." />,
+    );
     expect(screen.getByText('Selecione o tipo de fratura.')).toBeTruthy();
   });
 

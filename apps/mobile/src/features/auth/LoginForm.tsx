@@ -1,9 +1,11 @@
 import { BRAND, loginCredentialsSchema, type LoginCredentials } from '@concreto/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 
+import { BrandGlyph } from '../../components/BrandGlyph';
 import { LoadingButton } from '../../components/ui';
+import { COLORS, FONTS } from '../../theme/tokens';
 
 export interface LoginFormProps {
   onSubmit: (credentials: LoginCredentials) => void;
@@ -11,7 +13,7 @@ export interface LoginFormProps {
   errorMessage: string | null;
 }
 
-const INPUT_CLASS = 'rounded-2xl border border-gray-300 bg-white px-4';
+const INPUT_CLASS = 'rounded-xl border-2 border-concreto-200 bg-white px-4';
 
 /**
  * Presentational login form (F-S003-1). Validates with the shared Zod schema
@@ -30,82 +32,120 @@ export function LoginForm({ onSubmit, isPending, errorMessage }: LoginFormProps)
   });
 
   return (
-    <View className="flex-1 justify-center gap-4 p-6">
-      <View className="gap-1">
-        <Text style={{ fontSize: 24 }} className="text-center font-bold text-gray-900">
-          {BRAND.nome}
-        </Text>
-        <Text className="text-center text-gray-500">{BRAND.tagline}</Text>
-        <Text className="text-center text-gray-500">Entre com suas credenciais.</Text>
-      </View>
-
-      {errorMessage ? (
-        <View accessibilityRole="alert" className="rounded-2xl bg-red-100 px-4 py-3">
-          <Text style={{ fontSize: 16 }} className="font-medium text-danger">
-            {errorMessage}
+    <ScrollView className="flex-1 bg-concreto-25" contentContainerClassName="flex-grow">
+      <View className="gap-4 bg-grafite px-6 pb-8 pt-16">
+        <BrandGlyph size={64} />
+        <View className="gap-1">
+          <Text
+            style={{ fontSize: 13, letterSpacing: 1.4, fontFamily: FONTS.sansSemibold }}
+            className="uppercase text-sinal-500"
+          >
+            Rastro · {BRAND.tagline}
+          </Text>
+          <Text
+            style={{ fontSize: 34, lineHeight: 38, fontFamily: FONTS.displayBold }}
+            className="text-white"
+          >
+            {BRAND.nome}
+          </Text>
+          <Text style={{ fontSize: 16, fontFamily: FONTS.sans }} className="text-concreto-300">
+            Do caminhão ao laudo assinado.
           </Text>
         </View>
-      ) : null}
+      </View>
+      <View style={{ height: 6, backgroundColor: COLORS.sinal }} />
+      <View className="flex-1 gap-4 p-6">
+        <Text style={{ fontSize: 22, fontFamily: FONTS.displayBold }} className="text-grafite">
+          Entre com suas credenciais.
+        </Text>
 
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View className="gap-1">
-            <Text style={{ fontSize: 18 }} className="font-medium text-gray-800">
-              E-mail
+        {errorMessage ? (
+          <View
+            accessibilityRole="alert"
+            className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+          >
+            <Text style={{ fontSize: 16 }} className="font-medium text-danger">
+              {errorMessage}
             </Text>
-            <TextInput
-              accessibilityLabel="E-mail"
-              autoCapitalize="none"
-              autoComplete="email"
-              keyboardType="email-address"
-              editable={!isPending}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              style={{ minHeight: 56, fontSize: 18 }}
-              className={INPUT_CLASS}
-            />
-            {errors.email ? (
-              <Text className="font-medium text-danger">{errors.email.message}</Text>
-            ) : null}
           </View>
-        )}
-      />
+        ) : null}
 
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View className="gap-1">
-            <Text style={{ fontSize: 18 }} className="font-medium text-gray-800">
-              Senha
-            </Text>
-            <TextInput
-              accessibilityLabel="Senha"
-              autoCapitalize="none"
-              secureTextEntry
-              editable={!isPending}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              style={{ minHeight: 56, fontSize: 18 }}
-              className={INPUT_CLASS}
-            />
-            {errors.password ? (
-              <Text className="font-medium text-danger">{errors.password.message}</Text>
-            ) : null}
-          </View>
-        )}
-      />
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View className="gap-1">
+              <Text
+                style={{ fontSize: 16, fontFamily: FONTS.sansMedium }}
+                className="text-concreto-600"
+              >
+                E-mail
+              </Text>
+              <TextInput
+                accessibilityLabel="E-mail"
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                editable={!isPending}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={{
+                  minHeight: 56,
+                  fontSize: 18,
+                  fontFamily: FONTS.sans,
+                  color: COLORS.grafite,
+                }}
+                className={INPUT_CLASS}
+              />
+              {errors.email ? (
+                <Text className="font-medium text-danger">{errors.email.message}</Text>
+              ) : null}
+            </View>
+          )}
+        />
 
-      <LoadingButton
-        label="Entrar"
-        loadingLabel="Entrando..."
-        loading={isPending}
-        onPress={handleSubmit(onSubmit)}
-      />
-    </View>
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View className="gap-1">
+              <Text
+                style={{ fontSize: 16, fontFamily: FONTS.sansMedium }}
+                className="text-concreto-600"
+              >
+                Senha
+              </Text>
+              <TextInput
+                accessibilityLabel="Senha"
+                autoCapitalize="none"
+                secureTextEntry
+                editable={!isPending}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={{
+                  minHeight: 56,
+                  fontSize: 18,
+                  fontFamily: FONTS.sans,
+                  color: COLORS.grafite,
+                }}
+                className={INPUT_CLASS}
+              />
+              {errors.password ? (
+                <Text className="font-medium text-danger">{errors.password.message}</Text>
+              ) : null}
+            </View>
+          )}
+        />
+
+        <LoadingButton
+          label="Entrar"
+          loadingLabel="Entrando..."
+          loading={isPending}
+          onPress={handleSubmit(onSubmit)}
+        />
+      </View>
+    </ScrollView>
   );
 }

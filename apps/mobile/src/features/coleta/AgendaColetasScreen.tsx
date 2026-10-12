@@ -1,8 +1,10 @@
 import { hoursElapsed, MESSAGES } from '@concreto/shared';
 import { useRouter } from 'expo-router';
+import { CheckCircle, QrCode } from 'phosphor-react-native';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
 import { BigButton, EmptyState, StatusPill } from '../../components/ui';
+import { COLORS } from '../../theme/tokens';
 
 import { useAgendaColetas } from './useColeta';
 
@@ -21,7 +23,12 @@ export function AgendaColetasScreen() {
   const { data, isLoading, isError } = useAgendaColetas();
 
   const scanButton = (
-    <BigButton label="📷 Bipar QR para coletar" onPress={() => router.push('/coleta')} />
+    <BigButton
+      label="Bipar QR para coletar"
+      variant="accent"
+      icon={(c) => <QrCode size={24} color={c} weight="bold" />}
+      onPress={() => router.push('/coleta')}
+    />
   );
 
   if (isLoading) {
@@ -34,8 +41,11 @@ export function AgendaColetasScreen() {
 
   if (isError) {
     return (
-      <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-        <Text className="font-medium text-white">{MESSAGES.http.serverError}</Text>
+      <View
+        className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+        accessibilityRole="alert"
+      >
+        <Text className="font-medium text-danger">{MESSAGES.http.serverError}</Text>
       </View>
     );
   }
@@ -44,7 +54,10 @@ export function AgendaColetasScreen() {
     return (
       <View className="flex-1 gap-4">
         {scanButton}
-        <EmptyState icon="✅" title={MESSAGES.feature.emptyAgendaColeta} />
+        <EmptyState
+          icon={<CheckCircle size={28} color={COLORS.success} />}
+          title={MESSAGES.feature.emptyAgendaColeta}
+        />
       </View>
     );
   }

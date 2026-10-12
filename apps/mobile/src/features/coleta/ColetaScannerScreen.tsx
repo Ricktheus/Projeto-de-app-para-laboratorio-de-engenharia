@@ -1,10 +1,12 @@
 import { MESSAGES } from '@concreto/shared';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
+import { Camera } from 'phosphor-react-native';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 import { BigButton, EmptyState, useToast } from '../../components/ui';
 import { hapticError, hapticSuccess } from '../../services/haptics';
+import { COLORS } from '../../theme/tokens';
 
 import { useColetarCp } from './useColeta';
 
@@ -64,7 +66,7 @@ export function ColetaScannerScreen() {
   if (!permission.granted) {
     return (
       <EmptyState
-        icon="📷"
+        icon={<Camera size={28} color={COLORS.concreto500} />}
         title="Precisamos da câmera para ler o QR do corpo de prova."
         action={<BigButton label="Permitir câmera" onPress={() => void requestPermission()} />}
       />

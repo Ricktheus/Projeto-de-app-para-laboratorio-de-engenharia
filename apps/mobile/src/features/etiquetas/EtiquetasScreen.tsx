@@ -1,7 +1,9 @@
 import { formatIsoDateBr, MESSAGES } from '@concreto/shared';
+import { Printer, Tag } from 'phosphor-react-native';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
 import { BigButton, EmptyState, StatusPill, type StatusTone } from '../../components/ui';
+import { COLORS } from '../../theme/tokens';
 
 import type { ConcretagemEtiquetas, EtiquetaRow } from './etiquetas-service';
 import type { LabelPrintStatus } from './print-job';
@@ -10,10 +12,10 @@ import { usePrinterSession } from './usePrinterSession';
 
 /** Visual mapping for the per-label checklist (F-S005-1 US03-CA3). */
 const PRINT_STATUS: Record<LabelPrintStatus, { label: string; tone: StatusTone }> = {
-  pendente: { label: '🔄 Pendente', tone: 'neutral' },
-  imprimindo: { label: '🖨️ Imprimindo…', tone: 'info' },
-  impressa: { label: '✅ Impressa', tone: 'success' },
-  falhou: { label: '❌ Falhou', tone: 'danger' },
+  pendente: { label: 'Pendente', tone: 'neutral' },
+  imprimindo: { label: 'Imprimindo…', tone: 'info' },
+  impressa: { label: 'Impressa', tone: 'success' },
+  falhou: { label: 'Falhou', tone: 'danger' },
 };
 
 interface EtiquetasScreenProps {
@@ -79,23 +81,29 @@ export function EtiquetasScreen({ obraId, highlightId }: EtiquetasScreenProps) {
     return (
       <View
         key={concretagem.concretagemId}
-        className={`gap-2 rounded-2xl border bg-white p-4 ${
-          isNova ? 'border-brand' : 'border-gray-200'
+        className={`gap-3 rounded-2xl bg-white p-4 ${
+          isNova ? 'border-2 border-sinal-500' : 'border border-concreto-100'
         }`}
       >
         <View className="flex-row items-center gap-2">
           <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
             {concretagem.obraSigla} · NF {concretagem.nfNumero}
           </Text>
-          {isNova ? <StatusPill label="✨ Recém-criada" tone="success" /> : null}
+          {isNova ? <StatusPill label="Recém-criada" tone="accent" /> : null}
         </View>
         <Text className="text-gray-500">
           {formatIsoDateBr(concretagem.dataConcretagem)} · {concretagem.labels.length} etiqueta(s)
         </Text>
         <BigButton
           label={`Gerar Etiquetas (${concretagem.labels.length})`}
+          variant={isNova ? 'accent' : 'primary'}
+          icon={(c) => <Printer size={22} color={c} weight="bold" />}
           disabled={printer.busy || concretagem.labels.length === 0}
-          accessoryLeft={printer.busy ? <ActivityIndicator color="#fff" /> : undefined}
+          accessoryLeft={
+            printer.busy ? (
+              <ActivityIndicator color={isNova ? COLORS.grafite : COLORS.white} />
+            ) : undefined
+          }
           onPress={() =>
             printer.print(concretagem.labels.map((row) => ({ cpId: row.cpId, label: row.label })))
           }
@@ -144,21 +152,32 @@ export function EtiquetasScreen({ obraId, highlightId }: EtiquetasScreenProps) {
 
   if (isError) {
     return (
-      <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-        <Text className="font-medium text-white">{MESSAGES.http.serverError}</Text>
+      <View
+        className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+        accessibilityRole="alert"
+      >
+        <Text className="font-medium text-danger">{MESSAGES.http.serverError}</Text>
       </View>
     );
   }
 
   if (!data || data.length === 0) {
-    return <EmptyState icon="🏷️" title={MESSAGES.feature.emptyEtiquetas} />;
+    return (
+      <EmptyState
+        icon={<Tag size={28} color={COLORS.concreto500} />}
+        title={MESSAGES.feature.emptyEtiquetas}
+      />
+    );
   }
 
   return (
     <View className="flex-1 gap-4">
       {printer.errorMessage ? (
-        <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-          <Text className="font-medium text-white">{printer.errorMessage}</Text>
+        <View
+          className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+          accessibilityRole="alert"
+        >
+          <Text className="font-medium text-danger">{printer.errorMessage}</Text>
         </View>
       ) : null}
       <ScrollView contentContainerClassName="gap-4 pb-6">

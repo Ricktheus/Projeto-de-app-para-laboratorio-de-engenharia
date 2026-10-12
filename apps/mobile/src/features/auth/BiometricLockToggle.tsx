@@ -1,9 +1,11 @@
+import { LockKey } from 'phosphor-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, Switch, Text } from 'react-native';
+import { Pressable, Switch } from 'react-native';
 
 import { useToast } from '../../components/ui';
 import { isBiometricAvailable } from '../../services/biometrics';
 import { getLockEnabled, setLockEnabled } from '../../services/lock-preference';
+import { COLORS } from '../../theme/tokens';
 
 /**
  * Opt-in control for the biometric app lock (QW-22), shown in the app header.
@@ -52,7 +54,7 @@ export function BiometricLockToggle() {
       onPress={() => void handleToggle(!enabled)}
       className="flex-row items-center gap-2"
     >
-      <Text style={{ fontSize: 16 }}>🔒</Text>
+      <LockKey size={20} color={COLORS.concreto400} />
       <Switch value={enabled} onValueChange={(next) => void handleToggle(next)} />
     </Pressable>
   );

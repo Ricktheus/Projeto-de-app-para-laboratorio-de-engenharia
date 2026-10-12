@@ -108,7 +108,7 @@ describe('PrensaListScreen (F-S006-1) — states & QR search', () => {
     });
     render(<PrensaListScreen />);
 
-    fireEvent.press(screen.getByRole('button', { name: '📷 Bipar QR do CP' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Bipar QR do CP' }));
     // The camera is mounted; simulate a read of CP-BBB's QR.
     act(() => mockCamera.onScan?.({ data: 'CP-BBB', type: 'qr' }));
 

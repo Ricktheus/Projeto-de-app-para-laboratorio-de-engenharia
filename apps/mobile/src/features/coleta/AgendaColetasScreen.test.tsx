@@ -38,7 +38,7 @@ describe('AgendaColetasScreen (F-S005-3) — UI states', () => {
     agendaState({ isLoading: false, isError: false, data: [] });
     render(<AgendaColetasScreen />);
     expect(screen.getByText('Nenhuma coleta pendente para hoje.')).toBeTruthy();
-    expect(screen.getByText('📷 Bipar QR para coletar')).toBeTruthy();
+    expect(screen.getByText('Bipar QR para coletar')).toBeTruthy();
   });
 
   it('Error: shows the generic server-error copy', () => {

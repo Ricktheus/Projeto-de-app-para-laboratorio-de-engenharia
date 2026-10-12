@@ -6,10 +6,12 @@ import {
 } from '@concreto/shared';
 import { useMutation } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Camera, Receipt, WarningCircle } from 'phosphor-react-native';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Text, View } from 'react-native';
 
 import { BigButton, EmptyState, useToast } from '../../components/ui';
+import { COLORS } from '../../theme/tokens';
 import { captureNfPhoto, type NfPhoto } from '../ocr/nf-capture';
 import { readNotaFiscal } from '../ocr/ocr-service';
 
@@ -62,7 +64,11 @@ export function ConcretagemScreen() {
 
   if (!obraId) {
     return (
-      <EmptyState icon="⚠️" title="Obra não informada." description="Volte e selecione uma obra." />
+      <EmptyState
+        icon={<WarningCircle size={28} color={COLORS.concreto500} />}
+        title="Obra não informada."
+        description="Volte e selecione uma obra."
+      />
     );
   }
 
@@ -153,11 +159,16 @@ export function ConcretagemScreen() {
   return (
     <View className="flex-1 justify-center gap-4">
       <EmptyState
-        icon="📸"
+        icon={<Receipt size={28} color={COLORS.concreto500} />}
         title="Fotografe a nota fiscal"
         description="A IA lê os dados e preenche o formulário. Você sempre revisa antes de salvar."
       />
-      <BigButton label="Fotografar NF" onPress={handleCapture} />
+      <BigButton
+        label="Fotografar NF"
+        variant="accent"
+        icon={(c) => <Camera size={22} color={c} weight="bold" />}
+        onPress={handleCapture}
+      />
       <BigButton
         variant="neutral"
         label={MESSAGES.feature.ocrPreenchimentoManual}

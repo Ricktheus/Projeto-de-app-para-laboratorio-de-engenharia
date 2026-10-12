@@ -1,6 +1,6 @@
 import { ActivityIndicator } from 'react-native';
 
-import { BigButton, type BigButtonProps } from './BigButton';
+import { BigButton, buttonTextColor, type BigButtonProps } from './BigButton';
 
 export interface LoadingButtonProps extends BigButtonProps {
   loading?: boolean;
@@ -18,15 +18,19 @@ export function LoadingButton({
   loadingLabel,
   label,
   disabled = false,
+  variant = 'primary',
   ...rest
 }: LoadingButtonProps) {
   return (
     <BigButton
       label={loading ? (loadingLabel ?? label) : label}
+      variant={variant}
       disabled={disabled || loading}
       accessibilityState={{ disabled: disabled || loading, busy: loading }}
       accessoryLeft={
-        loading ? <ActivityIndicator color="#ffffff" testID="loading-spinner" /> : null
+        loading ? (
+          <ActivityIndicator color={buttonTextColor(variant)} testID="loading-spinner" />
+        ) : null
       }
       {...rest}
     />

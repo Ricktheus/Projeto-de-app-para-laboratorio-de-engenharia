@@ -1,11 +1,13 @@
 import { Text, TextInput, View, type TextInputProps } from 'react-native';
 
+import { COLORS, FONTS } from '../../theme/tokens';
+
 export interface TextFieldProps extends TextInputProps {
   label: string;
   /** Field error message; when set the input renders in the error (red) state. */
   error?: string;
   /**
-   * Highlights the field in amber for "needs review" (OCR low-confidence,
+   * Highlights the field in AI violet for "needs review" (OCR low-confidence,
    * US01-CA2). Independent from `error`.
    */
   highlight?: boolean;
@@ -17,24 +19,31 @@ export interface TextFieldProps extends TextInputProps {
  * needs (US01-CA2); a manual edit clears it in the parent.
  */
 export function TextField({ label, error, highlight, ...rest }: TextFieldProps) {
+  // Field theme "Sol" (plan §6.3): 2px borders for contrast under sunlight;
+  // violet = value suggested by OCR, still to be confirmed (plan §6.1).
   const borderClass = error
-    ? 'border-danger'
+    ? 'border-danger bg-white'
     : highlight
-      ? 'border-warning bg-yellow-50'
-      : 'border-gray-300';
+      ? 'border-ia-600 bg-ia-50'
+      : 'border-concreto-200 bg-white';
   return (
     <View className="w-full gap-1">
-      <Text style={{ fontSize: 18 }} className="font-medium text-gray-800">
+      <Text style={{ fontSize: 16, fontFamily: FONTS.sansMedium }} className="text-concreto-600">
         {label}
       </Text>
       <TextInput
         accessibilityLabel={label}
-        style={{ minHeight: 56, fontSize: 18 }}
-        className={`w-full rounded-2xl border bg-white px-4 ${borderClass}`}
+        style={{ minHeight: 56, fontSize: 18, fontFamily: FONTS.sans, color: COLORS.grafite }}
+        placeholderTextColor={COLORS.concreto400}
+        className={`w-full rounded-xl border-2 px-4 ${borderClass}`}
         {...rest}
       />
       {error ? (
-        <Text className="font-medium text-danger" accessibilityRole="alert">
+        <Text
+          style={{ fontSize: 15, fontFamily: FONTS.sansMedium }}
+          className="text-danger"
+          accessibilityRole="alert"
+        >
           {error}
         </Text>
       ) : null}

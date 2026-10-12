@@ -5,12 +5,15 @@ import {
   cpMandatorio28dMessage,
   fckVerdict,
   FCK_VEREDITO_LABELS,
+  formatMpaBr,
+  formatNumberBr,
   FRATURA_TIPO_LABELS,
   MESSAGES,
   type FckVeredito,
   type TipoFratura,
 } from '@concreto/shared';
 import { useRouter } from 'expo-router';
+import { MagnifyingGlass, Prohibit } from 'phosphor-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
@@ -23,6 +26,7 @@ import {
   useToast,
 } from '../../components/ui';
 import { hapticError, hapticSuccess } from '../../services/haptics';
+import { COLORS, FONTS } from '../../theme/tokens';
 import { EvidenciaCapture } from '../evidencia/EvidenciaCapture';
 import { FraturaPicker } from '../fratura/FraturaPicker';
 
@@ -50,10 +54,10 @@ const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 /** Solid, high-contrast band color for each verdict (glance-legible on the press). */
 const VEREDITO_BAND: Record<FckVeredito, string> = {
-  conforme: 'bg-green-600',
-  atencao: 'bg-amber-500',
-  abaixo: 'bg-danger',
-  indeterminado: 'bg-gray-700',
+  conforme: 'border-[#3DD68C] bg-[#0E3B25]',
+  atencao: 'border-[#FFA94D] bg-[#3D2A10]',
+  abaixo: 'border-[#FF6B6B] bg-[#3F1614]',
+  indeterminado: 'border-concreto-700 bg-concreto-800',
 };
 
 /**
@@ -75,33 +79,39 @@ function MpaDisplay({
 }) {
   const verdict = fckVerdict({ mpa, idadeDias, fckProjeto });
   return (
-    <View className="items-center gap-3 rounded-3xl bg-gray-900 p-6">
-      <Text style={{ fontSize: 16 }} className="text-gray-300">
+    <View className="items-center gap-2 rounded-2xl border border-concreto-800 bg-concreto-900 p-5">
+      <Text
+        style={{ fontSize: 14, letterSpacing: 1.2, fontFamily: FONTS.sansSemibold }}
+        className="uppercase text-concreto-400"
+      >
         Resistência calculada
       </Text>
-      <Text
-        style={{ fontSize: 48 }}
-        className="font-bold text-white"
-        accessibilityLabel="MPa calculado"
-      >
-        {mpa !== null ? mpa.toFixed(2) : '—'}
-      </Text>
-      <Text style={{ fontSize: 18 }} className="text-gray-300">
-        MPa
-      </Text>
+      <View className="flex-row items-baseline gap-2">
+        {/* Plan §6.4: MPa 96sp Barlow 700, white on the bench (18.9:1). No animation. */}
+        <Text
+          style={{ fontSize: 96, lineHeight: 100, fontFamily: FONTS.displayBold }}
+          className="text-white"
+          accessibilityLabel="MPa calculado"
+        >
+          {mpa !== null ? formatMpaBr(mpa) : '—'}
+        </Text>
+        <Text style={{ fontSize: 24, fontFamily: FONTS.display }} className="text-concreto-400">
+          MPa
+        </Text>
+      </View>
       {verdict.veredito !== 'indeterminado' ? (
         <View
-          className={`w-full items-center rounded-2xl px-4 py-3 ${VEREDITO_BAND[verdict.veredito]}`}
+          className={`w-full items-center rounded-xl border-2 px-4 py-3 ${VEREDITO_BAND[verdict.veredito]}`}
           accessibilityRole="text"
           accessibilityLabel={`Veredito: ${FCK_VEREDITO_LABELS[verdict.veredito]}`}
         >
           <Text style={{ fontSize: 18 }} className="font-bold text-white">
             {FCK_VEREDITO_LABELS[verdict.veredito]}
           </Text>
-          <Text style={{ fontSize: 13 }} className="text-white">
+          <Text style={{ fontSize: 15 }} className="text-concreto-300">
             {verdict.projetado
-              ? `Projeção 28d ${verdict.valorComparado?.toFixed(2)} MPa · fck ${fckProjeto} MPa`
-              : `fck de projeto ${fckProjeto} MPa`}
+              ? `Projeção 28d ${formatMpaBr(verdict.valorComparado)} MPa · fck ${formatNumberBr(fckProjeto)} MPa`
+              : `fck de projeto ${formatNumberBr(fckProjeto)} MPa`}
           </Text>
         </View>
       ) : null}
@@ -146,7 +156,9 @@ function RupturaResult({
     <ScrollView contentContainerClassName="gap-4 pb-8">
       <StatusPill tone="success" label="CP rompido" />
       <MpaDisplay mpa={mpa} idadeDias={idadeDias} fckProjeto={fckProjeto} />
-      <EvidenciaCapture rupturaId={rupturaId} />
+      <View className="rounded-2xl bg-white p-4">
+        <EvidenciaCapture rupturaId={rupturaId} />
+      </View>
 
       {purging ? (
         <MotivoPrompt
@@ -161,6 +173,8 @@ function RupturaResult({
           {proximo ? (
             <BigButton
               label={`Próximo CP → ${proximo.obraSigla} · ${proximo.idadeAlvoDias}d`}
+              variant="accent"
+              size="bench"
               onPress={() => router.replace(`/ruptura/${proximo.cpId}`)}
             />
           ) : null}
@@ -288,8 +302,8 @@ function RupturaInputForm({ cp }: { cp: PrensaCpRow }) {
 
   return (
     <ScrollView contentContainerClassName="gap-4 pb-8">
-      <View className="gap-1">
-        <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
+      <View className="gap-2">
+        <Text style={{ fontSize: 24, fontFamily: FONTS.displayBold }} className="text-white">
           {cp.obraSigla} · {cp.idadeAlvoDias}d · NF {cp.nfNumero}
         </Text>
         <View className="flex-row items-center gap-2">
@@ -299,8 +313,11 @@ function RupturaInputForm({ cp }: { cp: PrensaCpRow }) {
       </View>
 
       {mandatorioBlock ? (
-        <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-          <Text className="font-medium text-white">
+        <View
+          className="rounded-xl border-2 border-[#FF6B6B] bg-[#3F1614] px-4 py-3"
+          accessibilityRole="alert"
+        >
+          <Text style={{ fontSize: 17 }} className="font-medium text-white">
             {cpMandatorio28dMessage({ idade: cp.idadeAlvoDias, data: cp.dataRupturaPlanejada })}
           </Text>
         </View>
@@ -308,42 +325,48 @@ function RupturaInputForm({ cp }: { cp: PrensaCpRow }) {
 
       <MpaDisplay mpa={mpa} idadeDias={cp.idadeAlvoDias} fckProjeto={cp.fckProjeto} />
 
-      <NumericInput label="Carga de ruptura" suffix="kgf" value={carga} onChangeText={setCarga} />
-      {cargaWarning ? (
-        <Text className="font-medium text-warning" accessibilityRole="alert">
-          {cargaWarning.message}
-        </Text>
-      ) : null}
+      <View className="gap-4 rounded-2xl bg-white p-4">
+        <NumericInput label="Carga de ruptura" suffix="kgf" value={carga} onChangeText={setCarga} />
+        {cargaWarning ? (
+          <Text className="font-medium text-warning" accessibilityRole="alert">
+            {cargaWarning.message}
+          </Text>
+        ) : null}
 
-      <NumericInput label="Peso" suffix="g" value={peso} onChangeText={setPeso} />
-      <NumericInput
-        label="Diâmetro medido"
-        suffix="mm"
-        value={diametro}
-        onChangeText={setDiametro}
-      />
-      {!diametroWarning.ok && diametroWarning.message ? (
-        <Text className="font-medium text-warning">{diametroWarning.message}</Text>
-      ) : null}
-      <NumericInput label="Altura medida" suffix="mm" value={altura} onChangeText={setAltura} />
-      {!alturaWarning.ok && alturaWarning.message ? (
-        <Text className="font-medium text-warning">{alturaWarning.message}</Text>
-      ) : null}
+        <NumericInput label="Peso" suffix="g" value={peso} onChangeText={setPeso} />
+        <NumericInput
+          label="Diâmetro medido"
+          suffix="mm"
+          value={diametro}
+          onChangeText={setDiametro}
+        />
+        {!diametroWarning.ok && diametroWarning.message ? (
+          <Text className="font-medium text-warning">{diametroWarning.message}</Text>
+        ) : null}
+        <NumericInput label="Altura medida" suffix="mm" value={altura} onChangeText={setAltura} />
+        {!alturaWarning.ok && alturaWarning.message ? (
+          <Text className="font-medium text-warning">{alturaWarning.message}</Text>
+        ) : null}
+      </View>
 
-      <FraturaPicker value={tipoFratura} onChange={setTipoFratura} error={fraturaError} />
+      <View className="rounded-2xl bg-white p-4">
+        <FraturaPicker value={tipoFratura} onChange={setTipoFratura} error={fraturaError} />
+      </View>
 
       {confirming ? (
-        <View className="gap-3 rounded-3xl border border-brand bg-blue-50 p-4">
-          <Text style={{ fontSize: 18 }} className="font-semibold text-gray-900">
+        <View className="gap-3 rounded-2xl border-2 border-sinal-500 bg-concreto-900 p-4">
+          <Text style={{ fontSize: 22, fontFamily: FONTS.displayBold }} className="text-white">
             Confirmar ruptura?
           </Text>
-          <Text className="text-gray-700">
-            {mpa !== null ? `${mpa.toFixed(2)} MPa` : '—'} ·{' '}
+          <Text style={{ fontSize: 18 }} className="text-concreto-300">
+            {mpa !== null ? `${formatMpaBr(mpa)} MPa` : '—'} ·{' '}
             {tipoFratura ? FRATURA_TIPO_LABELS[tipoFratura] : ''}
           </Text>
           <LoadingButton
             label="Confirmar e salvar"
             loadingLabel="Salvando..."
+            variant="accent"
+            size="bench"
             loading={registrar.isPending}
             onPress={handleConfirmar}
           />
@@ -356,7 +379,13 @@ function RupturaInputForm({ cp }: { cp: PrensaCpRow }) {
         </View>
       ) : (
         <View className="gap-2">
-          <BigButton label="Salvar Ruptura" disabled={!canSubmit} onPress={handleSalvarPress} />
+          <BigButton
+            label="Salvar Ruptura"
+            variant="accent"
+            size="bench"
+            disabled={!canSubmit}
+            onPress={handleSalvarPress}
+          />
           <BigButton label="Descartar CP" variant="danger" onPress={() => setDiscarding(true)} />
         </View>
       )}
@@ -380,19 +409,27 @@ export function RupturaFormScreen({ cpId }: RupturaFormScreenProps) {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator accessibilityLabel="Carregando" />
+        <ActivityIndicator accessibilityLabel="Carregando" color={COLORS.sinal} />
       </View>
     );
   }
   if (isError) {
     return (
-      <View className="rounded-2xl bg-danger px-4 py-3" accessibilityRole="alert">
-        <Text className="font-medium text-white">{MESSAGES.http.serverError}</Text>
+      <View
+        className="rounded-xl border border-danger bg-danger-soft px-4 py-3"
+        accessibilityRole="alert"
+      >
+        <Text className="font-medium text-danger">{MESSAGES.http.serverError}</Text>
       </View>
     );
   }
   if (!cp) {
-    return <EmptyState icon="🔍" title={MESSAGES.domain.CP_NAO_ENCONTRADO} />;
+    return (
+      <EmptyState
+        icon={<MagnifyingGlass size={28} color={COLORS.concreto500} />}
+        title={MESSAGES.domain.CP_NAO_ENCONTRADO}
+      />
+    );
   }
   if (cp.status === 'coletado') {
     return <RupturaInputForm cp={cp} />;
@@ -410,7 +447,7 @@ export function RupturaFormScreen({ cpId }: RupturaFormScreenProps) {
   }
   return (
     <EmptyState
-      icon="🚫"
+      icon={<Prohibit size={28} color={COLORS.concreto500} />}
       title={`Este CP está ${cp.status}.`}
       description="Não há ação de ruptura disponível para este corpo de prova."
     />

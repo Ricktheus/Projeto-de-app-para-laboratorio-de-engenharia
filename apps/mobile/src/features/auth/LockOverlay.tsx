@@ -1,11 +1,13 @@
 import { BRAND } from '@concreto/shared';
 import { useRouter } from 'expo-router';
+import { LockKey } from 'phosphor-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { BigButton, LoadingButton } from '../../components/ui';
 import { authenticateBiometric } from '../../services/biometrics';
 import { useAuthStore } from '../../stores/auth-store';
+import { COLORS } from '../../theme/tokens';
 
 import { signOut } from './auth-service';
 
@@ -44,13 +46,15 @@ export function LockOverlay() {
   }
 
   return (
-    <View className="absolute inset-0 items-center justify-center gap-6 bg-gray-100 p-8">
+    <View className="absolute inset-0 items-center justify-center gap-6 bg-grafite p-8">
       <View className="items-center gap-2">
-        <Text style={{ fontSize: 48 }}>🔒</Text>
-        <Text style={{ fontSize: 22 }} className="text-center font-bold text-gray-900">
+        <View className="h-20 w-20 items-center justify-center rounded-2xl bg-concreto-800">
+          <LockKey size={44} color={COLORS.sinal} weight="bold" />
+        </View>
+        <Text style={{ fontSize: 22 }} className="text-center font-display-bold text-white">
           {BRAND.nome}
         </Text>
-        <Text className="text-center text-gray-500">
+        <Text style={{ fontSize: 16 }} className="text-center text-concreto-300">
           Aplicativo bloqueado. Desbloqueie com sua biometria para continuar.
         </Text>
       </View>

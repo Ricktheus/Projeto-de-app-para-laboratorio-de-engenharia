@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { useToastStore, type ToastItem, type ToastVariant } from '../../stores/toast-store';
+import { COLORS, FONTS } from '../../theme/tokens';
 
-const VARIANT_CLASSES: Record<ToastVariant, string> = {
-  success: 'bg-success',
-  error: 'bg-danger',
-  info: 'bg-neutral',
+/** Status rail colour; the toast itself is graphite (plan §6.7). */
+const VARIANT_RAIL: Record<ToastVariant, string> = {
+  success: COLORS.successDark,
+  error: COLORS.dangerDark,
+  info: COLORS.sinal,
 };
 
 const AUTO_DISMISS_MS = 5_000;
@@ -27,9 +29,10 @@ function ToastCard({ toast }: { toast: ToastItem }) {
     <Pressable
       onPress={() => dismiss(toast.id)}
       accessibilityRole={toast.variant === 'error' ? 'alert' : 'text'}
-      className={`w-full rounded-2xl px-4 py-3 ${VARIANT_CLASSES[toast.variant]}`}
+      style={{ borderLeftWidth: 4, borderLeftColor: VARIANT_RAIL[toast.variant] }}
+      className="w-full rounded-xl bg-grafite px-4 py-3"
     >
-      <Text style={{ fontSize: 16 }} className="font-medium text-white">
+      <Text style={{ fontSize: 16, fontFamily: FONTS.sansMedium }} className="text-white">
         {toast.message}
       </Text>
     </Pressable>

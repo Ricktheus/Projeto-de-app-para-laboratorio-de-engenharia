@@ -9,7 +9,7 @@ export default function RupturaRoute() {
   const { cpId } = useLocalSearchParams<{ cpId: string }>();
   return (
     <ProtectedScreen area="prensa">
-      <AppScreen title="Ruptura">
+      <AppScreen title="Ruptura" theme="bancada">
         <RupturaFormScreen cpId={typeof cpId === 'string' ? cpId : ''} />
       </AppScreen>
     </ProtectedScreen>

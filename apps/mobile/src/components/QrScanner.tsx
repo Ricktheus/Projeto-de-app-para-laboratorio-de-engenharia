@@ -1,6 +1,9 @@
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
+import { Camera } from 'phosphor-react-native';
 import { useRef } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+
+import { COLORS } from '../theme/tokens';
 
 import { BigButton, EmptyState } from './ui';
 
@@ -42,7 +45,7 @@ export function QrScanner({ onScan, onCancel, hint }: QrScannerProps) {
   if (!permission.granted) {
     return (
       <EmptyState
-        icon="📷"
+        icon={<Camera size={28} color={COLORS.concreto500} />}
         title="Precisamos da câmera para ler o QR do corpo de prova."
         action={
           <View className="gap-2">

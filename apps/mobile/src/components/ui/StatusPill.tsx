@@ -1,21 +1,22 @@
 import { Text, View } from 'react-native';
 
-export type StatusTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+import { FONTS } from '../../theme/tokens';
 
-const TONE_CLASSES: Record<StatusTone, string> = {
-  neutral: 'bg-gray-100',
-  info: 'bg-blue-100',
-  success: 'bg-green-100',
-  warning: 'bg-yellow-100',
-  danger: 'bg-red-100',
-};
+export type StatusTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'accent' | 'ai';
 
-const TONE_TEXT: Record<StatusTone, string> = {
-  neutral: 'text-gray-800',
-  info: 'text-blue-900',
-  success: 'text-green-900',
-  warning: 'text-yellow-900',
-  danger: 'text-red-900',
+/** Plan §6.2 semantic pairs (text/background ≥ 4.5:1); always dot + text. */
+const TONE: Record<StatusTone, { box: string; text: string; dot: string }> = {
+  neutral: {
+    box: 'bg-concreto-50 border-concreto-200',
+    text: 'text-concreto-600',
+    dot: 'bg-concreto-400',
+  },
+  info: { box: 'bg-cobalto-50 border-cobalto-50', text: 'text-cobalto-600', dot: 'bg-cobalto-600' },
+  success: { box: 'bg-success-soft border-success-soft', text: 'text-success', dot: 'bg-success' },
+  warning: { box: 'bg-warning-soft border-warning-soft', text: 'text-warning', dot: 'bg-warning' },
+  danger: { box: 'bg-danger-soft border-danger-soft', text: 'text-danger', dot: 'bg-danger' },
+  accent: { box: 'bg-sinal-50 border-sinal-600', text: 'text-grafite', dot: 'bg-sinal-500' },
+  ai: { box: 'bg-ia-50 border-ia-600', text: 'text-ia-600', dot: 'bg-ia-600' },
 };
 
 export interface StatusPillProps {
@@ -23,11 +24,17 @@ export interface StatusPillProps {
   tone?: StatusTone;
 }
 
-/** Compact status badge with AA-legible dark-on-tint colors (F-S003-3). */
+/** Compact status badge — status by dot + text, never colour alone (F-S003-3). */
 export function StatusPill({ label, tone = 'neutral' }: StatusPillProps) {
+  const t = TONE[tone];
   return (
-    <View className={`self-start rounded-full px-3 py-1 ${TONE_CLASSES[tone]}`}>
-      <Text className={`text-sm font-medium ${TONE_TEXT[tone]}`}>{label}</Text>
+    <View
+      className={`flex-row items-center gap-1.5 self-start rounded-md border px-2.5 py-1 ${t.box}`}
+    >
+      <View className={`h-2 w-2 rounded-full ${t.dot}`} />
+      <Text style={{ fontSize: 14, fontFamily: FONTS.sansMedium }} className={t.text}>
+        {label}
+      </Text>
     </View>
   );
 }

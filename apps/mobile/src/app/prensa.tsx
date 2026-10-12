@@ -6,7 +6,7 @@ import { ProtectedScreen } from '../routes/ProtectedScreen';
 export default function PrensaRoute() {
   return (
     <ProtectedScreen area="prensa">
-      <AppScreen title="Prensa">
+      <AppScreen title="Bancada" subtitle="Rompimentos do dia" theme="bancada">
         <PrensaListScreen />
       </AppScreen>
     </ProtectedScreen>
